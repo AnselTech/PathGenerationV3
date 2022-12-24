@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # All the global singleton objects
     screen: pygame.Surface = pygame.display.set_mode((Utility.SCREEN_SIZE + Utility.PANEL_WIDTH, Utility.SCREEN_SIZE))
-    pygame.display.set_caption("Path Generation 2.0 by Ansel")
+    pygame.display.set_caption("Path Generation 3.0 by Ansel")
 
     fieldTransform: FieldTransform = FieldTransform()
     ReferenceFrame.initFieldTransform(fieldTransform)
@@ -59,9 +59,9 @@ def main():
         # Handle all field left click functionality
         if userInput.isMouseOnField:
             if userInput.leftClicked:
-                handleLeftClick(state, fieldSurface)
+                handleLeftClick(state, fieldSurface, userInput, program)
             elif userInput.rightClicked:
-                handleRightClick(state, userInput.mousePosition)
+                handleRightClick(state, userInput)
 
         # Draw everything on the screen
         drawEverything()
@@ -78,6 +78,9 @@ def drawEverything() -> None:
     border = 5
     pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
+
+    # Draw path specified by commands
+    program.draw(screen)
 
     # Draw mouse selector buttons
     mouseSelector.draw(screen)
@@ -98,7 +101,7 @@ def getHoverables() -> Iterator[Hoverable]:
 
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
-            
+
         yield fieldSurface
         
             

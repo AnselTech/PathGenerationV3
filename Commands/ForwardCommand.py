@@ -1,28 +1,33 @@
-from AbstractCommand import Command
-from Pose import Pose
+from Commands.AbstractCommand import Command
+from Commands.Pose import Pose
 from SingletonState.ReferenceFrame import PointRef, Ref
 import math, pygame, graphics, colors
 
+"""
+A command to go forward in the current direction some relative distance
+"""
+
 class ForwardCommand(Command):
 
-    def __init__(self, distanceInches):
+    def __init__(self, distanceInches: float):
+
+        super().__init__()
+
         self.distance: float = distanceInches
-        self.startPos: PointRef = None
-        self.endPos: PointRef = None
 
     # Go forward the direction the robot is already facing
     # save those two positions into the object to be drawn
     def compute(self, initialPose: Pose) -> Pose:
 
-        self.startPos = initialPose.pos
+        self.beforePose = initialPose
         
-        xpos, ypos = self.startPos.fieldRef
+        xpos, ypos = self.beforePose.pos.fieldRef
         xpos += self.distance * math.cos(initialPose.theta)
         ypos += self.distance * math.sin(initialPose.theta)
 
-        self.endPos = PointRef(Ref.FIELD, (xpos, ypos))
+        self.afterPose = Pose(PointRef(Ref.FIELD, (xpos, ypos)), initialPose.theta)
 
-        return Pose(self.endPos, initialPose.theta)
+        return self.afterPose
 
     # goForwardU(distance)
     def getCode(self) -> str:
@@ -32,4 +37,4 @@ class ForwardCommand(Command):
     def draw(self, screen: pygame.Surface):
 
         # draw line between self.startPos and self.endPos
-        graphics.drawLine(screen, colors.BLACK, *self.startPos.screenRef, *self.endPos.screenRef, 5)
+        graphics.drawLine(screen, colors.BLACK, *self.beforePose.pos.screenRef, *self.afterPose.pos.screenRef, 2)

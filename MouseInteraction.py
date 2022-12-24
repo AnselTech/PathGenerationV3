@@ -6,22 +6,27 @@ from SingletonState.ReferenceFrame import PointRef, Ref
 from VisibleElements.FieldSurface import FieldSurface
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
+from Commands.Program import Program
 import Utility
 from typing import Iterator
 
 import pygame
 
 # Handle left clicks for dealing with the field
-def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface):
-    print("Left click")
-    pass
+def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program):
+    
+    if userInput.isMouseOnField:
+
+        # Add segment at mouse location
+        if state.mode == Mode.ADD_SEGMENT:
+            program.addPoint(userInput.mousePosition)
 
 # Handle right clicks for dealing with the field
-def handleRightClick(state: SoftwareState, mousePosition: PointRef):
+def handleRightClick(state: SoftwareState, userInput: UserInput):
 
-    print("Right click")
-
-    pass
+    # If right click, cycle the mouse mode (excluding playback)
+    if userInput.isMouseOnField:
+        state.mode = state.mode.next()
         
 # Handle zooming through mousewheel. Zoom "origin" should be at the mouse location
 def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform, userInput: UserInput) -> None:

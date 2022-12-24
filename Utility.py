@@ -87,6 +87,10 @@ def pointOnLineClosestToPoint(pointX: int, pointY: int, firstX: int, firstY: int
 def thetaTwoPoints(pointA: tuple, pointB: tuple) -> float:
     return math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
 
+# Get the absolute heading (0 radians point up, clockwise positive) from A to B
+def headingTwoPoints(pointA: tuple, pointB: tuple) -> float:
+    return 3.1415 / 2.0 - thetaTwoPoints(pointA, pointB)
+
 # Bound angle to between -pi and pi, preferring the smaller magnitude
 def boundAngleRadians(angle: float) -> float:
     PI = 3.1415

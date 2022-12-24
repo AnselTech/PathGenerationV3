@@ -15,13 +15,21 @@ class Mode(Enum):
     ADD_CURVE = 3 # Configure path following parameters and export to robot; import recorded run to program
     PLAYBACK = 4 # run simulation
 
+    # get next mode excluding playback
+    def next(self):
+        if self == Mode.MOUSE_SELECT:
+            return Mode.ADD_SEGMENT
+        elif self == Mode.ADD_SEGMENT:
+            return Mode.ADD_CURVE
+        else:
+            return Mode.MOUSE_SELECT
+
 class SoftwareState:
 
     def __init__(self):
         self.mode: Mode = Mode.MOUSE_SELECT
         self.objectHovering: Hoverable = None # object the mouse is currently hovering over
         self.objectDragged: Draggable = None # object the mouse is currently dragging
-
 
     def __str__(self):
         return "Software State:\nHovering: {}\nDragged: {}".format(self.objectHovering, self.objectDragged)

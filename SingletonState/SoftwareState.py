@@ -18,6 +18,7 @@ class Mode(Enum):
 class SoftwareState:
 
     def __init__(self):
+        self.mode: Mode = Mode.MOUSE_SELECT
         self.objectHovering: Hoverable = None # object the mouse is currently hovering over
         self.objectDragged: Draggable = None # object the mouse is currently dragging
 

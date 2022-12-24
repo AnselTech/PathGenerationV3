@@ -7,9 +7,13 @@ from SingletonState.UserInput import UserInput
 from VisibleElements.FieldSurface import FieldSurface
 from MouseInteraction import *
 from MouseInterfaces.TooltipOwner import TooltipOwner
+
+from Commands.Program import Program
+from MouseSelector.MouseSelector import MouseSelector
+
 import Utility, colors
 from typing import Iterator
-import Graphics
+import graphics
 import multiprocessing as mp 
 
 if __name__ == '__main__':
@@ -23,11 +27,10 @@ if __name__ == '__main__':
 
     fieldSurface: FieldSurface = FieldSurface(fieldTransform)
     userInput: UserInput = UserInput(pygame.mouse, pygame.key)
-    
+    program: Program = Program()
 
     state: SoftwareState = SoftwareState()
-
-
+    mouseSelector: MouseSelector = MouseSelector(state)
 
 
 def main():
@@ -76,6 +79,9 @@ def drawEverything() -> None:
     pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
 
+    # Draw mouse selector buttons
+    mouseSelector.draw(screen)
+
     # Draw a tooltip if there is one
     if state.objectHovering is not None and isinstance(state.objectHovering, TooltipOwner):
         state.objectHovering.drawTooltip(screen, userInput.mousePosition.screenRef)
@@ -89,7 +95,14 @@ def getHoverables() -> Iterator[Hoverable]:
 
     # The points, segments, and field can only be hoverable if the mouse is on the field permieter and not on the panel
     if userInput.isMouseOnField:
-        pass
+
+        for hoverable in mouseSelector.getHoverables():
+            yield hoverable
+            
+        yield fieldSurface
+        
+            
+
     else:
         pass
 

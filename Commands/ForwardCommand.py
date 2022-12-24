@@ -12,7 +12,7 @@ class ForwardCommand(Command):
 
     # Go forward the direction the robot is already facing
     # save those two positions into the object to be drawn
-    def run(self, initialPose: Pose) -> Pose:
+    def compute(self, initialPose: Pose) -> Pose:
 
         self.startPos = initialPose.pos
         

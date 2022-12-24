@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import pygame
-from Pose import Pose
+from Commands.Pose import Pose
 
 class Command(ABC):
 
@@ -11,8 +11,9 @@ class Command(ABC):
 
     # Recompute the command's actions given the starting pose
     # Also return the modified pose after the command is run
+    # SHOULD NOT MODIFY initialPose
     @abstractmethod
-    def run(self, initialPose: Pose) -> Pose:
+    def compute(self, initialPose: Pose) -> Pose:
         pass
 
     # Return the command in c++ code string form

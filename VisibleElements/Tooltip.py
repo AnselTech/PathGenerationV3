@@ -1,4 +1,4 @@
-import Utility, colors, Graphics, pygame
+import Utility, colors, graphics, pygame
 
 """
 Classes that have a self.tooltip instance variable storing a Tooltip object will have a tooltip displayed
@@ -18,7 +18,7 @@ class Tooltip:
     def getTooltipSurface(self, messages):
 
         # generate temporary text surfaces for each line to figure out width and height of text
-        texts = [Graphics.FONT20.render(message, True, TEXT_COLOR) for message in messages]
+        texts = [graphics.FONT20.render(message, True, TEXT_COLOR) for message in messages]
 
         outsideMargin = 7 # margin between text and tooltip surface
         insideMargin = 1 # margin between lines of text
@@ -53,5 +53,9 @@ class Tooltip:
 
         # prevent tooltip from spilling over right edge of screen
         x = min(x, Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - self.tooltip.get_width())
+
+        # if y is spilling in the bottom, make tooltip above mouse instead
+        if y + self.tooltip.get_height() > Utility.SCREEN_SIZE:
+            y = int(mousePosition[1] - self.tooltip.get_height() - 10)
 
         screen.blit(self.tooltip, (x,y))

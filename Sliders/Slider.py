@@ -3,7 +3,7 @@ from SingletonState.UserInput import UserInput
 from VisibleElements.Tooltip import Tooltip
 from SingletonState.ReferenceFrame import PointRef
 from MouseInterfaces.TooltipOwner import TooltipOwner
-import colors, pygame, Graphics, Utility
+import colors, pygame, graphics, Utility
 
 from typing import Callable
 
@@ -89,12 +89,12 @@ class Slider(Draggable, TooltipOwner):
 
     # Draw slider on surface
     def draw(self, screen: pygame.Surface):
-        Graphics.drawRoundedLine(screen, colors.LINEGREY, self.x, self.y, self.x + self.width, self.y, 20)
-        Graphics.drawCircle(screen, self.getCircleX(), self.y, self.color, 8)
+        graphics.drawRoundedLine(screen, colors.LINEGREY, self.x, self.y, self.x + self.width, self.y, 20)
+        graphics.drawCircle(screen, self.getCircleX(), self.y, self.color, 8)
 
         if self.text != "":
             RIGHT_PADDING = 20
-            Graphics.drawText(screen, Graphics.FONT20, self.text, colors.BLACK, self.x - RIGHT_PADDING, self.y, 1, 0.5)
+            graphics.drawText(screen, graphics.FONT20, self.text, colors.BLACK, self.x - RIGHT_PADDING, self.y, 1, 0.5)
 
 
     # Draw tooltip for value

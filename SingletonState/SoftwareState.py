@@ -6,24 +6,21 @@ from MouseInterfaces.Draggable import Draggable
 
 """ A class representing global state of the software."""
 
+# Right click to toggle 1-3, buttons for all four at bottom left
 class Mode(Enum):
-    AI = 1 # Automatic path generation with MCTS
-    EDIT = 2 # Modfying the path
-    SIMULATE = 3 # Simulating the path with some path following algorithm with a virtual robot
-    ROBOT = 4 # Configure path following parameters and export to robot; import recorded run to program
-    ODOM = 5 # Real-time view of the robot's position through odometry from serial
+    MOUSE_SELECT = 1 # Can hover over parts of path to see robot model's position.
+    #                  Also can select turn/segment/curve/etc to modify it
+    #                  If hovering over last node, can add a turn manually by clicking on it
+    ADD_SEGMENT = 2 # left click to add segment (will add turn as well)
+    ADD_CURVE = 3 # Configure path following parameters and export to robot; import recorded run to program
+    PLAYBACK = 4 # run simulation
 
 class SoftwareState:
 
     def __init__(self):
-        self.mode: Mode = Mode.EDIT # edit or simulation mode
         self.objectHovering: Hoverable = None # object the mouse is currently hovering over
         self.objectDragged: Draggable = None # object the mouse is currently dragging
 
-
-        self.playingSimulation = False # Whether the simulation is currently stepping through each frame
-        self.rerunSimulation = True
-        self.simulationController = None
 
     def __str__(self):
         return "Software State:\nHovering: {}\nDragged: {}".format(self.objectHovering, self.objectDragged)

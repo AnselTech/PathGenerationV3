@@ -5,16 +5,8 @@ import SingletonState.ReferenceFrame as ReferenceFrame
 from SingletonState.SoftwareState import SoftwareState, Mode
 from SingletonState.UserInput import UserInput
 from VisibleElements.FieldSurface import FieldSurface
-from Simulation.ControllerRelated.ControllerManager import ControllerManager
-from Simulation.Simulation import Simulation
-from Simulation.DriverControl.DriverSimulation import DriverSimulation
-import Simulation.ControllerRelated.ControllerSliderBuilder as ControllerSliderBuilder
 from MouseInteraction import *
-from VisibleElements.FullPath import FullPath
-from Panel.Panel import Panel
 from MouseInterfaces.TooltipOwner import TooltipOwner
-from AI.DiscManager import DiscManager
-from RobotSpecs import RobotSpecs
 import Utility, colors
 from typing import Iterator
 import Graphics
@@ -34,15 +26,7 @@ if __name__ == '__main__':
     
 
     state: SoftwareState = SoftwareState()
-    ControllerSliderBuilder.initState(state)
 
-    controllers: ControllerManager = ControllerManager()
-    path: FullPath = FullPath()
-    discManager: DiscManager = DiscManager()
-    robotSpecs: RobotSpecs = RobotSpecs()
-    simulation: Simulation = Simulation(state, controllers, path, robotSpecs)
-    driver: DriverSimulation = DriverSimulation(robotSpecs)
-    panel: Panel = Panel(state, path, simulation, driver, discManager)
 
 
 
@@ -56,71 +40,41 @@ def main():
             pygame.quit()
             sys.exit()
 
-        # Handle import path from dropped file
-        handleImportPath(userInput.loadedFile, state, path)
         
         # Handle zooming with mousewheel
         handleMousewheel(fieldSurface, fieldTransform, userInput)
-
-        # Handle panel keyboard input
-        panel.handleKeyboardInput(userInput.keyJustPressed)
         
         # Find the hovered object out of all the possible hoverable objects
         handleHoverables(state, userInput, getHoverables())
         
         # Now that the hovered object is computed, handle what object is being dragged and then actually dragging the object
-        handleDragging(userInput, state, fieldSurface, path)
+        handleDragging(userInput, state, fieldSurface)
 
         # If the X key is pressed, delete hovered PathPoint/segment
-        handleDeleting(userInput, state, path)
-
-        # get the shadow point based on the mouse position
-        shadowPointRef = getShadowPosition(userInput.mousePosition, state)
+        handleDeleting(userInput, state)
 
         # Handle all field left click functionality
         if userInput.isMouseOnField:
             if userInput.leftClicked:
-                handleLeftClick(state, shadowPointRef, fieldSurface, path)
+                handleLeftClick(state, fieldSurface)
             elif userInput.rightClicked:
-                handleRightClick(state, path, userInput.mousePosition)
-
-        if state.mode == Mode.SIMULATE:
-            simulation.update()
-        elif state.mode == Mode.ODOM:
-            driver.update()
-        elif state.mode == Mode.AI:
-            discManager.update()
+                handleRightClick(state, userInput.mousePosition)
 
         # Draw everything on the screen
-        drawEverything(shadowPointRef)
+        drawEverything()
         
         
 
 # Draw the vex field, full path, and panel
-def drawEverything(shadowPointRef: PointRef) -> None:
+def drawEverything() -> None:
     
     # Draw the vex field
     fieldSurface.draw(screen)
 
-    if state.mode == Mode.EDIT or state.mode == Mode.SIMULATE or state.mode == Mode.ROBOT:
-        # Draw the entire path with segments and PathPoints
-        path.draw(screen, state)
-
-    # Draw PathPoint shadow at mouse
-    if state.mode == Mode.EDIT and state.objectDragged is None and (state.objectHovering is fieldSurface or isinstance(state.objectHovering, PathSegment)):
-        Graphics.drawCircle(screen, *shadowPointRef.screenRef, colors.GREEN, 10, 140)
-
-            
     # Draw panel background
     border = 5
     pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
-
-    if state.mode == Mode.AI:
-        discManager.draw(screen)
-    
-    # Draw panel buttons
-    panel.draw(screen)
 
     # Draw a tooltip if there is one
     if state.objectHovering is not None and isinstance(state.objectHovering, TooltipOwner):
@@ -135,28 +89,9 @@ def getHoverables() -> Iterator[Hoverable]:
 
     # The points, segments, and field can only be hoverable if the mouse is on the field permieter and not on the panel
     if userInput.isMouseOnField:
-
-        if state.mode == Mode.EDIT: # the path is only interactable when on edit mode
-            # For each pathPoint, iterate through the control points then the pathPoint itself
-            for section in path.sections:
-                for pathPoint in section.pathPoints:
-                    yield pathPoint.controlA
-                    yield pathPoint.controlB
-                    yield pathPoint
-
-            # After checking all the points, check the segments
-            for section in path.sections:
-                for segment in section.segments:
-                    yield segment
-
-        # If nothing has been hovered, then finally check fieldSurface
-        yield fieldSurface
-
-    else: # hoverable panel objects
-
-        # Iterate through each button on the panel
-        for panelObject in panel.getHoverables():
-            yield panelObject
+        pass
+    else:
+        pass
 
     # weird python hack to make it return an empty iterator if nothing hoverable
     return

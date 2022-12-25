@@ -30,7 +30,14 @@ class Node(Draggable, ABC):
     # Called every frame that the object is being dragged. Most likely used to update the position of the object based
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
+        self.position = userInput.mousePosition.copy()
+
+    @abstractmethod
+    def compute(self, beforeHeading: float) -> float:
         pass
+
+    def drawHovered(self, screen: pygame.Surface):
+        graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.afterHeading)
 
     @abstractmethod
     def draw(self, screen: pygame.Surface):
@@ -44,6 +51,9 @@ class StartNode(Node):
         defaultStartPosition: PointRef = PointRef(Ref.FIELD, (24, 48))
         super().__init__(defaultStartPosition, 20)
         self.setHeading(0)
+
+    def compute(self, beforeHeading: float) -> float:
+        return self.afterHeading
 
     def setHeading(self, heading):
         self.afterHeading = heading
@@ -71,6 +81,10 @@ class TurnNode(Node):
         self.beforeHeading = beforeHeading
         self.clockwise = Utility.deltaInHeading(self.afterHeading, beforeHeading) < 0
         return self.afterHeading
+
+    def drawHovered(self, screen: pygame.Surface):
+        super().drawHovered(screen)
+        graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.beforeHeading)
 
     def draw(self, screen: pygame.Surface): 
         # draw turn node

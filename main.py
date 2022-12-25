@@ -9,7 +9,8 @@ from MouseInteraction import *
 from MouseInterfaces.TooltipOwner import TooltipOwner
 
 from Commands.Program import Program
-from Commands.AbstractCommand import Command
+from Commands.Edge import Edge
+from Commands.Node import Node
 from MouseSelector.MouseSelector import MouseSelector
 
 import Utility, colors, math
@@ -77,7 +78,7 @@ def drawEverything() -> None:
     # Draw the vex field
     fieldSurface.draw(screen)
 
-    if isinstance(state.objectHovering, Command):
+    if isinstance(state.objectHovering, Edge) or isinstance(state.objectHovering, Node):
         command: Command = state.objectHovering
         command.drawHovered(screen)
 

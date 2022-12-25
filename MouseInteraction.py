@@ -7,6 +7,7 @@ from VisibleElements.FieldSurface import FieldSurface
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from Commands.Program import Program
+from Commands.NullCommand import NullCommand
 import Utility
 from typing import Iterator
 
@@ -82,7 +83,7 @@ def handleStartingPressingObject(userInput: UserInput, state: SoftwareState, fie
         state.objectDragged = state.objectHovering
         state.objectDragged._startDragging(userInput.mousePosition)
 
-        if state.objectHovering is not fieldSurface:
+        if state.objectHovering is not fieldSurface and type(state.objectHovering) != NullCommand:
             state.objectSelected = state.objectHovering
     elif isinstance(state.objectHovering, Clickable):
         objectClicked: Clickable = state.objectHovering

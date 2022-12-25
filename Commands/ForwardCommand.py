@@ -16,8 +16,9 @@ class ForwardCommand(Command):
 
         self.distance: float = distanceInches
 
-        self.SEGMENT_THICKNESS = 2
-        self.SEGMENT_HITBOX_THICKNESS = 5
+        self.SEGMENT_THICKNESS = 3
+        self.SEGMENT_THICKNESS_2 = 4
+        self.SEGMENT_HITBOX_THICKNESS = 8
 
     # Go forward the direction the robot is already facing
     # save those two positions into the object to be drawn
@@ -47,7 +48,16 @@ class ForwardCommand(Command):
     def draw(self, screen: pygame.Surface, isSelected: bool):
 
         # draw line between self.startPos and self.endPos
-        graphics.drawLine(screen, colors.BLACK, *self.beforePose.pos.screenRef, *self.afterPose.pos.screenRef, self.SEGMENT_THICKNESS)
+        if isSelected:
+            color = colors.BLUE
+            thick = self.SEGMENT_THICKNESS_2
+        elif self.isHovering:
+            color = (0,0,130)
+            thick = self.SEGMENT_THICKNESS_2
+        else:
+            color = colors.BLACK
+            thick = self.SEGMENT_THICKNESS
+        graphics.drawLine(screen, color, *self.beforePose.pos.screenRef, *self.afterPose.pos.screenRef, thick)
 
     # Callback when the dragged object was just released
     def stopDragging(self):

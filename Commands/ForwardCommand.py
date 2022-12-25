@@ -57,7 +57,7 @@ class ForwardCommand(Command):
             color = colors.BLUE
             thick = self.SEGMENT_THICKNESS_2
         elif self.isHovering:
-            color = (0,0,130)
+            color = colors.DARKBLUE
             thick = self.SEGMENT_THICKNESS_2
         else:
             color = colors.BLACK

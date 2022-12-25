@@ -34,14 +34,20 @@ class NullCommand(Command):
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         distance = Utility.distanceTuples(self.afterPose.pos.screenRef, userInput.mousePosition.screenRef)
-        return distance < 6
+        return distance < 12
 
     def drawHovered(self, screen: pygame.Surface):
         graphics.drawGuideLine(screen, colors.GREEN, *self.beforePose.pos.screenRef, self.heading)
 
     # Draw the command on the path on the graph
     def draw(self, screen: pygame.Surface, isSelected: bool):
-        graphics.drawCircle(screen, *self.afterPose.pos.screenRef, colors.BLACK, 7 if self.isHovering else 5)
+        if isSelected:
+            color = colors.BLUE
+        elif self.isHovering:
+            color = colors.DARKBLUE
+        else:
+            color = colors.BLACK
+        graphics.drawCircle(screen, *self.afterPose.pos.screenRef, color, 7 if self.isHovering else 5)
 
     # Callback when the dragged object was just released
     def stopDragging(self):

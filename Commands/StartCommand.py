@@ -26,7 +26,7 @@ class StartCommand(Command):
         print(heading * 180 / 3.1415)
         self.rotatedImage = pygame.transform.rotate(self.rawImage, heading * 180 / 3.1415)
         self.rotatedImage2 = pygame.transform.rotate(self.rawImage2, heading * 180 / 3.1415)
-        self.rotatedImageH = graphics.getLighterImage(self.rotatedImage, 0.75)
+        self.rotatedImageH = graphics.getLighterImage(self.rotatedImage, 0.8)
 
     # Return the stored initial position of the robot to start the program
     def compute(self, initialPose: Pose) -> Pose:

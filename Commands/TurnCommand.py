@@ -23,8 +23,8 @@ class TurnCommand(Command):
         self.ccImage = graphics.getImage("Images/Buttons/PathButtons/counterclockwise.png", 0.07)
         self.cImage2 = graphics.getImage("Images/Buttons/PathButtons/clockwise2.png", 0.07)
         self.ccImage2 = graphics.getImage("Images/Buttons/PathButtons/counterclockwise2.png", 0.07)
-        self.cImageH = graphics.getLighterImage(self.cImage, 0.75)
-        self.ccImageH = graphics.getLighterImage(self.ccImage, 0.75)
+        self.cImageH = graphics.getLighterImage(self.cImage, 0.8)
+        self.ccImageH = graphics.getLighterImage(self.ccImage, 0.8)
 
 
     # Go forward the direction the robot is already facing

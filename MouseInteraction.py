@@ -7,6 +7,7 @@ from VisibleElements.FieldSurface import FieldSurface
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from Commands.Program import Program
+from Commands.AbstractCommand import Command
 from Commands.NullCommand import NullCommand
 import Utility
 from typing import Iterator
@@ -52,11 +53,14 @@ def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform,
 
 
 # If X is pressed and hovering over PathPoint/PathSegment, delete it
-def handleDeleting(userInput: UserInput, state: SoftwareState):
+def handleDeleting(userInput: UserInput, state: SoftwareState, program: Program):
 
     # Obviously, if X is not pressed, we're not deleting anything
     if not userInput.isKeyPressing(pygame.K_x):
         return
+
+    if isinstance(state.objectHovering, Command):
+        program.delete(state.objectHovering)
 
 
 # Find the object that is hoverable, update that object's hoverable state, and return the object
@@ -83,7 +87,7 @@ def handleStartingPressingObject(userInput: UserInput, state: SoftwareState, fie
         state.objectDragged = state.objectHovering
         state.objectDragged._startDragging(userInput.mousePosition)
 
-        if state.objectHovering is not fieldSurface and type(state.objectHovering) != NullCommand:
+        if state.objectHovering is not fieldSurface:
             state.objectSelected = state.objectHovering
     elif isinstance(state.objectHovering, Clickable):
         objectClicked: Clickable = state.objectHovering

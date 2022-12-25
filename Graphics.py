@@ -51,6 +51,15 @@ def getLighterImage(image: pygame.Surface, lightenPercent: float) -> pygame.Surf
 
     return newImage
 
+def getDarkerImage(image: pygame.Surface, darkenPercent: float) -> pygame.Surface:
+    rect = image.get_rect()
+    dark = pygame.Surface((rect.width, rect.height))
+    dark.fill(colors.BLACK)
+    dark.set_alpha(darkenPercent * 255)
+    newImage = image.copy()
+    newImage.blit(dark, (0,0))
+    return newImage
+
 # Draw surface with center coordinates (cx, cy)
 def drawSurface(surface: pygame.Surface, drawnSurface: pygame.Surface, cx: int, cy: int, angle: float = 0):
     

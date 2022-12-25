@@ -68,6 +68,67 @@ class Program:
         distance = Utility.distanceTuples(lastPose.pos.fieldRef, targetPosition.fieldRef)
         self.addForward(distance)
 
+    def delete(self, command: Command):
+        if type(command) == StartCommand:
+            return
+
+        # delete both the null command and the movement before it
+        if type(command) == NullCommand:
+            command = command.previous
+            command.next = None
+            del self.commands[-1]
+
+        if type(command) == ForwardCommand:
+            # easy case, just delete end
+            if command.next is None:
+                command.previous.next = None
+                del self.commands[-1]
+            else:
+                # not allowed to delete segments connected on both ends
+                pass
+        
+        if type(command) == TurnCommand:
+            # easy case, just delete end
+            if command.next is None:
+                print("deleete last turn")
+                null = NullCommand(self)
+                null.previous = command.previous
+                command.previous.next = null
+                print(self.commands[-1])
+                del self.commands[-1]
+                print(self.commands[-1].next)
+                self.commands.append(null)
+                print(self.commands)
+
+            else:
+                # join the previous and next goForwards together
+                turn: TurnCommand = command
+                forwardBefore: ForwardCommand = turn.previous
+                forwardAfter: ForwardCommand = turn.next
+                print("both", forwardBefore, forwardAfter)
+                fro = forwardBefore.beforePose.pos.fieldRef
+                to = forwardAfter.afterPose.pos.fieldRef
+                forwardBefore.distance = Utility.distanceTuples(fro, to)
+                forwardBefore.next = turn.next
+                turn.next.previous = forwardBefore
+                i = self.commands.index(turn)
+                print(i)
+                print(self.commands)
+                print(len(self.commands))
+                del self.commands[i+1]
+
+                prevTurn: TurnCommand = forwardBefore.previous
+                prevTurn.heading = Utility.thetaTwoPoints(fro, to)
+
+        if len(self.commands) > 2 and type(self.commands[-1]) == NullCommand and type(self.commands[-2]) == TurnCommand:
+            print("delete last null")
+            del self.commands[-1]
+            self.commands[-1].next = None
+
+        self.recompute()
+
+
+
     # Recompute the entire path given list of commands
     # Should be called whenever the path is modified
     def recompute(self):
@@ -75,6 +136,12 @@ class Program:
         currentPose: Pose = None
         for command in self.commands:
             currentPose = command.compute(currentPose)
+
+        for i in range(len(self.commands)):
+            if i != 0:
+                assert(self.commands[i].previous is not None)
+            if i != len(self.commands) - 1:
+                assert(self.commands[i].next is not None)
 
     # Draw entire path. Draw the segments under the icons
     def draw(self, screen: pygame.Surface, state: SoftwareState):

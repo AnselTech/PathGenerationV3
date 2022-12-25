@@ -54,7 +54,7 @@ def main():
         handleDragging(userInput, state, fieldSurface)
 
         # If the X key is pressed, delete hovered PathPoint/segment
-        handleDeleting(userInput, state)
+        handleDeleting(userInput, state, program)
 
         # Handle all field left click functionality
         if userInput.isMouseOnField:
@@ -69,7 +69,6 @@ def main():
         # Draw everything on the screen
         drawEverything()
 
-        print(state.objectSelected)
                 
 
 # Draw the vex field, full path, and panel

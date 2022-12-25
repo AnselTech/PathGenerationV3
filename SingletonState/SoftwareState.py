@@ -2,7 +2,7 @@ from enum import Enum
 
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Draggable import Draggable
-
+from MouseInterfaces.Clickable import Clickable
 
 """ A class representing global state of the software."""
 
@@ -30,6 +30,7 @@ class SoftwareState:
         self.mode: Mode = Mode.MOUSE_SELECT
         self.objectHovering: Hoverable = None # object the mouse is currently hovering over
         self.objectDragged: Draggable = None # object the mouse is currently dragging
+        self.objectSelected: Clickable = None # object that is currently selected through click
 
     def __str__(self):
         return "Software State:\nHovering: {}\nDragged: {}".format(self.objectHovering, self.objectDragged)

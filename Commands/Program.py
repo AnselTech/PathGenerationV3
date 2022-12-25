@@ -1,11 +1,15 @@
 from Commands.AbstractCommand import Command
+from Commands.NullCommand import NullCommand
 from Commands.StartCommand import StartCommand
 from Commands.ForwardCommand import ForwardCommand
 from Commands.TurnCommand import TurnCommand
 
 from Commands.Pose import Pose
+from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref
+from SingletonState.SoftwareState import SoftwareState
 import pygame, Utility
+from typing import Iterator
 
 """
 Stores a list of commands, which make up the path
@@ -15,16 +19,27 @@ class Program:
 
     def __init__(self):
 
-        self.commands: list[Command] = [ StartCommand() ]
+        self.commands: list[Command] = [ StartCommand(self) ]
 
     # append goTurnU() to the program
     def addTurn(self, absoluteHeading: float):
-        self.commands.append(TurnCommand(absoluteHeading))
+        if type(self.commands[-1]) == NullCommand:
+            del self.commands[-1]
+        
+        self.commands[-1].next = TurnCommand(self, absoluteHeading)
+        self.commands.append(self.commands[-1].next)
+        self.commands[-1].previous = self.commands[-2]
         self.recompute()
 
     # append goForwardU() to the program
     def addForward(self, distanceInches: float):
-        self.commands.append(ForwardCommand(distanceInches))
+        self.commands[-1].next = ForwardCommand(self, distanceInches)
+        self.commands.append(self.commands[-1].next)
+        self.commands[-1].previous = self.commands[-2]
+
+        self.commands[-1].next = NullCommand(self)
+        self.commands.append(self.commands[-1].next)
+        self.commands[-1].previous = self.commands[-2]
         self.recompute()
 
     # User just clicked a point. Add a goForward there. But, if robot is not aimed towards
@@ -62,22 +77,38 @@ class Program:
             currentPose = command.compute(currentPose)
 
     # Draw entire path. Draw the segments under the icons
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, state: SoftwareState):
 
         # Draw the segments first
         for command in self.commands:
             if type(command) == ForwardCommand:
-                command.draw(screen)
+                command.draw(screen, command == state.objectSelected)
 
         # Draw the non-segments last
         for command in self.commands:
             if type(command) != ForwardCommand:
-                command.draw(screen)    
+                command.draw(screen, command == state.objectSelected)    
 
     # Return the entire list of c++ instructions as a multiline string
     def getCode(self) -> str:
         string = ""
         for command in self.commands:
-            string += command.getCode() + "\n"
+            code = command.getCode()
+            if code is not None:
+                string += code + "\n"
 
         return string
+
+    # Get the list of commands that are hoverable for mouse interaction purposes
+    def getHoverables(self) -> Iterator[Hoverable]:
+
+        # First check for StartCommand and TurnCommand icons
+        yield self.commands[0]
+        for command in self.commands[1:]:
+            if type(command) == TurnCommand:
+                yield command
+
+        # Then check for segments and curves
+        for command in self.commands[1:]:
+            if isinstance(command, Hoverable) and type(command) != TurnCommand:
+                yield command

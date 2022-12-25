@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from MouseInterfaces.Draggable import Draggable
 import pygame
 from Commands.Pose import Pose
 
@@ -7,15 +8,22 @@ An abstract command which is an instruction that can be translated to c++, as we
 as manipulate the robot's pose in some way
 """
 
-class Command(ABC):
+class Command(Draggable, ABC):
 
-    def __init__(self):
+    def __init__(self, program):
+        super().__init__()
+
+        self.program = program
+
         self.beforePose: Pose = None
         self.afterPose: Pose = None
 
+        self.previous: Command = None
+        self.next: Command = None
+
     # Draw the command on the path on the graph
     @abstractmethod
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, isSelected: bool):
         pass
 
     # Update beforePose and afterPose based on the nature of hte command

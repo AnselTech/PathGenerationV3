@@ -42,7 +42,6 @@ def main():
         if userInput.isQuit:
             pygame.quit()
             sys.exit()
-
         
         # Handle zooming with mousewheel
         handleMousewheel(fieldSurface, fieldTransform, userInput)
@@ -63,10 +62,14 @@ def main():
             elif userInput.rightClicked:
                 handleRightClick(state, userInput)
 
+        if userInput.isKeyPressed(pygame.K_p):
+            print(program.getCode())
+
         # Draw everything on the screen
         drawEverything()
-        
-        
+
+        print(state.objectSelected)
+                
 
 # Draw the vex field, full path, and panel
 def drawEverything() -> None:
@@ -80,7 +83,9 @@ def drawEverything() -> None:
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
 
     # Draw path specified by commands
-    program.draw(screen)
+    program.draw(screen, state)
+
+    drawShadow()
 
     # Draw mouse selector buttons
     mouseSelector.draw(screen)
@@ -91,6 +96,19 @@ def drawEverything() -> None:
         
     pygame.display.update()
 
+def drawShadow():
+
+    if state.objectHovering is not fieldSurface or state.objectSelected is not None:
+        return
+
+    if state.mode != Mode.ADD_SEGMENT:
+        return
+
+    fro = program.commands[-1].afterPose.pos.screenRef
+    to = userInput.mousePosition.screenRef
+    graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
+    graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
+
 
 # returns a generator object to iterate through all the hoverable objects,
 # to determine which object is being hovered by the mouse in order
@@ -100,6 +118,9 @@ def getHoverables() -> Iterator[Hoverable]:
     if userInput.isMouseOnField:
 
         for hoverable in mouseSelector.getHoverables():
+            yield hoverable
+
+        for hoverable in program.getHoverables():
             yield hoverable
 
         yield fieldSurface

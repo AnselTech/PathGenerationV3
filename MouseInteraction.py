@@ -14,12 +14,15 @@ import pygame
 
 # Handle left clicks for dealing with the field
 def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program):
-    
-    if userInput.isMouseOnField:
 
-        # Add segment at mouse location
-        if state.mode == Mode.ADD_SEGMENT:
-            program.addPoint(userInput.mousePosition)
+    if state.objectSelected is not fieldSurface and state.objectSelected is not None and state.objectHovering is fieldSurface:
+        state.objectSelected = None
+        return
+
+    # Add segment at mouse location if mouse if clicking at some area of the field
+    if state.objectHovering == fieldSurface and state.mode == Mode.ADD_SEGMENT:
+        program.addPoint(userInput.mousePosition)
+    
 
 # Handle right clicks for dealing with the field
 def handleRightClick(state: SoftwareState, userInput: UserInput):
@@ -78,8 +81,11 @@ def handleStartingPressingObject(userInput: UserInput, state: SoftwareState, fie
     if isinstance(state.objectHovering, Draggable):
         state.objectDragged = state.objectHovering
         state.objectDragged._startDragging(userInput.mousePosition)
+
+        if state.objectHovering is not fieldSurface:
+            state.objectSelected = state.objectHovering
     elif isinstance(state.objectHovering, Clickable):
-        objectClicked: Clickable = state.objectHovering # "cast" type hint to Clickable
+        objectClicked: Clickable = state.objectHovering
         objectClicked.click()
 
 
@@ -99,7 +105,7 @@ def handleDragging(userInput: UserInput, state: SoftwareState, fieldSurface: Fie
 
     # Now that we know what's being dragged, actually drag the object
     if state.objectDragged is not None:
-        changed = state.objectDragged.beDraggedByMouse(userInput)
+        state.objectDragged.beDraggedByMouse(userInput)
 
 
         # if an object is being dragged it always takes precedence over any object that might be "hovering"

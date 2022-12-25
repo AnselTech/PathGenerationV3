@@ -113,11 +113,22 @@ def drawPolygon(screen: pygame.Surface, color: tuple, points: list[tuple]):
     pygame.gfxdraw.aapolygon(screen, points, color)
 
 
-def drawLine(screen: pygame.Surface, color: tuple, x1: int, y1: int, x2: int, y2: int, thickness: int = 1):
+def drawLine(screen: pygame.Surface, color: tuple, x1: int, y1: int, x2: int, y2: int, thickness: int = 1, alpha: int = 255):
 
     thickness = round(thickness)
 
     from math import cos, sin
+
+    if alpha != 255:
+        mx = min(x1, x2)
+        my = min(y1, y2)
+        dx = abs(x1-x2)
+        dy = abs(y1-y2)
+        x1 -= mx
+        x2 -= mx
+        y1 -= my
+        y2 -= my
+
 
     X0 = [x1,y1]
     X1 = [x2,y2]
@@ -131,8 +142,16 @@ def drawLine(screen: pygame.Surface, color: tuple, x1: int, y1: int, x2: int, y2
     BL = (center_L1[0] + (length/2.) * cos(angle) + (thickness/2.) * sin(angle), center_L1[1] - (thickness/2.) * cos(angle) + (length/2.) * sin(angle))
     BR = (center_L1[0] - (length/2.) * cos(angle) + (thickness/2.) * sin(angle), center_L1[1] - (thickness/2.) * cos(angle) - (length/2.) * sin(angle))
 
-    pygame.gfxdraw.aapolygon(screen, (UL, UR, BR, BL), color)
-    pygame.gfxdraw.filled_polygon(screen, (UL, UR, BR, BL), color)
+    if alpha == 255:
+        pygame.gfxdraw.aapolygon(screen, (UL, UR, BR, BL), color)
+        pygame.gfxdraw.filled_polygon(screen, (UL, UR, BR, BL), color)
+    else:
+        surface = pygame.Surface([dx, dy], pygame.SRCALPHA)
+        
+        pygame.gfxdraw.aapolygon(surface, (UL, UR, BR, BL), (*color, alpha))
+        pygame.gfxdraw.filled_polygon(surface, (UL, UR, BR, BL), (*color, alpha))
+
+        screen.blit(surface, (mx, my))
 
 def drawVector(screen: pygame.Surface, x1: int, y1: int, magnitude: float, heading: float):
 

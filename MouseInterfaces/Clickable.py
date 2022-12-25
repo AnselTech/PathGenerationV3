@@ -15,5 +15,5 @@ class Clickable(Hoverable):
 
     # Called the first frame the mouse is down on a hovered object
     @abstractmethod
-    def click():
+    def click(self):
         pass

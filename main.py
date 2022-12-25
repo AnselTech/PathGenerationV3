@@ -10,7 +10,8 @@ from MouseInterfaces.TooltipOwner import TooltipOwner
 
 from Commands.Program import Program
 from Commands.Edge import Edge
-from Commands.Node import Node
+import Commands.Node as Node
+
 from MouseSelector.MouseSelector import MouseSelector
 
 import Utility, colors, math
@@ -29,6 +30,7 @@ if __name__ == '__main__':
 
     fieldSurface: FieldSurface = FieldSurface(fieldTransform)
     userInput: UserInput = UserInput(pygame.mouse, pygame.key)
+    Node.init()
     program: Program = Program()
 
     state: SoftwareState = SoftwareState()
@@ -78,12 +80,11 @@ def drawEverything() -> None:
     # Draw the vex field
     fieldSurface.draw(screen)
 
-    if isinstance(state.objectHovering, Edge) or isinstance(state.objectHovering, Node):
-        command: Command = state.objectHovering
-        command.drawHovered(screen)
+    if isinstance(state.objectHovering, Edge) or isinstance(state.objectHovering, Node.Node):
+        state.objectHovering.drawHovered(screen)
 
     # Draw path specified by commands
-    program.draw(screen, state)
+    program.draw(screen)
 
     drawShadow()
 
@@ -101,16 +102,17 @@ def drawEverything() -> None:
         state.objectHovering.drawTooltip(screen, userInput.mousePosition.screenRef)
         
     pygame.display.update()
+    print(state.objectHovering)
 
 def drawShadow():
 
-    if state.objectHovering is not fieldSurface or state.objectSelected is not None:
+    if state.objectHovering is not fieldSurface:
         return
 
     if state.mode != Mode.ADD_SEGMENT:
         return
 
-    fro = program.commands[-1].afterPose.pos.screenRef
+    fro = program.nodes[-1].position.screenRef
     to = userInput.mousePosition.screenRef
     theta = Utility.thetaTwoPoints(fro, to)
     x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)

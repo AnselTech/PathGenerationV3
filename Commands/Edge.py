@@ -7,6 +7,7 @@ import pygame, colors, graphics, Utility
 # Edges are not draggable. even curved edges are completely determined by node positions and starting theta
 class Edge(Hoverable, ABC):
     def __init__(self):
+        super().__init__()
         self.beforePos: PointRef = None
         self.afterPos: PointRef = None
 
@@ -28,8 +29,11 @@ class StraightEdge(Edge):
         super().__init__()
         self.distance: float = None
 
-    def compute(self, beforeHeading: float) -> float:
+    def compute(self, beforeHeading: float, beforePos: PointRef, afterPos: PointRef) -> float:
         self.heading = beforeHeading
+        self.beforePos = beforePos
+        self.afterPos = afterPos
+        return self.heading
 
     # Check whether mouse is near the segment using a little math
     def checkIfHovering(self, userInput: UserInput) -> bool:

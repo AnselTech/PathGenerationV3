@@ -17,13 +17,12 @@ import pygame
 # Handle left clicks for dealing with the field
 def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program):
 
-    if state.objectSelected is not fieldSurface and state.objectSelected is not None and state.objectHovering is fieldSurface:
-        state.objectSelected = None
-        return
-
-    # Add segment at mouse location if mouse if clicking at some area of the field
-    if state.objectHovering == fieldSurface and state.mode == Mode.ADD_SEGMENT:
-        program.addPoint(userInput.mousePosition)
+# Add segment at mouse location if mouse if clicking at some area of the field
+    if state.objectHovering == fieldSurface:
+        if state.mode == Mode.ADD_SEGMENT:
+            program.addNodeForward(userInput.mousePosition)
+        elif state.mode == Mode.ADD_CURVE:
+            program.addNodeCurve(userInput.mousePosition)
     
 
 # Handle right clicks for dealing with the field
@@ -59,9 +58,6 @@ def handleDeleting(userInput: UserInput, state: SoftwareState, program: Program)
     if not userInput.isKeyPressing(pygame.K_x):
         return
 
-    if isinstance(state.objectHovering, Command):
-        program.delete(state.objectHovering)
-
 
 # Find the object that is hoverable, update that object's hoverable state, and return the object
 def handleHoverables(state: SoftwareState, userInput: UserInput, hoverablesGenerator: Iterator[Hoverable]):
@@ -87,8 +83,6 @@ def handleStartingPressingObject(userInput: UserInput, state: SoftwareState, fie
         state.objectDragged = state.objectHovering
         state.objectDragged._startDragging(userInput.mousePosition)
 
-        if state.objectHovering is not fieldSurface:
-            state.objectSelected = state.objectHovering
     elif isinstance(state.objectHovering, Clickable):
         objectClicked: Clickable = state.objectHovering
         objectClicked.click()

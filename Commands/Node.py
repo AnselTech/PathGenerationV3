@@ -4,10 +4,27 @@ from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
 import pygame, graphics, Utility, colors
 
+startImage = None
+turnCImage = None
+turnCCImage = None
+turnCImageH = None
+turnCCImageH = None
+def init():
+    global startImage, turnCImage, turnCCImage, turnCImageH, turnCCImageH
+    startImage = graphics.getImage("Images/Buttons/PathButtons/start.png", 0.1)
+    turnCImage = graphics.getImage("Images/Buttons/PathButtons/clockwise.png", 0.07)
+    turnCCImage = graphics.getImage("Images/Buttons/PathButtons/counterclockwise.png", 0.07)
+    turnCImageH = graphics.getLighterImage(turnCImage, 0.8)
+    turnCCImageH = graphics.getLighterImage(turnCCImage, 0.8)
+
 class Node(Draggable, ABC):
 
-    def __init__(self, position: PointRef, hoverRadius: int):
-        self.position: PointRef = position
+    def __init__(self, program, position: PointRef, hoverRadius: int):
+
+        super().__init__()
+
+        self.program = program
+        self.position: PointRef = position.copy()
         self.hoverRadius = hoverRadius
 
         self.beforeHeading: float = None
@@ -16,7 +33,7 @@ class Node(Draggable, ABC):
 
     # Called to determine if the mouse is touching this object (and if is the first object touched, would be considered hovered)
     def checkIfHovering(self, userInput: UserInput) -> bool:
-        distance = Utility.distanceTuples(self.position.fieldRef, userInput.mousePosition.screenRef)
+        distance = Utility.distanceTuples(self.position.screenRef, userInput.mousePosition.screenRef)
         return distance < self.hoverRadius
 
     # Callback when the dragged object was just released
@@ -31,10 +48,19 @@ class Node(Draggable, ABC):
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
         self.position = userInput.mousePosition.copy()
+        self.program.recompute()
 
     @abstractmethod
-    def compute(self, beforeHeading: float) -> float:
-        pass
+    def compute(self, beforePosition: PointRef, afterPosition: PointRef) -> float:
+        if beforePosition is None:
+            self.beforeHeading = None
+        else:
+            self.beforeHeading = Utility.thetaTwoPoints(beforePosition.fieldRef, self.position.fieldRef)
+
+        if afterPosition is None:
+            self.afterHeading = None
+        else:
+            self.afterHeading = Utility.thetaTwoPoints(self.position.fieldRef, afterPosition.fieldRef)
 
     def drawHovered(self, screen: pygame.Surface):
         graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.afterHeading)
@@ -43,13 +69,12 @@ class Node(Draggable, ABC):
     def draw(self, screen: pygame.Surface):
         pass
 
-startImage = graphics.getImage("Images/Buttons/PathButtons/start.png", 0.1)
 class StartNode(Node):
 
-    def __init__(self):
+    def __init__(self, program):
 
         defaultStartPosition: PointRef = PointRef(Ref.FIELD, (24, 48))
-        super().__init__(defaultStartPosition, 20)
+        super().__init__(program, defaultStartPosition, 20)
         self.setHeading(0)
 
     def compute(self, beforeHeading: float) -> float:
@@ -62,19 +87,16 @@ class StartNode(Node):
 
     def draw(self, screen: pygame.Surface): 
         image = self.rotatedImageH if self.isHovering else self.rotatedImage
-        screen.blit(image)
+        graphics.drawSurface(screen, image, *self.position.screenRef)
 
-turnCImage = graphics.getImage("Images/Buttons/PathButtons/clockwise.png", 0.07)
-turnCCImage = graphics.getImage("Images/Buttons/PathButtons/counterclockwise.png", 0.07)
-turnCImageH = graphics.getLighterImage(turnCImage, 0.8)
-turnCCImageH = graphics.getLighterImage(turnCCImage, 0.8)
 class TurnNode(Node):
 
-    def __init__(self, position: PointRef):
+    def __init__(self, program, position: PointRef):
 
-        super().__init__(position, 15)
+        super().__init__(program, position, 15)
         self.clockwise: bool = False
         self.hasTurn: bool = False
+        self.afterHeading = 0
 
     # Given previous heading, return the resultant heading after the turn
     def compute(self, beforeHeading: float) -> float:
@@ -95,7 +117,7 @@ class TurnNode(Node):
             else:
                 image = turnCCImageH if self.isHovering else turnCCImage
 
-            screen.blit(image)
+            graphics.drawSurface(screen, image, *self.position.screenRef)
 
         else:
             # draw black node

@@ -32,6 +32,8 @@ class ForwardCommand(Command):
 
         self.afterPose = Pose(PointRef(Ref.FIELD, (xpos, ypos)), initialPose.theta)
 
+        self.heading = Utility.thetaTwoPoints(self.beforePose.pos.fieldRef, self.afterPose.pos.fieldRef)
+
         return self.afterPose
 
     # Check whether mouse is near the segment using a little math
@@ -43,6 +45,9 @@ class ForwardCommand(Command):
     # goForwardU(distance)
     def getCode(self) -> str:
         return f"goForwardU({self.distance});"
+
+    def drawHovered(self, screen: pygame.Surface):
+        graphics.drawGuideLine(screen, colors.GREEN, *self.beforePose.pos.screenRef, self.heading)
 
     # Draw the command on the path on the graph
     def draw(self, screen: pygame.Surface, isSelected: bool):

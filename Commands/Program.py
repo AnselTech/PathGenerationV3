@@ -105,10 +105,10 @@ class Program:
         # First check for StartCommand and TurnCommand icons
         yield self.commands[0]
         for command in self.commands[1:]:
-            if type(command) == TurnCommand:
+            if type(command) != ForwardCommand:
                 yield command
 
         # Then check for segments and curves
         for command in self.commands[1:]:
-            if isinstance(command, Hoverable) and type(command) != TurnCommand:
+            if isinstance(command, Hoverable) and type(command) == ForwardCommand:
                 yield command

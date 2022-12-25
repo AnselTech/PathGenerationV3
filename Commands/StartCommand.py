@@ -40,6 +40,9 @@ class StartCommand(Command):
         distance = Utility.distanceTuples(self.afterPose.pos.screenRef, userInput.mousePosition.screenRef)
         return distance < 20
 
+    def drawHovered(self, screen: pygame.Surface):
+        graphics.drawGuideLine(screen, colors.GREEN, *self.afterPose.pos.screenRef, self.afterPose.theta)
+
     # Draw the command on the path on the graph
     def draw(self, screen: pygame.Surface, isSelected: bool):
         if isSelected:

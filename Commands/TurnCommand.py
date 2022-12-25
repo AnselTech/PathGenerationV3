@@ -35,6 +35,7 @@ class TurnCommand(Command):
         self.clockwise = Utility.deltaInHeading(self.heading, initialPose.theta) < 0
 
         self.afterPose = Pose(initialPose.pos, self.heading)
+        self.previousHeading = Utility.thetaTwoPoints(self.previous.beforePose.pos.fieldRef, initialPose.pos.fieldRef)
         return self.afterPose
 
     # goTurnU(getRadians(headingDegrees))
@@ -44,6 +45,10 @@ class TurnCommand(Command):
     def checkIfHovering(self, userInput: UserInput) -> bool:
         distance = Utility.distanceTuples(self.afterPose.pos.screenRef, userInput.mousePosition.screenRef)
         return distance < 20
+
+    def drawHovered(self, screen: pygame.Surface):
+        graphics.drawGuideLine(screen, colors.RED, *self.beforePose.pos.screenRef, self.previousHeading)
+        graphics.drawGuideLine(screen, colors.GREEN, *self.beforePose.pos.screenRef, self.heading)
 
     # Draw the command on the path on the graph
     def draw(self, screen: pygame.Surface, isSelected: bool):
@@ -55,6 +60,8 @@ class TurnCommand(Command):
             image = self.cImage if self.clockwise else self.ccImage
 
         graphics.drawSurface(screen, image, *self.afterPose.pos.screenRef)
+            
+
 
     # Callback when the dragged object was just released
     def stopDragging(self):

@@ -9,9 +9,10 @@ from MouseInteraction import *
 from MouseInterfaces.TooltipOwner import TooltipOwner
 
 from Commands.Program import Program
+from Commands.AbstractCommand import Command
 from MouseSelector.MouseSelector import MouseSelector
 
-import Utility, colors
+import Utility, colors, math
 from typing import Iterator
 import graphics
 import multiprocessing as mp 
@@ -77,10 +78,9 @@ def drawEverything() -> None:
     # Draw the vex field
     fieldSurface.draw(screen)
 
-    # Draw panel background
-    border = 5
-    pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
-    pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
+    if isinstance(state.objectHovering, Command):
+        command: Command = state.objectHovering
+        command.drawHovered(screen)
 
     # Draw path specified by commands
     program.draw(screen, state)
@@ -89,6 +89,12 @@ def drawEverything() -> None:
 
     # Draw mouse selector buttons
     mouseSelector.draw(screen)
+
+    # Draw panel background
+    border = 5
+    pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
+    pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
+
 
     # Draw a tooltip if there is one
     if state.objectHovering is not None and isinstance(state.objectHovering, TooltipOwner):
@@ -106,8 +112,12 @@ def drawShadow():
 
     fro = program.commands[-1].afterPose.pos.screenRef
     to = userInput.mousePosition.screenRef
+    theta = Utility.thetaTwoPoints(fro, to)
+    x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)
+    graphics.drawThinLine(screen, colors.GREEN, *to, x, y)
     graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
     graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
+    
 
 
 # returns a generator object to iterate through all the hoverable objects,

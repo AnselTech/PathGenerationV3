@@ -153,6 +153,16 @@ def drawLine(screen: pygame.Surface, color: tuple, x1: int, y1: int, x2: int, y2
 
         screen.blit(surface, (mx, my))
 
+# Draw guideline at (x,y) at angle theta, bounded by the field screen
+def drawGuideLine(screen: pygame.Surface, color: tuple, x: int, y: int, theta: float):
+    c = math.cos(theta) * Utility.SCREEN_SIZE
+    s = math.sin(theta) * Utility.SCREEN_SIZE
+
+    x1, x2 = x + c, x - c
+    y1, y2 = y - s, y + s
+
+    drawThinLine(screen, color, x1, y1, x2, y2)
+
 def drawVector(screen: pygame.Surface, x1: int, y1: int, magnitude: float, heading: float):
 
     x2 = int(x1 + magnitude * math.cos(heading))

@@ -24,6 +24,8 @@ class NullCommand(Command):
         self.beforePose = initialPose
         self.afterPose = initialPose
 
+        self.heading = Utility.thetaTwoPoints(self.previous.beforePose.pos.fieldRef, self.afterPose.pos.fieldRef)
+
         return initialPose
 
     # goForwardU(distance)
@@ -33,6 +35,9 @@ class NullCommand(Command):
     def checkIfHovering(self, userInput: UserInput) -> bool:
         distance = Utility.distanceTuples(self.afterPose.pos.screenRef, userInput.mousePosition.screenRef)
         return distance < 6
+
+    def drawHovered(self, screen: pygame.Surface):
+        graphics.drawGuideLine(screen, colors.GREEN, *self.beforePose.pos.screenRef, self.heading)
 
     # Draw the command on the path on the graph
     def draw(self, screen: pygame.Surface, isSelected: bool):

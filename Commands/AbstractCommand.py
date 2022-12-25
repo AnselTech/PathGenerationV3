@@ -26,6 +26,10 @@ class Command(Draggable, ABC):
     def draw(self, screen: pygame.Surface, isSelected: bool):
         pass
 
+    # Draw any guide lines, etc. when hovered
+    def drawHovered(self, screen: pygame.Surface):
+        pass
+
     # Update beforePose and afterPose based on the nature of hte command
     # Also return afterPose after the update
     # SHOULD NOT MODIFY initialPose parameter

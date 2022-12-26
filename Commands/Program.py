@@ -3,7 +3,7 @@ from Commands.Node import Node, StartNode, TurnNode
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.SoftwareState import SoftwareState, Mode
-import pygame, Utility
+import pygame, Utility, math
 from typing import Iterator
 
 """
@@ -29,6 +29,24 @@ class Program:
         self.edges.append(CurveEdge())
         self.recompute()
 
+    def snapNewPoint(self, position: PointRef, node: Node = None) -> PointRef:
+        if node is None:
+            i = len(self.nodes)
+        else:
+            i = self.nodes.index(node)
+            
+        if i >= 2:
+            before: 'Node' = self.nodes[i-1]
+            currentHeading = Utility.thetaTwoPoints(before.position.fieldRef, position.fieldRef)
+
+            if abs(Utility.deltaInHeading(currentHeading, before.beforeHeading)) < 0.06:
+                dist = Utility.distanceTuples(before.position.fieldRef, position.fieldRef)
+                x = before.position.fieldRef[0] + dist * math.cos(before.beforeHeading)
+                y = before.position.fieldRef[1] + dist * math.sin(before.beforeHeading)
+                return PointRef(Ref.FIELD, (x,y))
+
+        return position.copy()
+
     def recompute(self):
         if len(self.nodes) == 0:
             return
@@ -36,10 +54,10 @@ class Program:
             self.nodes[0].compute(None, None)
             return
 
-        heading = self.nodes[0].compute(None, self.nodes[1].position)
+        heading = self.nodes[0].compute(None, self.nodes[1])
         for i in range(len(self.edges)):
             heading = self.edges[i].compute(heading, self.nodes[i].position, self.nodes[i+1].position)
-            heading = self.nodes[i+1].compute(self.nodes[i].position, None if i == len(self.edges)-1 else self.nodes[i+1].position)
+            heading = self.nodes[i+1].compute(self.nodes[i], None if i == len(self.edges)-1 else self.nodes[i+2])
 
     def getHoverables(self) -> Iterator[Hoverable]:
 

@@ -47,20 +47,23 @@ class Node(Draggable, ABC):
     # Called every frame that the object is being dragged. Most likely used to update the position of the object based
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
-        self.position = userInput.mousePosition.copy()
+
+        self.position = self.program.snapNewPoint(userInput.mousePosition, self)
         self.program.recompute()
 
-    def compute(self, beforePosition: PointRef, afterPosition: PointRef) -> float:
-        if beforePosition is None:
+    def compute(self, before: 'Node', after: 'Node') -> float:
+
+
+        if before is None:
             self.beforeHeading = None
         else:
-            self.beforeHeading = Utility.thetaTwoPoints(beforePosition.fieldRef, self.position.fieldRef)
-
-        if afterPosition is None:
+            self.beforeHeading = Utility.thetaTwoPoints(before.position.fieldRef, self.position.fieldRef)
+            
+        if after is None:
             self.afterHeading = None
         else:
-            self.afterHeading = Utility.thetaTwoPoints(self.position.fieldRef, afterPosition.fieldRef)
-
+            self.afterHeading = Utility.thetaTwoPoints(self.position.fieldRef, after.position.fieldRef)
+        
         self.computeSubclass()
 
         return self.afterHeading

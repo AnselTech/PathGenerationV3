@@ -113,7 +113,7 @@ def drawShadow():
         return
 
     fro = program.nodes[-1].position.screenRef
-    to = userInput.mousePosition.screenRef
+    to = program.snapNewPoint(userInput.mousePosition).screenRef
     theta = Utility.thetaTwoPoints(fro, to)
     x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)
     graphics.drawThinLine(screen, colors.GREEN, *to, x, y)

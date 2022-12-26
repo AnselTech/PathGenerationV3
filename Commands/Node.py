@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
-import pygame, graphics, Utility, colors
+import pygame, graphics, Utility, colors, math
 
 startImage = None
 turnCImage = None
@@ -50,7 +50,6 @@ class Node(Draggable, ABC):
         self.position = userInput.mousePosition.copy()
         self.program.recompute()
 
-    @abstractmethod
     def compute(self, beforePosition: PointRef, afterPosition: PointRef) -> float:
         if beforePosition is None:
             self.beforeHeading = None
@@ -62,8 +61,20 @@ class Node(Draggable, ABC):
         else:
             self.afterHeading = Utility.thetaTwoPoints(self.position.fieldRef, afterPosition.fieldRef)
 
+        self.computeSubclass()
+
+        return self.afterHeading
+
+    def computeSubclass(self):
+        pass
+
     def drawHovered(self, screen: pygame.Surface):
-        graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.afterHeading)
+        if self.afterHeading is not None:
+            graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.afterHeading)
+
+        if self.beforeHeading is not None:
+            graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.beforeHeading)
+
 
     @abstractmethod
     def draw(self, screen: pygame.Surface):
@@ -75,14 +86,13 @@ class StartNode(Node):
 
         defaultStartPosition: PointRef = PointRef(Ref.FIELD, (24, 48))
         super().__init__(program, defaultStartPosition, 20)
-        self.setHeading(0)
+        self.afterHeading = 0
 
-    def compute(self, beforeHeading: float) -> float:
-        return self.afterHeading
-
-    def setHeading(self, heading):
-        self.afterHeading = heading
-        self.rotatedImage = pygame.transform.rotate(startImage, heading * 180 / 3.1415)
+    def computeSubclass(self):
+        if self.afterHeading is None:
+            self.rotatedImage = startImage
+        else:
+            self.rotatedImage = pygame.transform.rotate(startImage, self.afterHeading * 180 / 3.1415)
         self.rotatedImageH = graphics.getLighterImage(self.rotatedImage, 0.8)
 
     def draw(self, screen: pygame.Surface): 
@@ -99,14 +109,12 @@ class TurnNode(Node):
         self.afterHeading = 0
 
     # Given previous heading, return the resultant heading after the turn
-    def compute(self, beforeHeading: float) -> float:
-        self.beforeHeading = beforeHeading
-        self.clockwise = Utility.deltaInHeading(self.afterHeading, beforeHeading) < 0
-        return self.afterHeading
-
-    def drawHovered(self, screen: pygame.Surface):
-        super().drawHovered(screen)
-        graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.beforeHeading)
+    def computeSubclass(self) -> float:
+        if self.afterHeading is None or math.isclose(self.beforeHeading, self.afterHeading):
+            self.hasTurn = False
+        else:
+            self.hasTurn = True
+            self.clockwise = Utility.deltaInHeading(self.afterHeading, self.beforeHeading) < 0
 
     def draw(self, screen: pygame.Surface): 
         # draw turn node

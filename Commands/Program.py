@@ -30,10 +30,16 @@ class Program:
         self.recompute()
 
     def recompute(self):
-        heading = self.nodes[0].afterHeading
+        if len(self.nodes) == 0:
+            return
+        elif len(self.nodes) == 1:
+            self.nodes[0].compute(None, None)
+            return
+
+        heading = self.nodes[0].compute(None, self.nodes[1].position)
         for i in range(len(self.edges)):
             heading = self.edges[i].compute(heading, self.nodes[i].position, self.nodes[i+1].position)
-            heading = self.nodes[i+1].compute(heading)
+            heading = self.nodes[i+1].compute(self.nodes[i].position, None if i == len(self.edges)-1 else self.nodes[i+1].position)
 
     def getHoverables(self) -> Iterator[Hoverable]:
 

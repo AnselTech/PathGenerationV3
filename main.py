@@ -102,7 +102,6 @@ def drawEverything() -> None:
         state.objectHovering.drawTooltip(screen, userInput.mousePosition.screenRef)
         
     pygame.display.update()
-    print(state.objectHovering)
 
 def drawShadow():
 

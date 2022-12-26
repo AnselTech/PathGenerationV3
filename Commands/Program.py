@@ -34,7 +34,7 @@ class Program:
             i = len(self.nodes)
         else:
             i = self.nodes.index(node)
-            
+
         if i >= 2:
             before: 'Node' = self.nodes[i-1]
             currentHeading = Utility.thetaTwoPoints(before.position.fieldRef, position.fieldRef)
@@ -47,6 +47,21 @@ class Program:
 
         return position.copy()
 
+    def deleteNode(self, node: TurnNode):
+        
+        # Last node. just delete last segment and node
+        if node.afterHeading is None:
+            del self.nodes[-1]
+            del self.edges[-1]
+        else:
+            # connect the previous and next node together
+            i = self.nodes.index(node)
+            del self.nodes[i]
+            del self.edges[i]
+
+        self.recompute()
+
+    # recalculate all the state for each point/edge and command after the list of points is modified
     def recompute(self):
         if len(self.nodes) == 0:
             return

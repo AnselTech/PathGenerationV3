@@ -7,6 +7,7 @@ from VisibleElements.FieldSurface import FieldSurface
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from Commands.Program import Program
+from Commands.Node import StartNode, TurnNode
 import Utility
 from typing import Iterator
 
@@ -55,6 +56,10 @@ def handleDeleting(userInput: UserInput, state: SoftwareState, program: Program)
     # Obviously, if X is not pressed, we're not deleting anything
     if not userInput.isKeyPressing(pygame.K_x):
         return
+
+    # can only delete turn nodes, not edges or first node
+    if type(state.objectHovering) == TurnNode:
+        program.deleteNode(state.objectHovering)
 
 
 # Find the object that is hoverable, update that object's hoverable state, and return the object

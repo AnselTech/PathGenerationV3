@@ -7,7 +7,8 @@ from VisibleElements.FieldSurface import FieldSurface
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from Commands.Program import Program
-from Commands.Node import StartNode, TurnNode
+from Commands.StartNode import StartNode
+from Commands.TurnNode import TurnNode
 import Utility
 from typing import Iterator
 

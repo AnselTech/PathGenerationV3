@@ -11,6 +11,8 @@ from MouseInterfaces.TooltipOwner import TooltipOwner
 from Commands.Program import Program
 from Commands.Edge import Edge
 import Commands.Node as Node
+import Commands.StartNode as StartNode
+import Commands.TurnNode as TurnNode
 
 from MouseSelector.MouseSelector import MouseSelector
 
@@ -21,6 +23,8 @@ import multiprocessing as mp
 
 if __name__ == '__main__':
 
+    pygame.init()
+
     # All the global singleton objects
     screen: pygame.Surface = pygame.display.set_mode((Utility.SCREEN_SIZE + Utility.PANEL_WIDTH, Utility.SCREEN_SIZE))
     pygame.display.set_caption("Path Generation 3.0 by Ansel")
@@ -30,7 +34,8 @@ if __name__ == '__main__':
 
     fieldSurface: FieldSurface = FieldSurface(fieldTransform)
     userInput: UserInput = UserInput(pygame.mouse, pygame.key)
-    Node.init()
+    StartNode.init()
+    TurnNode.init()
     program: Program = Program()
 
     state: SoftwareState = SoftwareState()

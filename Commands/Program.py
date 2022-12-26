@@ -1,5 +1,7 @@
 from Commands.Edge import Edge, StraightEdge, CurveEdge
-from Commands.Node import Node, StartNode, TurnNode
+from Commands.Node import Node
+from Commands.StartNode import StartNode
+from Commands.TurnNode import TurnNode
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.SoftwareState import SoftwareState, Mode
@@ -30,20 +32,56 @@ class Program:
         self.recompute()
 
     def snapNewPoint(self, position: PointRef, node: Node = None) -> PointRef:
+
+        SNAP_CONSTANT = 0.06
+
         if node is None:
             i = len(self.nodes)
         else:
             i = self.nodes.index(node)
 
+        # If close, snap previous turn
         if i >= 2:
             before: 'Node' = self.nodes[i-1]
             currentHeading = Utility.thetaTwoPoints(before.position.fieldRef, position.fieldRef)
 
-            if abs(Utility.deltaInHeading(currentHeading, before.beforeHeading)) < 0.06:
+            if abs(Utility.deltaInHeading(currentHeading, before.beforeHeading)) < SNAP_CONSTANT:
                 dist = Utility.distanceTuples(before.position.fieldRef, position.fieldRef)
                 x = before.position.fieldRef[0] + dist * math.cos(before.beforeHeading)
                 y = before.position.fieldRef[1] + dist * math.sin(before.beforeHeading)
                 return PointRef(Ref.FIELD, (x,y))
+
+        # If close, snap current turn
+        if i < len(self.nodes) - 1:
+            before: 'Node' = self.nodes[i-1]
+            after: 'Node' = self.nodes[i+1]
+            beforeHeading = Utility.thetaTwoPoints(before.position.fieldRef, position.fieldRef)
+            nextHeading = Utility.thetaTwoPoints(position.fieldRef, after.position.fieldRef)
+
+            diff = Utility.deltaInHeading(beforeHeading, nextHeading)
+            if abs(diff) < SNAP_CONSTANT:
+
+                newHeading = Utility.thetaTwoPoints(before.position.fieldRef, after.position.fieldRef)
+
+                dist = Utility.distanceTuples(before.position.fieldRef, position.fieldRef)
+                x = before.position.fieldRef[0] + dist * math.cos(newHeading)
+                y = before.position.fieldRef[1] + dist * math.sin(newHeading)
+                return PointRef(Ref.FIELD, (x,y))
+
+        # If close, snap next turn
+        if i < len(self.nodes) - 1 and self.nodes[i+1].afterHeading is not None:
+            after: 'Node' = self.nodes[i+1]
+            beforeHeading = Utility.thetaTwoPoints(position.fieldRef, after.position.fieldRef)
+            
+            diff = Utility.deltaInHeading(beforeHeading, after.afterHeading)
+            if abs(diff) < SNAP_CONSTANT:
+
+                dist = Utility.distanceTuples(position.fieldRef, after.position.fieldRef)
+                x = after.position.fieldRef[0] - dist * math.cos(after.afterHeading)
+                y = after.position.fieldRef[1] - dist * math.sin(after.afterHeading)
+                return PointRef(Ref.FIELD, (x,y))
+
+
 
         return position.copy()
 

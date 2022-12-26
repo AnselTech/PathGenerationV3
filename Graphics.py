@@ -1,6 +1,5 @@
 import pygame, math, Utility, colors, colorsys
 
-
 """
 A class that cycles through each hue gradually through next(), which returns a color
 """
@@ -21,6 +20,7 @@ class ColorCycle:
 
 
 FONT_PATH = 'Corbel.ttf'
+FONT15 = pygame.font.Font(FONT_PATH, 15)
 FONT20 = pygame.font.Font(FONT_PATH, 20)
 FONT25 = pygame.font.Font(FONT_PATH, 25)
 FONT30 = pygame.font.Font(FONT_PATH, 30)
@@ -75,7 +75,40 @@ def drawSurface(surface: pygame.Surface, drawnSurface: pygame.Surface, cx: int, 
 # align = 1 -> align right/bottom
 def drawText(surface: pygame.Surface, font: pygame.font, string: str, color: tuple, x: int, y: int, alignX: float = 0.5, alignY: float = 0.5):
     text = font.render(string, True, color)
-    surface.blit(text, [x - text.get_width()*alignX, y - text.get_height()*alignY])
+    x -= text.get_width()*alignX
+    y -= text.get_height()*alignY
+    surface.blit(text, (x,y))
+
+# Theta in radians. At 0 rad/degrrees (pointing right), text does not rotate
+def drawTextRotate(surface: pygame.Surface, font: pygame.font, string: str, color: tuple, x: int, y: int, thetaRad: float):
+    theta = thetaRad * 180 / 3.1415
+    theta %= 360
+    if theta > 90 and theta < 270:
+        theta -= 180
+        theta %= 360
+    
+    text = font.render(string, True, color)
+    text = pygame.transform.rotate(text, theta)
+
+    dx = 0.5 * math.cos(theta * 3.1415 / 180)
+    dy = math.cos(theta * 3.1415 / 180) * 1.2
+
+    if abs(theta - 40) < 15:
+        dx += 0.25
+        dy += 0.25
+    if abs(theta - 225) < 10:
+        dx += 0.25
+        dy += 0.25
+    if abs(theta - 90) < 10 or abs(theta - 270) < 10:
+        dx -= 0.25
+
+    x -= text.get_width()*dx
+    y -= text.get_height()*dy
+
+    
+
+    surface.blit(text, (x,y))
+
 
 def drawThinLine(screen: pygame.Surface, color: tuple, x1: int, y1: int, x2: int, y2: int):
     pygame.draw.aaline(screen, color, (x1,y1), (x2,y2))

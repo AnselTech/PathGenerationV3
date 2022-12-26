@@ -178,7 +178,6 @@ class VectorRef:
     def __mul__(self, scalar: float) -> 'VectorRef':
         return VectorRef(Ref.FIELD, Utility.scaleTuple(self.fieldRef, scalar))
 
-
 # Testing code
 if __name__ == "__main__":
     f = FieldTransform(2, (0,0))

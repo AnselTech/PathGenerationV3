@@ -81,8 +81,6 @@ class Program:
                 y = after.position.fieldRef[1] - dist * math.sin(after.afterHeading)
                 return PointRef(Ref.FIELD, (x,y))
 
-
-
         return position.copy()
 
     def deleteNode(self, node: TurnNode):

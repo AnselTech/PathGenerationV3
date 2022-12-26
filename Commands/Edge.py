@@ -33,6 +33,7 @@ class StraightEdge(Edge):
         self.heading = beforeHeading
         self.beforePos = beforePos
         self.afterPos = afterPos
+        self.distance = Utility.distanceTuples(beforePos.fieldRef, afterPos.fieldRef)
         return self.heading
 
     # Check whether mouse is near the segment using a little math
@@ -54,6 +55,9 @@ class StraightEdge(Edge):
             thick = 3
         graphics.drawLine(screen, color, *self.beforePos.screenRef, *self.afterPos.screenRef, thick)
 
+        if self.isHovering:
+            midpoint: PointRef = self.beforePos + (self.afterPos - self.beforePos)*0.5
+            graphics.drawTextRotate(screen, graphics.FONT15, str(round(self.distance,2)) + "\"", colors.BLACK, *midpoint.screenRef, self.heading)
 
 # circular arc
 class CurveEdge(Edge):

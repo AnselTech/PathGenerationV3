@@ -8,9 +8,10 @@ from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from Commands.Program import Program
 from Commands.StartNode import StartNode
+from Commands.Edge import StraightEdge
 from Commands.TurnNode import TurnNode
 import Utility
-from typing import Iterator
+from typing import Iterator, Tuple
 
 import pygame
 
@@ -33,7 +34,8 @@ def handleRightClick(state: SoftwareState, userInput: UserInput):
         state.mode = state.mode.next()
         
 # Handle zooming through mousewheel. Zoom "origin" should be at the mouse location
-def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform, userInput: UserInput) -> None:
+# return true if modified
+def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform, userInput: UserInput) -> bool:
     
     if not fieldSurface.isDragging and userInput.mousewheelDelta != 0:
 
@@ -49,6 +51,9 @@ def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform,
 
 
         fieldSurface.updateScaledSurface()
+        return True
+
+    return False
 
 
 # If X is pressed and hovering over PathPoint/PathSegment, delete it
@@ -117,3 +122,25 @@ def handleDragging(userInput: UserInput, state: SoftwareState, fieldSurface: Fie
                 state.objectHovering.resetHoverableObject()
             state.objectHovering = state.objectDragged
             state.objectHovering.setHoveringObject()
+
+def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program) -> Tuple[PointRef, float]:
+
+    # hovering only
+    if state.objectDragged is not None or userInput.isMousePressing:
+        return None, None
+
+    if state.mode == Mode.MOUSE_SELECT:
+
+        if type(state.objectHovering) == StraightEdge:
+            pos = state.objectHovering.getClosestPoint(userInput.mousePosition)
+            heading = state.objectHovering.heading
+            return pos, heading
+        elif type(state.objectHovering) == StartNode:
+            pos = state.objectHovering.position
+            heading = state.objectHovering.afterHeading
+            return pos, heading
+        elif type(state.objectHovering) == TurnNode:
+            pos = state.objectHovering.position
+            heading = state.objectHovering.beforeHeading
+            return pos, heading
+    return None, None

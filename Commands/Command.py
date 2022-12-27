@@ -8,11 +8,12 @@ from AbstractButtons.ToggleButton import ToggleButton
 from typing import Iterable
 
 class CommandSlider(Slider):
-    def __init__(self, min: float, max: float, step: float, text: str):
+    def __init__(self, min: float, max: float, step: float, text: str, default: float = 0):
         self.min = min
         self.max = max
         self.step = step
         self.text = text
+        self.default = default
 
     def getX(self):
         return self.parent.x + 200
@@ -23,7 +24,7 @@ class CommandSlider(Slider):
     def init(self, parent: 'Command'):
         self.parent: 'Command' = parent
         width = 50
-        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, textX = width/2, textY = -20)
+        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20)
 
 
 class ToggleOption(Clickable):
@@ -183,7 +184,7 @@ class TurnCommand(Command):
         BLUE = [[57, 126, 237], [122, 169, 245]]
 
         toggle = CommandToggle("PREC", "FAST")
-        slider = CommandSlider(0, 1, 0.01, "Speed")
+        slider = CommandSlider(0, 1, 0.01, "Speed", 1)
         super().__init__(parent, "Images/Commands/Turn.png", BLUE, toggle = toggle, slider = slider)
 
 class StraightCommand(Command):
@@ -192,7 +193,7 @@ class StraightCommand(Command):
         RED = [[245, 73, 73], [237, 119, 119]]
 
         toggle = CommandToggle("PREC", "FAST")
-        slider = CommandSlider(0, 1, 0.01, "Speed")
+        slider = CommandSlider(0, 1, 0.01, "Speed", 1)
         super().__init__(parent, "Images/Commands/Straight.png", RED, toggle = toggle, slider = slider)
 
 class CurveCommand(Command):

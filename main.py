@@ -7,6 +7,7 @@ from SingletonState.UserInput import UserInput
 from VisibleElements.FieldSurface import FieldSurface
 from MouseInteraction import *
 from MouseInterfaces.TooltipOwner import TooltipOwner
+from RobotImage import RobotImage
 
 from Commands.Program import Program
 from Commands.Edge import Edge
@@ -42,6 +43,7 @@ if __name__ == '__main__':
 
     state: SoftwareState = SoftwareState()
     mouseSelector: MouseSelector = MouseSelector(state)
+    robotImage: RobotImage = RobotImage(fieldTransform)
 
 
 def main():
@@ -55,7 +57,7 @@ def main():
             sys.exit()
         
         # Handle zooming with mousewheel
-        handleMousewheel(fieldSurface, fieldTransform, userInput)
+        modified = handleMousewheel(fieldSurface, fieldTransform, userInput)
         
         # Find the hovered object out of all the possible hoverable objects
         handleHoverables(state, userInput, getHoverables())
@@ -65,6 +67,9 @@ def main():
 
         # If the X key is pressed, delete hovered PathPoint/segment
         handleDeleting(userInput, state, program)
+
+        shadowPos, shadowHeading = handleHoverPath(userInput, state, program)
+
 
         # Handle all field left click functionality
         if userInput.isMouseOnField:
@@ -77,12 +82,12 @@ def main():
             print(program.getCode())
 
         # Draw everything on the screen
-        drawEverything()
+        drawEverything(shadowPos, shadowHeading)
 
                 
 
 # Draw the vex field, full path, and panel
-def drawEverything() -> None:
+def drawEverything(shadowPos: PointRef, shadowHeading: float) -> None:
     
     # Draw the vex field
     fieldSurface.draw(screen)
@@ -93,7 +98,12 @@ def drawEverything() -> None:
     # Draw path specified by commands
     program.drawPath(screen)
 
+    # Draw robot if mouse is hovering over point or line
+    if shadowPos is not None:
+        robotImage.draw(screen, shadowPos, shadowHeading)
+
     drawShadow()
+
 
     # Draw mouse selector buttons
     mouseSelector.draw(screen)

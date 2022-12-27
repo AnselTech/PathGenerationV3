@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from SingletonState.ReferenceFrame import PointRef
+from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Hoverable import Hoverable
 from Commands.Command import Command, StraightCommand, CurveCommand
@@ -43,7 +43,11 @@ class StraightEdge(Edge):
     def checkIfHovering(self, userInput: UserInput) -> bool:
         a = self.beforePos.screenRef
         b = self.afterPos.screenRef
-        return Utility.pointTouchingLine(*userInput.mousePosition.screenRef, *a, *b, 10)
+        return Utility.pointTouchingLine(*userInput.mousePosition.screenRef, *a, *b, 13)
+
+    def getClosestPoint(self, position: PointRef) -> PointRef:
+        positionOnSegment = Utility.pointOnLineClosestToPoint(*position.fieldRef, *self.beforePos.fieldRef, *self.afterPos.fieldRef)
+        return PointRef(Ref.FIELD, positionOnSegment)
 
     def drawHovered(self, screen: pygame.Surface):
         graphics.drawGuideLine(screen, colors.GREEN, *self.beforePos.screenRef, self.heading)

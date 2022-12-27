@@ -4,7 +4,7 @@ from SingletonState.UserInput import UserInput
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Draggable import Draggable
 from Commands.Command import Command, StraightCommand, CurveCommand
-import pygame, colors, graphics, Utility
+import pygame, pygame.gfxdraw, colors, graphics, Utility
 
 # Edges are not draggable. even curved edges are completely determined by node positions and starting theta
 class Edge(Hoverable, ABC):
@@ -40,6 +40,17 @@ class CurvePoint(Draggable):
     def compute(self):
         midpoint: PointRef = self.edge.beforePos + (self.edge.afterPos - self.edge.beforePos) * 0.5
         self.curvePoint = midpoint + VectorRef(Ref.FIELD, magnitude = self.curveDistance, heading = self.edge.heading + 3.1415/2)
+        
+        if self.curveDistance == 0:
+            self.center: PointRef = None
+        else:
+            # find the center of the arc's circle
+            p1 = self.edge.beforePos.fieldRef
+            p2 = self.curvePoint.fieldRef
+            p3 = self.edge.afterPos.fieldRef
+            fieldPos = Utility.circleCenterFromThreePoints(*p1, *p2, *p3)
+            self.center: PointRef = PointRef(Ref.FIELD, fieldPos)
+
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         return Utility.distanceTuples(self.curvePoint.screenRef, userInput.mousePosition.screenRef) < 10
@@ -106,7 +117,19 @@ class StraightEdge(Edge):
         else:
             color = colors.BLACK
             thick = 3
-        graphics.drawLine(screen, color, *self.beforePos.screenRef, *self.afterPos.screenRef, thick)
+
+        if self.curve.curveDistance == 0: # draw line
+            graphics.drawLine(screen, color, *self.beforePos.screenRef, *self.afterPos.screenRef, thick)
+        else: # draw curve
+            center: PointRef = self.curve.center
+            theta1: float = -Utility.thetaTwoPoints(center.fieldRef, self.beforePos.fieldRef) * 180 / 3.1415
+            theta2: float = -Utility.thetaTwoPoints(center.fieldRef, self.afterPos.fieldRef) * 180 / 3.1415
+
+            if self.curve.curveDistance < 0:
+                theta1, theta2 = theta2, theta1    
+        
+            radius = Utility.distanceTuples(center.screenRef, self.curve.curvePoint.screenRef)
+            pygame.gfxdraw.arc(screen, int(center.screenRef[0]), int(center.screenRef[1]), int(radius), int(theta1), int(theta2), color)
 
         # Draw curve point
         if drawCurvePoint:

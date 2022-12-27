@@ -111,11 +111,11 @@ class Program:
             heading = self.nodes[i+1].compute(self.nodes[i], None if i == len(self.edges)-1 else self.nodes[i+2])
 
         # recompute commands
-        x = Utility.SCREEN_SIZE + 18
+        x = Utility.SCREEN_SIZE + 17
         y = 18
-        dy = 30
+        dy = 70
         for command in self.getHoverablesCommands():
-            command.updatePosition(x,y)
+            command.updatePosition(x, y)
             y += dy
 
     def getHoverablesPath(self) -> Iterator[Hoverable]:
@@ -142,13 +142,15 @@ class Program:
         return
         yield
 
-    def draw(self, screen: pygame.Surface):
+    def drawPath(self, screen: pygame.Surface):
 
         # Draw the path
         for edge in self.edges:
             edge.draw(screen)
         for node in self.nodes:
             node.draw(screen)
+
+    def drawCommands(self, screen: pygame.Surface):
 
         # Draw the commands
         for command in self.getHoverablesCommands():

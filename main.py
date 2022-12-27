@@ -91,7 +91,7 @@ def drawEverything() -> None:
         state.objectHovering.drawHovered(screen)
 
     # Draw path specified by commands
-    program.draw(screen)
+    program.drawPath(screen)
 
     drawShadow()
 
@@ -102,6 +102,8 @@ def drawEverything() -> None:
     border = 5
     pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
+
+    program.drawCommands(screen)
 
     # Draw a tooltip if there is one
     if state.objectHovering is not None and isinstance(state.objectHovering, TooltipOwner):

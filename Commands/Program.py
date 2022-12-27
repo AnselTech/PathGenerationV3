@@ -16,7 +16,7 @@ class Program:
 
     def __init__(self):
         self.nodes: list[Node] = [ StartNode(self) ]
-        self.edges: list[Edge] = []
+        self.edges: list[StraightEdge] = []
         self.recompute()
         
     def addNodeForward(self, position: PointRef):
@@ -28,7 +28,7 @@ class Program:
     def addNodeCurve(self, position: PointRef):
 
         self.nodes.append(TurnNode(self, position))
-        self.edges.append(CurveEdge())
+        self.edges.append(StraightEdge())
         self.recompute()
 
     def snapNewPoint(self, position: PointRef, node: Node = None) -> PointRef:
@@ -127,10 +127,14 @@ class Program:
             command.updatePosition(x, y)
             y += dy
 
-    def getHoverablesPath(self) -> Iterator[Hoverable]:
+    def getHoverablesPath(self, drawCurvePoints: bool = False) -> Iterator[Hoverable]:
 
         for node in self.nodes:
             yield node
+
+        if drawCurvePoints:
+            for edge in self.edges:
+                yield edge.curve
 
         for edge in self.edges:
             yield edge
@@ -143,6 +147,7 @@ class Program:
 
         if len(self.nodes) >= 2:
             for i in range(len(self.edges)):
+
                 yield self.edges[i].command
 
                 if self.nodes[i+1].hasTurn:
@@ -151,11 +156,11 @@ class Program:
         return
         yield
 
-    def drawPath(self, screen: pygame.Surface):
+    def drawPath(self, screen: pygame.Surface, drawCurvePoints: bool):
 
         # Draw the path
         for edge in self.edges:
-            edge.draw(screen)
+            edge.draw(screen, drawCurvePoints)
         for node in self.nodes:
             node.draw(screen)
 

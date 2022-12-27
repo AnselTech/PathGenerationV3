@@ -26,12 +26,10 @@ class Draggable(Hoverable):
         self.stopDragging()
 
     # Callback when the dragged object was just released
-    @abstractmethod
     def stopDragging(self):
         pass
 
     # Called when the object was just pressed at the start of a drag
-    @abstractmethod
     def startDragging(self, userInput: UserInput):
         pass
 

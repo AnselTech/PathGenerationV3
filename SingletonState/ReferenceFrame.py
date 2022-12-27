@@ -113,9 +113,14 @@ VectorRef - VectorRef = VectorRef
 """
 class VectorRef:
 
-    def __init__(self, referenceMode: Ref = None, vector: tuple = (0,0)):
+    def __init__(self, referenceMode: Ref, vector: tuple = (0,0), magnitude: float = None, heading: float = None):
         self.transform: FieldTransform = transform
         self._vxf, self._vyf = None, None
+
+        # If given in (magnitude, heading) form instead, find the vector
+        if magnitude is not None:
+            vector = magnitude * math.cos(heading), magnitude * math.sin(heading)
+
         if referenceMode == Ref.SCREEN:
             self.screenRef = vector
         else:

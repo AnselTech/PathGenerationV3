@@ -97,7 +97,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
         state.objectHovering.drawHovered(screen)
 
     # Draw path specified by commands
-    program.drawPath(screen)
+    program.drawPath(screen, state.mode == Mode.ADD_CURVE)
 
     # Draw robot if mouse is hovering over point or line
     if shadowPos is not None:
@@ -133,13 +133,17 @@ def drawShadow():
     if state.mode != Mode.ADD_SEGMENT:
         return
 
+    toPos = program.snapNewPoint(userInput.mousePosition)
+
     fro = program.nodes[-1].position.screenRef
-    to = program.snapNewPoint(userInput.mousePosition).screenRef
+    to = toPos.screenRef
     theta = Utility.thetaTwoPoints(fro, to)
     x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)
     graphics.drawThinLine(screen, colors.GREEN, *to, x, y)
     graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
     graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
+
+    robotImage.draw(screen, toPos, -theta)
     
 
 
@@ -153,7 +157,7 @@ def getHoverables() -> Iterator[Hoverable]:
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
 
-        for hoverable in program.getHoverablesPath():
+        for hoverable in program.getHoverablesPath(state.mode == Mode.ADD_CURVE):
             yield hoverable
 
         yield fieldSurface

@@ -128,9 +128,6 @@ def handleDragging(userInput: UserInput, state: SoftwareState, fieldSurface: Fie
 
 def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program) -> Tuple[PointRef, float]:
 
-    # hovering only
-    if state.objectDragged is not None or userInput.isMousePressing:
-        return None, None
 
     if state.mode == Mode.MOUSE_SELECT:
 

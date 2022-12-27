@@ -103,6 +103,7 @@ class CommandToggle:
 
 class Command(Hoverable, ABC):
 
+
     def __init__(self, parent, imagePath: str, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
 
         super().__init__()

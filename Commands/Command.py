@@ -172,16 +172,22 @@ class Command(Hoverable, ABC):
             self.slider.draw(screen)
 
 class TurnCommand(Command):
-    pass
-
-class ForwardCommand(Command):
     def __init__(self):
 
         RED = [[245, 73, 73], [240, 91, 91], [237, 119, 119]]
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed")
-        super().__init__("Images/Commands/Straight.png", RED, toggle, slider)
+        super().__init__("Images/Commands/Turn.png", RED, toggle = toggle, slider = slider)
+
+class StraightCommand(Command):
+    def __init__(self):
+
+        RED = [[245, 73, 73], [240, 91, 91], [237, 119, 119]]
+
+        toggle = CommandToggle("PREC", "FAST")
+        slider = CommandSlider(0, 1, 0.01, "Speed")
+        super().__init__("Images/Commands/Straight.png", RED, toggle = toggle, slider = slider)
 
 class CurveCommand(Command):
     pass

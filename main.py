@@ -43,9 +43,6 @@ if __name__ == '__main__':
     state: SoftwareState = SoftwareState()
     mouseSelector: MouseSelector = MouseSelector(state)
 
-    command = ForwardCommand()
-    command.updatePosition(Utility.SCREEN_SIZE + 20, 300)
-
 
 def main():
 
@@ -106,8 +103,6 @@ def drawEverything() -> None:
     pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
 
-    command.draw(screen)
-
     # Draw a tooltip if there is one
     if state.objectHovering is not None and isinstance(state.objectHovering, TooltipOwner):
         state.objectHovering.drawTooltip(screen, userInput.mousePosition.screenRef)
@@ -142,14 +137,15 @@ def getHoverables() -> Iterator[Hoverable]:
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
 
-        for hoverable in program.getHoverables():
+        for hoverable in program.getHoverablesPath():
             yield hoverable
 
         yield fieldSurface
     
     else:
-        for hoverable in command.getHoverables():
-            yield hoverable
+        for command in program.getHoverablesCommands():
+            for hoverable in command.getHoverables():
+                yield hoverable
 
     # weird python hack to make it return an empty iterator if nothing hoverable
     return

@@ -3,6 +3,7 @@ from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
 import pygame, graphics, Utility, colors, math
+from Commands.Command import Command, TurnCommand
 
 class Node(Draggable, ABC):
 
@@ -16,6 +17,8 @@ class Node(Draggable, ABC):
 
         self.beforeHeading: float = None
         self.afterHeading: float = None
+
+        self.command: Command = TurnCommand()
 
 
     # Called to determine if the mouse is touching this object (and if is the first object touched, would be considered hovered)

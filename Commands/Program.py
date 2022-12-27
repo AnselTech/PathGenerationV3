@@ -1,5 +1,5 @@
 from Commands.Edge import Edge, StraightEdge, CurveEdge
-from Commands.Node import Node
+from Commands.Node import *
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from MouseInterfaces.Hoverable import Hoverable
@@ -110,7 +110,15 @@ class Program:
             heading = self.edges[i].compute(heading, self.nodes[i].position, self.nodes[i+1].position)
             heading = self.nodes[i+1].compute(self.nodes[i], None if i == len(self.edges)-1 else self.nodes[i+2])
 
-    def getHoverables(self) -> Iterator[Hoverable]:
+        # recompute commands
+        x = Utility.SCREEN_SIZE + 18
+        y = 18
+        dy = 30
+        for command in self.getHoverablesCommands():
+            command.updatePosition(x,y)
+            y += dy
+
+    def getHoverablesPath(self) -> Iterator[Hoverable]:
 
         for node in self.nodes:
             yield node
@@ -121,8 +129,28 @@ class Program:
         return
         yield
 
+    # Skip start node. Skip any nodes that don't turn
+    def getHoverablesCommands(self) -> Iterator[Command]:
+
+        if len(self.nodes) >= 2:
+            for i in range(len(self.edges)):
+                yield self.edges[i].command
+
+                if self.nodes[i+1].hasTurn:
+                    yield self.nodes[i+1].command
+
+        return
+        yield
+
     def draw(self, screen: pygame.Surface):
+
+        # Draw the path
         for edge in self.edges:
             edge.draw(screen)
         for node in self.nodes:
             node.draw(screen)
+
+        # Draw the commands
+        for command in self.getHoverablesCommands():
+            command.draw(screen)
+

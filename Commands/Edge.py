@@ -2,14 +2,17 @@ from abc import ABC, abstractmethod
 from SingletonState.ReferenceFrame import PointRef
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Hoverable import Hoverable
+from Commands.Command import Command, StraightCommand, CurveCommand
 import pygame, colors, graphics, Utility
 
 # Edges are not draggable. even curved edges are completely determined by node positions and starting theta
 class Edge(Hoverable, ABC):
-    def __init__(self):
+    def __init__(self, command: Command):
         super().__init__()
         self.beforePos: PointRef = None
         self.afterPos: PointRef = None
+
+        self.command: Command = command
 
     @abstractmethod
     def compute(self, beforeHeading: float) -> float:
@@ -26,7 +29,7 @@ class Edge(Hoverable, ABC):
 # linear
 class StraightEdge(Edge):
     def __init__(self):
-        super().__init__()
+        super().__init__(StraightCommand())
         self.distance: float = None
 
     def compute(self, beforeHeading: float, beforePos: PointRef, afterPos: PointRef) -> float:
@@ -62,7 +65,7 @@ class StraightEdge(Edge):
 # circular arc
 class CurveEdge(Edge):
     def __init__(self):
-        super().__init__()
+        super().__init__(CurveCommand())
         self.beforeHeading = None
         self.afterHeading = None
 

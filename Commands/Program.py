@@ -83,6 +83,15 @@ class Program:
 
         return position.copy()
 
+    def insertNode(self, edge: StraightEdge, position: PointRef):
+        i = self.edges.index(edge) + 1
+        # insert edge and node at index i
+
+        self.nodes.insert(i, TurnNode(self, position))
+        self.edges.insert(i, StraightEdge())
+        self.recompute()
+
+
     def deleteNode(self, node: TurnNode):
         
         # Last node. just delete last segment and node

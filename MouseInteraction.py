@@ -16,7 +16,7 @@ from typing import Iterator, Tuple
 import pygame
 
 # Handle left clicks for dealing with the field
-def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program):
+def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program, segmentShadow: PointRef):
 
 # Add segment at mouse location if mouse if clicking at some area of the field
     if state.objectHovering == fieldSurface:
@@ -24,6 +24,9 @@ def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput:
             program.addNodeForward(userInput.mousePosition)
         elif state.mode == Mode.ADD_CURVE:
             program.addNodeCurve(userInput.mousePosition)
+
+    elif segmentShadow is not None:
+        program.insertNode(state.objectHovering, segmentShadow)
     
 
 # Handle right clicks for dealing with the field
@@ -144,3 +147,12 @@ def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program
             heading = state.objectHovering.beforeHeading
             return pos, heading
     return None, None
+
+def handleHoverPathAdd(userInput: UserInput, state: SoftwareState, program: Program) -> PointRef:
+
+    if state.mode == Mode.ADD_SEGMENT:
+        if type(state.objectHovering) == StraightEdge:
+            pos = state.objectHovering.getClosestPoint(userInput.mousePosition)
+            return pos
+
+    return None

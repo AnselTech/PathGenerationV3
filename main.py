@@ -69,12 +69,13 @@ def main():
         handleDeleting(userInput, state, program)
 
         shadowPos, shadowHeading = handleHoverPath(userInput, state, program)
+        segmentShadow = handleHoverPathAdd(userInput, state, program)
 
 
         # Handle all field left click functionality
         if userInput.isMouseOnField:
             if userInput.leftClicked:
-                handleLeftClick(state, fieldSurface, userInput, program)
+                handleLeftClick(state, fieldSurface, userInput, program, segmentShadow)
             elif userInput.rightClicked:
                 handleRightClick(state, userInput)
 
@@ -82,12 +83,12 @@ def main():
             print(program.getCode())
 
         # Draw everything on the screen
-        drawEverything(shadowPos, shadowHeading)
+        drawEverything(shadowPos, shadowHeading, segmentShadow)
 
                 
 
 # Draw the vex field, full path, and panel
-def drawEverything(shadowPos: PointRef, shadowHeading: float) -> None:
+def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: PointRef) -> None:
     
     # Draw the vex field
     fieldSurface.draw(screen)
@@ -101,6 +102,9 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float) -> None:
     # Draw robot if mouse is hovering over point or line
     if shadowPos is not None:
         robotImage.draw(screen, shadowPos, shadowHeading)
+
+    if segmentShadow is not None:
+        graphics.drawCircle(screen, *segmentShadow.screenRef, colors.BLACK, 4)
 
     drawShadow()
 

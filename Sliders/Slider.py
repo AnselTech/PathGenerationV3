@@ -22,7 +22,7 @@ class Slider(Draggable, TooltipOwner):
         else:
             return 0
 
-    def __init__(self, x: int, y: int, width: int, min: float, max: float, step: float, color: tuple, text: str = "", defaultValue = None, onSet = lambda: None):
+    def __init__(self, x: int, y: int, width: int, min: float, max: float, step: float, color: tuple, text: str = "", defaultValue = None, onSet = lambda: None, textX = 0, textY = 0):
         self.x = x
         self.y = y
         self.width = width
@@ -32,6 +32,8 @@ class Slider(Draggable, TooltipOwner):
         self.color = color
         self.text = text
         self.onSet = onSet
+        self.textX = textX
+        self.textY = textY
 
         self.rounding = self.getRounding(str(self.step))
 
@@ -93,8 +95,7 @@ class Slider(Draggable, TooltipOwner):
         graphics.drawCircle(screen, self.getCircleX(), self.y, self.color, 8)
 
         if self.text != "":
-            RIGHT_PADDING = 20
-            graphics.drawText(screen, graphics.FONT20, self.text, colors.BLACK, self.x - RIGHT_PADDING, self.y, 1, 0.5)
+            graphics.drawText(screen, graphics.FONT15, self.text, colors.BLACK, self.x + self.textX, self.y + self.textY, 0.5, 0.5)
 
 
     # Draw tooltip for value

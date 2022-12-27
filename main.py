@@ -10,6 +10,8 @@ from MouseInterfaces.TooltipOwner import TooltipOwner
 
 from Commands.Program import Program
 from Commands.Edge import Edge
+from Commands.Command import *
+
 import Commands.Node as Node
 import Commands.StartNode as StartNode
 import Commands.TurnNode as TurnNode
@@ -40,6 +42,9 @@ if __name__ == '__main__':
 
     state: SoftwareState = SoftwareState()
     mouseSelector: MouseSelector = MouseSelector(state)
+
+    command = ForwardCommand()
+    command.updatePosition(Utility.SCREEN_SIZE + 20, 300)
 
 
 def main():
@@ -101,6 +106,7 @@ def drawEverything() -> None:
     pygame.draw.rect(screen, colors.PANEL_GREY, [Utility.SCREEN_SIZE + border, 0, Utility.PANEL_WIDTH - border, Utility.SCREEN_SIZE])
     pygame.draw.rect(screen, colors.BORDER_GREY, [Utility.SCREEN_SIZE, 0, border, Utility.SCREEN_SIZE])
 
+    command.draw(screen)
 
     # Draw a tooltip if there is one
     if state.objectHovering is not None and isinstance(state.objectHovering, TooltipOwner):
@@ -140,11 +146,10 @@ def getHoverables() -> Iterator[Hoverable]:
             yield hoverable
 
         yield fieldSurface
-        
-            
-
+    
     else:
-        pass
+        for hoverable in command.getHoverables():
+            yield hoverable
 
     # weird python hack to make it return an empty iterator if nothing hoverable
     return

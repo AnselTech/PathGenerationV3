@@ -18,7 +18,7 @@ class Node(Draggable, ABC):
         self.beforeHeading: float = None
         self.afterHeading: float = None
 
-        self.command: Command = TurnCommand()
+        self.command: Command = TurnCommand(self)
 
 
     # Called to determine if the mouse is touching this object (and if is the first object touched, would be considered hovered)

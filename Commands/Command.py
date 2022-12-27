@@ -102,10 +102,11 @@ class CommandToggle:
 
 class Command(Hoverable, ABC):
 
-    def __init__(self, imagePath: str, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
+    def __init__(self, parent, imagePath: str, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
 
         super().__init__()
 
+        self.parent = parent
         self.width = 270
         self.height = 60
         self.x = 0
@@ -148,9 +149,14 @@ class Command(Hoverable, ABC):
 
         yield self
 
+    def isAnyHovering(self) -> bool:
+        toggleHovering = self.toggle is not None and (self.toggle.top.isHovering or self.toggle.bottom.isHovering)
+        sliderHovering = self.slider is not None and self.slider.isHovering
+        return self.isHovering or toggleHovering or sliderHovering or self.parent.isHovering
+
     def draw(self, screen: pygame.Surface):
-        
-        if self.isHovering:
+
+        if self.isAnyHovering():
             # border
             pygame.draw.rect(screen, self.colors[0], [self.x - self.margin, self.y - self.margin, self.width + self.margin*2, self.height + self.margin*2])
 
@@ -172,22 +178,22 @@ class Command(Hoverable, ABC):
             self.slider.draw(screen)
 
 class TurnCommand(Command):
-    def __init__(self):
+    def __init__(self, parent):
 
         RED = [[245, 73, 73], [240, 91, 91], [237, 119, 119]]
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed")
-        super().__init__("Images/Commands/Turn.png", RED, toggle = toggle, slider = slider)
+        super().__init__(parent, "Images/Commands/Turn.png", RED, toggle = toggle, slider = slider)
 
 class StraightCommand(Command):
-    def __init__(self):
+    def __init__(self, parent):
 
         RED = [[245, 73, 73], [240, 91, 91], [237, 119, 119]]
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed")
-        super().__init__("Images/Commands/Straight.png", RED, toggle = toggle, slider = slider)
+        super().__init__(parent, "Images/Commands/Straight.png", RED, toggle = toggle, slider = slider)
 
 class CurveCommand(Command):
     pass

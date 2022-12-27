@@ -20,5 +20,8 @@ class StartNode(Node):
         self.rotatedImageH = graphics.getLighterImage(self.rotatedImage, 0.8)
 
     def draw(self, screen: pygame.Surface): 
-        image = self.rotatedImageH if self.isHovering else self.rotatedImage
+
+        isHovering = self.isHovering or self.command.isAnyHovering()
+
+        image = self.rotatedImageH if isHovering else self.rotatedImage
         graphics.drawSurface(screen, image, *self.position.screenRef)

@@ -29,7 +29,7 @@ class Edge(Hoverable, ABC):
 # linear
 class StraightEdge(Edge):
     def __init__(self):
-        super().__init__(StraightCommand())
+        super().__init__(StraightCommand(self))
         self.distance: float = None
 
     def compute(self, beforeHeading: float, beforePos: PointRef, afterPos: PointRef) -> float:
@@ -49,8 +49,11 @@ class StraightEdge(Edge):
         graphics.drawGuideLine(screen, colors.GREEN, *self.beforePos.screenRef, self.heading)
 
     def draw(self, screen: pygame.Surface):
+
+        isHovering = self.isHovering or self.command.isAnyHovering()
+
         # draw line between self.startPos and self.endPos
-        if self.isHovering:
+        if isHovering:
             color = colors.DARKBLUE
             thick = 4
         else:
@@ -58,14 +61,14 @@ class StraightEdge(Edge):
             thick = 3
         graphics.drawLine(screen, color, *self.beforePos.screenRef, *self.afterPos.screenRef, thick)
 
-        if self.isHovering:
+        if isHovering:
             midpoint: PointRef = self.beforePos + (self.afterPos - self.beforePos)*0.5
             graphics.drawTextRotate(screen, graphics.FONT15, str(round(self.distance,2)) + "\"", colors.BLACK, *midpoint.screenRef, self.heading)
 
 # circular arc
 class CurveEdge(Edge):
     def __init__(self):
-        super().__init__(CurveCommand())
+        super().__init__(CurveCommand(self))
         self.beforeHeading = None
         self.afterHeading = None
 

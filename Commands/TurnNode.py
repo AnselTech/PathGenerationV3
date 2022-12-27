@@ -24,14 +24,17 @@ class TurnNode(Node):
             self.hasTurn = True
             self.clockwise = Utility.deltaInHeading(self.afterHeading, self.beforeHeading) < 0
 
-    def draw(self, screen: pygame.Surface): 
+    def draw(self, screen: pygame.Surface):
+
+        isHovering = self.isHovering or self.command.isAnyHovering()
+
         # draw turn node
         if self.hasTurn:
 
             if self.clockwise:
-                image = turnCImageH if self.isHovering else turnCImage
+                image = turnCImageH if isHovering else turnCImage
             else:
-                image = turnCCImageH if self.isHovering else turnCCImage
+                image = turnCCImageH if isHovering else turnCCImage
 
             graphics.drawSurface(screen, image, *self.position.screenRef)
 

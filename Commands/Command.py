@@ -161,7 +161,7 @@ class Command(Hoverable, ABC):
             pygame.draw.rect(screen, self.colors[0], [self.x - self.margin, self.y - self.margin, self.width + self.margin*2, self.height + self.margin*2])
 
         # parameters
-        pygame.draw.rect(screen, self.colors[2], [self.x, self.y, self.width, self.height])
+        pygame.draw.rect(screen, self.colors[1], [self.x, self.y, self.width, self.height])
 
         # icon
         width = self.height * 0.9
@@ -180,16 +180,16 @@ class Command(Hoverable, ABC):
 class TurnCommand(Command):
     def __init__(self, parent):
 
-        RED = [[245, 73, 73], [240, 91, 91], [237, 119, 119]]
+        BLUE = [[57, 126, 237], [122, 169, 245]]
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed")
-        super().__init__(parent, "Images/Commands/Turn.png", RED, toggle = toggle, slider = slider)
+        super().__init__(parent, "Images/Commands/Turn.png", BLUE, toggle = toggle, slider = slider)
 
 class StraightCommand(Command):
     def __init__(self, parent):
 
-        RED = [[245, 73, 73], [240, 91, 91], [237, 119, 119]]
+        RED = [[245, 73, 73], [237, 119, 119]]
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed")

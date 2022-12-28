@@ -3,20 +3,22 @@ from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
 import pygame, graphics, Utility, colors, math
+from Commands.Edge import StraightEdge, Edge
 from Commands.Command import Command, TurnCommand
 
 class Node(Draggable, ABC):
 
-    def __init__(self, program, position: PointRef, hoverRadius: int):
+    def __init__(self, program, position: PointRef, hoverRadius: int, previous: Edge = None, next: Edge = None):
 
         super().__init__()
+
+        self.previous: Edge = previous
+        self.next: Edge = next
 
         self.program = program
         self.position: PointRef = position.copy()
         self.hoverRadius = hoverRadius
 
-        self.beforeHeading: float = None
-        self.afterHeading: float = None
 
         self.command: Command = TurnCommand(self)
 
@@ -41,26 +43,6 @@ class Node(Draggable, ABC):
         self.position = self.program.snapNewPoint(userInput.mousePosition, self)
         self.program.recompute()
 
-    def compute(self, before: 'Node', after: 'Node') -> float:
-
-
-        if before is None:
-            self.beforeHeading = None
-        else:
-            self.beforeHeading = Utility.thetaTwoPoints(before.position.fieldRef, self.position.fieldRef)
-            
-        if after is None:
-            self.afterHeading = None
-        else:
-            self.afterHeading = Utility.thetaTwoPoints(self.position.fieldRef, after.position.fieldRef)
-        
-        self.computeSubclass()
-
-        return self.afterHeading
-
-    def computeSubclass(self):
-        pass
-
     def drawHovered(self, screen: pygame.Surface):
         if self.afterHeading is not None:
             graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.afterHeading)
@@ -68,6 +50,9 @@ class Node(Draggable, ABC):
         if self.beforeHeading is not None:
             graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.beforeHeading)
 
+    @abstractmethod
+    def compute(self):
+        pass
 
     @abstractmethod
     def draw(self, screen: pygame.Surface):

@@ -3,17 +3,16 @@ from SingletonState.ReferenceFrame import PointRef, Ref
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
 import pygame, graphics, Utility, colors, math
-from Commands.Edge import StraightEdge, Edge
 from Commands.Command import Command, TurnCommand
 
 class Node(Draggable, ABC):
 
-    def __init__(self, program, position: PointRef, hoverRadius: int, previous: Edge = None, next: Edge = None):
+    def __init__(self, program, position: PointRef, hoverRadius: int, previous: 'Edge' = None, next: 'Edge' = None):
 
         super().__init__()
 
-        self.previous: Edge = previous
-        self.next: Edge = next
+        self.previous: 'Edge' = previous
+        self.next: 'Edge' = next
 
         self.program = program
         self.position: PointRef = position.copy()
@@ -44,11 +43,11 @@ class Node(Draggable, ABC):
         self.program.recompute()
 
     def drawHovered(self, screen: pygame.Surface):
-        if self.afterHeading is not None:
-            graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.afterHeading)
+        if self.next is not None:
+            graphics.drawGuideLine(screen, colors.GREEN, *self.position.screenRef, self.next.beforeHeading)
 
-        if self.beforeHeading is not None:
-            graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.beforeHeading)
+        if self.previous is not None:
+            graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.previous.afterHeading)
 
     @abstractmethod
     def compute(self):

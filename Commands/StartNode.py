@@ -6,7 +6,7 @@ def init():
 
 class StartNode(Node):
 
-    def __init__(self, program, previous: Edge = None, next: Edge = None):
+    def __init__(self, program, previous: 'Edge' = None, next: 'Edge' = None):
 
         defaultStartPosition: PointRef = PointRef(Ref.FIELD, (24, 48))
         super().__init__(program, defaultStartPosition, 20, previous = previous, next = next)

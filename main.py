@@ -135,7 +135,7 @@ def drawShadow():
 
     toPos = program.snapNewPoint(userInput.mousePosition)
 
-    fro = program.nodes[-1].position.screenRef
+    fro = program.last.position.screenRef
     to = toPos.screenRef
     theta = Utility.thetaTwoPoints(fro, to)
     x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)

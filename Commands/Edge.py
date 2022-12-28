@@ -4,7 +4,7 @@ from SingletonState.UserInput import UserInput
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Draggable import Draggable
 from Commands.Command import Command, StraightCommand, CurveCommand
-from Node import Node
+from Commands.Node import Node
 import pygame, pygame.gfxdraw, colors, graphics, Utility, math
 from typing import Tuple
 
@@ -68,9 +68,9 @@ class CurvePoint(Draggable):
             heading2: float = Utility.thetaTwoPoints(p2, p3)
 
             if self.curveDistance > 0:
-                return heading2, heading1
+                return (heading2 + 3.1415/2)%3.1415*2, heading1
             else:
-                return heading1, heading2
+                return (heading1 + 3.1415/2)%3.1415*2, heading2
 
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
@@ -110,7 +110,7 @@ class StraightEdge(Edge):
     def compute(self) -> float:
 
         self.distance = Utility.distanceTuples(self.previous.position.fieldRef, self.next.position.fieldRef)
-        self.beforeHeading, self.afterHeading = self.curve.compute(self.previous, self.next)
+        self.beforeHeading, self.afterHeading = self.curve.compute()
         
         return self.afterHeading
 
@@ -144,12 +144,12 @@ class StraightEdge(Edge):
             thick = 3
 
         if self.curve.curveDistance == 0: # draw line
-            graphics.drawLine(screen, color, *self.preivous.position.screenRef, *self.next.position.screenRef, thick)
+            graphics.drawLine(screen, color, *self.previous.position.screenRef, *self.next.position.screenRef, thick)
         else: # draw curve
             center: PointRef = self.curve.center
             radius = Utility.distanceTuples(center.screenRef, self.curve.curvePoint.screenRef)
 
-            pygame.draw.arc(screen, color, [center.screenRef[0] - radius, center.screenRef[1] - radius, radius*2, radius*2], self.beforeHeading, self.afterHeading, thick+1)
+            pygame.draw.arc(screen, color, [center.screenRef[0] - radius, center.screenRef[1] - radius, radius*2, radius*2], (self.beforeHeading + 3.1415/2)%3.1415*2, self.afterHeading, thick+1)
 
         # Draw curve point
         if drawCurvePoint:

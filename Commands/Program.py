@@ -1,4 +1,4 @@
-from Commands.Edge import Edge, StraightEdge, CurveEdge
+from Commands.Edge import Edge, StraightEdge
 from Commands.Node import *
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
@@ -25,17 +25,19 @@ class Program:
     # add a edge and node to self.last, and then point to the new last node
     # Segment should be straight
     def addNodeForward(self, position: PointRef):
+        self.last.next = StraightEdge(self, previous = self.last)
+        self.last = self.last.next
         self.last.next = TurnNode(self, position, previous = self.last)
         self.last = self.last.next
-        self.last.next = StraightEdge(self, previous = self.last)
         self.recompute()
 
     # Segment should be curved with constraint with beforeHeading fixed
     def addNodeCurve(self, position: PointRef):
 
+        self.last.next = StraightEdge(self, previous = self.last)
+        self.last = self.last.next
         self.last.next = TurnNode(self, position, previous = self.last)
         self.last = self.last.next
-        self.last.next = StraightEdge(self, previous = self.last)
         self.recompute()
 
     
@@ -69,18 +71,19 @@ class Program:
         self.recompute()
 
     # recalculate all the state for each point/edge and command after the list of points is modified
-    def recomputePath(self):
+    def recompute(self):
 
         # only 1 node. return
         edge = self.first.next
         if edge is None:
+            self.first.compute()
             return
         
         # Compute all the edges first to update beforeHeading and afterHeading for each node
-        edge.compute()
-        while edge.next is not None:
-            edge = edge.next.next
+        
+        while edge is not None:
             edge.compute()
+            edge = edge.next.next
 
         # Compute all the nodes based on the heading values of the edges
         node = self.first
@@ -113,14 +116,13 @@ class Program:
         
         # Yield edges next
         edge = self.first.next
-        if edge is not None:
+        while edge is not None:
+
             if drawCurvePoints:
-                yield node
-        while edge.next is not None:
-            edge = edge.next.next
-            if drawCurvePoints:
-                yield edge.curve # Yield curve points if on ADD_CURVE mode
+                yield edge.curve
             yield edge
+
+            edge = edge.next.next
 
         return
         yield
@@ -131,8 +133,12 @@ class Program:
         current = self.first
         while current is not None:
 
-            # as long as it's not a turn node without a turn, yield the command
-            if not (type(current) == TurnNode and not current.hasTurn):
+            # no command if the turn node has no turn
+            if type(current) == TurnNode and current.direction == 0:
+                pass
+            elif type(current) == StartNode: # start node has no command
+                pass
+            else:
                 yield current.command
 
             current = current.next
@@ -144,11 +150,9 @@ class Program:
 
         # Draw the edges first
         edge = self.first.next
-        if edge is not None:
+        while edge is not None:
             edge.draw(screen, drawCurvePoints)
-        while edge.next is not None:
             edge = edge.next.next
-            edge.draw(screen, drawCurvePoints)
 
         # Draw the nodes next
         node = self.first

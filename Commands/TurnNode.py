@@ -9,13 +9,15 @@ def init():
 
 class TurnNode(Node):
 
-    def __init__(self, program, position: PointRef, previous: Edge.Edge = None, next: Edge.Edge = None):
+    def __init__(self, program, position: PointRef, previous: 'Edge' = None, next: 'Edge' = None):
 
         super().__init__(program, position, 15, previous = previous, next = next)
         self.direction = 0 # -1 for counterclockwise, 0 for no turn, 1 for clockwise
 
     # Given previous heading, return the resultant heading after the turn
     def compute(self) -> float:
+        print(self.previous)
+        print(self.next)
         if self.next is None or math.isclose(self.previous.afterHeading, self.next.beforeHeading):
             self.direction = 0
         elif Utility.deltaInHeading(self.next.beforeHeading, self.previous.afterHeading) < 0:

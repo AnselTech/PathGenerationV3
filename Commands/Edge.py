@@ -45,32 +45,45 @@ class CurvePoint(Draggable):
         self.curveDistance: float = 0
         self.curvePoint: PointRef = None
 
+    # return false if impossible
     def compute(self) -> Tuple[float, float]:
 
         previous, next = self.edge.previous, self.edge.next
 
         
         theta = Utility.thetaTwoPoints(previous.position.fieldRef, next.position.fieldRef) 
-        self.curvePoint = self.edge.getMidpoint() + VectorRef(Ref.FIELD, magnitude = self.curveDistance, heading = theta + 3.1415/2)
+        midpoint = self.edge.getMidpoint()
+        oldCurvePoint = self.curvePoint
+        self.curvePoint = midpoint + VectorRef(Ref.FIELD, magnitude = self.curveDistance, heading = theta + 3.1415/2)
         
         if self.curveDistance == 0:
             self.center: PointRef = None
-            return theta, theta
+            return True, theta, theta, theta, theta
         else:
             # find the center of the arc's circle
             p1 = previous.position.fieldRef
             p2 = self.curvePoint.fieldRef
             p3 = next.position.fieldRef
             fieldPos = Utility.circleCenterFromThreePoints(*p1, *p2, *p3)
+            oldCenter = self.center
             self.center: PointRef = PointRef(Ref.FIELD, fieldPos)
 
-            heading1: float = Utility.thetaTwoPoints(p2, p1)
-            heading2: float = Utility.thetaTwoPoints(p2, p3)
+            # Bound curve point so that center of circle never crosses the line between the the two vertices
+            if Utility.distanceTuples(self.curvePoint.fieldRef, self.center.fieldRef) < Utility.distanceTuples(self.curvePoint.fieldRef, midpoint.fieldRef):
+                self.curvePoint = oldCurvePoint
+                self.center = oldCenter
+                return False, self.edge.theta1, self.edge.theta2, self.edge.beforeHeading, self.edge.afterHeading
 
-            if self.curveDistance > 0:
-                return (heading2 + 3.1415/2)%3.1415*2, heading1
+            heading1: float = Utility.thetaTwoPoints(self.center.fieldRef, p1)
+            heading2: float = Utility.thetaTwoPoints(self.center.fieldRef, p3)
+
+            if self.curveDistance < 0:
+                print("a")
+                return True, heading1, heading2, heading1 + 3.1415/2, heading2
+                
             else:
-                return (heading1 + 3.1415/2)%3.1415*2, heading2
+                return True, heading1, heading2, 3.1415 - heading2, heading1
+
 
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
@@ -110,7 +123,7 @@ class StraightEdge(Edge):
     def compute(self) -> float:
 
         self.distance = Utility.distanceTuples(self.previous.position.fieldRef, self.next.position.fieldRef)
-        self.beforeHeading, self.afterHeading = self.curve.compute()
+        _, self.theta1, self.theta2, self.beforeHeading, self.afterHeading = self.curve.compute()
         
         return self.afterHeading
 
@@ -148,8 +161,7 @@ class StraightEdge(Edge):
         else: # draw curve
             center: PointRef = self.curve.center
             radius = Utility.distanceTuples(center.screenRef, self.curve.curvePoint.screenRef)
-
-            pygame.draw.arc(screen, color, [center.screenRef[0] - radius, center.screenRef[1] - radius, radius*2, radius*2], (self.beforeHeading + 3.1415/2)%3.1415*2, self.afterHeading, thick+1)
+            graphics.drawArc(screen, color, center.screenRef, radius, self.theta1, self.theta2, thick+1)
 
         # Draw curve point
         if drawCurvePoint:

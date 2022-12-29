@@ -244,3 +244,21 @@ def _aa_render_region(image, rect: pygame.Rect, color, rad):
         pygame.gfxdraw.filled_circle(image, x, y, rad, color)
     image.fill(color, rect.inflate(-2*rad,0))
     image.fill(color, rect.inflate(0,-2*rad))
+
+# manually draw an arc through linear approximation
+def drawArc(screen: pygame.Surface, color: tuple, center: tuple, radius: float, theta1: float, theta2: float, thickness: int = 1):
+
+    dt = Utility.deltaInHeading(theta2, theta1)
+
+    K = 10 # constant for how many lines to draw (the more the smoother)
+    numberLines = int(K * abs(dt))
+
+    x1, y1 = center[0] + radius * math.cos(theta1), center[1] - radius * math.sin(theta1)
+    for i in range(1, numberLines+1):
+        t2 = theta1 + dt * (i) / numberLines
+        x2, y2 = center[0] + radius * math.cos(t2), center[1] - radius * math.sin(t2)
+
+        drawLine(screen, color, x1, y1, x2, y2, thickness)
+
+        x1 = x2
+        y1 = y2

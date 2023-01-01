@@ -150,3 +150,8 @@ def circleCenterFromThreePoints(x1, y1, x2, y2, x3, y3) -> tuple:
     k = -f
 
     return h,k
+
+# Given an initial theta and an offset x and y, calculate the other theta
+# if (0,0) and (x,y) were two points of an arc with the initial theta
+def thetaFromArc(theta1: float, dx: float, dy: float) -> float:
+    return (2 * math.atan2(dy, dx) - theta1) % (3.1415*2)

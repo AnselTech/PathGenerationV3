@@ -49,22 +49,31 @@ class Program:
     def insertNode(self, edge: StraightEdge, position: PointRef):
         
         # add another edge after the original one
-        edge.next.previous = StraightEdge(next = edge.next)
+        edge.next.previous = StraightEdge(self, next = edge.next)
+        newEdge: Edge = edge.next.previous
         
         # Insert the node between the two edges
-        edge.next = TurnNode(self, position, previous = edge, next = edge.next)
+        edge.next = TurnNode(self, position, previous = edge, next = edge.next.previous)
+        newEdge.previous = edge.next
 
         self.recompute()
 
-    # Delete a node and merge the two adjacent edges
-    # We keep node.previous and delete node.next
+    
     def deleteNode(self, node: TurnNode):
-        
-        # previous segment's next set to the node after next segment
-        node.previous.next = node.next.next 
 
-        # node after next segment's previous set to previous segment
-        node.next.next.previous = node.previous
+        if node.next is None:
+            # If this is the last node, dereference this and the segment before it
+            node.previous.previous.next = None
+
+        else:
+            # Otherwise, delete the node and merge the two adjacent edges
+            # We keep node.previous and delete node.next
+
+            # previous segment's next set to the node after next segment
+            node.previous.next = node.next.next 
+
+            # node after next segment's previous set to previous segment
+            node.next.next.previous = node.previous
 
         # node parameter should be dereferenced after function scope ends
 

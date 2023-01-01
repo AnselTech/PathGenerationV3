@@ -96,7 +96,6 @@ class CurvePoint(Draggable):
             heading2: float = Utility.thetaTwoPoints(self.center.fieldRef, p3)
 
             if self.curveDistance < 0:
-                print("a")
                 return True, heading1, heading2, (heading1 + 3.1415/2)%(3.1415*2), (heading2 + 3.1415/2) % (3.1415*2)
                 
             else:
@@ -160,6 +159,10 @@ class StraightEdge(Edge):
         return PointRef(Ref.FIELD, positionOnSegment)
 
     def drawHovered(self, screen: pygame.Surface):
+        
+        x = self.next.position.fieldRef[0] - self.previous.position.fieldRef[0]
+        y = self.next.position.fieldRef[1] - self.previous.position.fieldRef[1]
+        print("Compare", self.afterHeading, Utility.thetaFromArc(self.beforeHeading, x, y))
 
         graphics.drawGuideLine(screen, colors.GREEN, *self.next.position.screenRef, self.afterHeading)
 

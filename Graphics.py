@@ -248,7 +248,7 @@ def _aa_render_region(image, rect: pygame.Rect, color, rad):
 # manually draw an arc through linear approximation
 def drawArc(screen: pygame.Surface, color: tuple, center: tuple, radius: float, theta1: float, theta2: float, thickness: int = 1):
 
-    dt = Utility.deltaInHeading(theta2, theta1)
+    dt = Utility.deltaInHeadingUnbounded(theta2, theta1)
 
     K = 10 # constant for how many lines to draw (the more the smoother)
     numberLines = int(K * abs(dt))

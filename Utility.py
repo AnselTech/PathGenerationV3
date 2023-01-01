@@ -109,6 +109,15 @@ def boundAngleRadians(angle: float) -> float:
 def deltaInHeading(targetHeading: float, currentHeading: float) -> float:
     return boundAngleRadians(targetHeading - currentHeading)
 
+def deltaInHeadingUnbounded(targetHeading: float, currentHeading: float) -> float:
+    diff = targetHeading - currentHeading
+    PI = 3.1415
+    if diff > 2 * PI:
+        diff -= 2 * PI
+    if diff < -2 * PI:
+        diff += 2 * PI
+    return diff
+
 def circleCenterFromThreePoints(x1, y1, x2, y2, x3, y3) -> tuple:
     x12 = x1 - x2
     x13 = x1 - x3
@@ -155,3 +164,15 @@ def circleCenterFromThreePoints(x1, y1, x2, y2, x3, y3) -> tuple:
 # if (0,0) and (x,y) were two points of an arc with the initial theta
 def thetaFromArc(theta1: float, dx: float, dy: float) -> float:
     return (2 * math.atan2(dy, dx) - theta1) % (3.1415*2)
+
+# Given (x1,y1), (x2,y2), and the heading of (x1,y1), find the center of hte circle
+def circleCenterFromTwoPointsAndTheta(x1, y1, x2, y2, theta) -> tuple:
+
+    a = (x1 - x2) * math.cos(theta) + (y1 - y2) * math.sin(theta)
+    b = (y1 - y2) * math.cos(theta) - (x1 - x2) * math.sin(theta)
+    c = a / (2 * b)
+
+    x = (x1+x2)/2 + c * (y1 - y2)
+    y = (y1+y2)/2 + c * (x2 - x1)
+
+    return x,y

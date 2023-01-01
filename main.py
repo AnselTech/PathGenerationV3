@@ -130,20 +130,47 @@ def drawShadow():
     if state.objectHovering is not fieldSurface:
         return
 
-    if state.mode != Mode.ADD_SEGMENT:
-        return
+    if state.mode == Mode.ADD_SEGMENT:
 
-    toPos = program.snapNewPoint(userInput.mousePosition)
+        toPos = program.snapNewPoint(userInput.mousePosition)
 
-    fro = program.last.position.screenRef
-    to = toPos.screenRef
-    theta = Utility.thetaTwoPoints(fro, to)
-    x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)
-    graphics.drawThinLine(screen, colors.GREEN, *to, x, y)
-    graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
-    graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
+        fro = program.last.position.screenRef
+        to = toPos.screenRef
+        theta = Utility.thetaTwoPoints(fro, to)
+        x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)
+        graphics.drawThinLine(screen, colors.GREEN, *to, x, y)
+        graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
+        graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
 
-    robotImage.draw(screen, toPos, -theta)
+        robotImage.draw(screen, toPos, -theta)
+
+    elif state.mode == Mode.ADD_CURVE:
+
+        to = program.snapNewPoint(userInput.mousePosition)
+        fro = program.last.position
+        
+        dx = to.fieldRef[0] - fro.fieldRef[0]
+        dy = to.fieldRef[1] - fro.fieldRef[1]
+
+        if program.last.previous is None:
+            heading1 = 0
+        else:
+            heading1 = program.last.previous.afterHeading
+
+        heading2 = Utility.thetaFromArc(heading1, dx, dy)
+
+        t = Utility.thetaTwoPoints(to.fieldRef, fro.fieldRef)
+        if Utility.deltaInHeadingUnbounded(t, heading1) < 0:
+            theta1 = heading1 - 3.1415/2
+            theta2 = heading2 - 3.1415/2
+        else:
+            theta1 = heading1 + 3.1415/2
+            theta2 = heading2 + 3.1415/2
+        
+        center = Utility.circleCenterFromTwoPointsAndTheta(*fro.fieldRef, *to.fieldRef, heading1)
+        centerS = PointRef(Ref.FIELD, center).screenRef
+        radius = Utility.distanceTuples(fro.screenRef, centerS)
+        graphics.drawArc(screen, colors.BLACK, centerS, radius, theta1, theta2, 3)
     
 
 

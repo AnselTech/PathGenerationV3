@@ -198,7 +198,14 @@ class StraightCommand(Command):
         super().__init__(parent, "Images/Commands/Straight.png", RED, toggle = toggle, slider = slider)
 
 class CurveCommand(Command):
-    pass
+    def __init__(self, parent):
+
+        GREEN = [[80, 217, 87], [149, 230, 153]]
+
+        toggle = CommandToggle("PREC", "FAST")
+        slider = CommandSlider(0, 1, 0.01, "Speed", 1)
+        super().__init__(parent, "Images/Commands/Curve.png", GREEN, toggle = toggle, slider = slider)
+
 
 class ShootCommand(Command):
     pass

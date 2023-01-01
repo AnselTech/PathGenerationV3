@@ -57,6 +57,15 @@ class CurvePoint(Draggable):
         self.curvePoint = midpoint + VectorRef(Ref.FIELD, magnitude = self.curveDistance, heading = theta + 3.1415/2)
         
         if self.curveDistance == 0:
+
+            # Switch command from curve to straight, and copy over data
+            if self.edge.command is self.edge.curveCommand:
+                old: CurveCommand = self.edge.curveCommand
+                new: StraightCommand = self.edge.straightCommand
+                new.toggle.isTopActive = old.toggle.isTopActive
+                new.slider.setValue(old.slider.getValue())
+                self.edge.command = new
+
             self.center: PointRef = None
             return True, theta, theta, theta, theta
         else:
@@ -74,15 +83,24 @@ class CurvePoint(Draggable):
                 self.center = oldCenter
                 return False, self.edge.theta1, self.edge.theta2, self.edge.beforeHeading, self.edge.afterHeading
 
+            # Switch command from curve to straight, and copy over data
+            if self.edge.command is self.edge.straightCommand:
+                old: StraightCommand = self.edge.straightCommand
+                new: CurveCommand = self.edge.curveCommand
+                new.toggle.isTopActive = old.toggle.isTopActive
+                new.slider.setValue(old.slider.getValue())
+                self.edge.command = new
+
+
             heading1: float = Utility.thetaTwoPoints(self.center.fieldRef, p1)
             heading2: float = Utility.thetaTwoPoints(self.center.fieldRef, p3)
 
             if self.curveDistance < 0:
                 print("a")
-                return True, heading1, heading2, heading1 + 3.1415/2, heading2
+                return True, heading1, heading2, (heading1 + 3.1415/2)%(3.1415*2), (heading2 + 3.1415/2) % (3.1415*2)
                 
             else:
-                return True, heading1, heading2, 3.1415 - heading2, heading1
+                return True, heading1, heading2, (heading1 - 3.1415/2)%(3.1415*2), (heading2 - 3.1415/2) % (3.1415*2)
 
 
 
@@ -112,7 +130,11 @@ class CurvePoint(Draggable):
 # linear
 class StraightEdge(Edge):
     def __init__(self, program, previous: Node = None, next: Node = None):
-        super().__init__(program, StraightCommand(self), previous = previous, next = next)
+
+        self.straightCommand: StraightCommand = StraightCommand(self)
+        self.curveCommand: CurveCommand = CurveCommand(self)
+
+        super().__init__(program, self.straightCommand, previous = previous, next = next)
         self.distance: float = None
         self.curve: CurvePoint = CurvePoint(self)
 

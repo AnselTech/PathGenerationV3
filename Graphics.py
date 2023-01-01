@@ -200,8 +200,8 @@ def drawGuideLine(screen: pygame.Surface, color: tuple, x: int, y: int, theta: f
     c = math.cos(theta) * Utility.SCREEN_SIZE
     s = math.sin(theta) * Utility.SCREEN_SIZE
 
-    x1, x2 = x + c, x - c
-    y1, y2 = y - s, y + s
+    x1, x2 = x + c, x
+    y1, y2 = y - s, y
 
     drawThinLine(screen, color, x1, y1, x2, y2)
 

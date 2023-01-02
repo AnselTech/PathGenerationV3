@@ -50,6 +50,11 @@ class HeadingPoint(Draggable):
 
         self.heading = heading
 
+    def setStraight(self):
+        fro: PointRef = self.edge.previous.position
+        to: PointRef = self.edge.next.position
+        self.heading = Utility.thetaTwoPoints(fro.fieldRef, to.fieldRef)
+
     def compute(self):
         nodePos: PointRef = self.edge.previous.position
         vector: VectorRef = VectorRef(Ref.FIELD, magnitude = self.distanceToNode, heading = self.heading)

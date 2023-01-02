@@ -41,6 +41,12 @@ class Node(Draggable, ABC):
 
         self.position = self.program.snapNewPoint(userInput.mousePosition, self)
 
+        # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
+        if self.previous is not None and self.previous.arc.isStraight:
+            self.previous.headingPoint.setStraight()
+        if self.next is not None and self.next.arc.isStraight:
+            self.next.headingPoint.setStraight()
+
         self.program.recompute()
 
     def drawHovered(self, screen: pygame.Surface):

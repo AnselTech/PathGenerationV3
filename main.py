@@ -21,7 +21,7 @@ from MouseSelector.MouseSelector import MouseSelector
 
 import Utility, colors, math
 from typing import Iterator
-import graphics
+import graphics, Arc
 import multiprocessing as mp 
 
 if __name__ == '__main__':
@@ -97,7 +97,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
         state.objectHovering.drawHovered(screen)
 
     # Draw path specified by commands
-    program.drawPath(screen, state.mode == Mode.ADD_CURVE)
+    program.drawPath(screen)
 
     # Draw robot if mouse is hovering over point or line
     if shadowPos is not None:
@@ -148,23 +148,21 @@ def drawShadow():
 
         to = program.snapNewPoint(userInput.mousePosition)
         fro = program.last.position
-        
-        dx = to.fieldRef[0] - fro.fieldRef[0]
-        dy = to.fieldRef[1] - fro.fieldRef[1]
 
         if program.last.previous is None:
             heading1 = 0
         else:
             heading1 = program.last.previous.afterHeading
         
-        center = Utility.circleCenterFromTwoPointsAndTheta(*fro.fieldRef, *to.fieldRef, heading1)
-        centerS = PointRef(Ref.FIELD, center).screenRef
-        radius = Utility.distanceTuples(fro.screenRef, centerS)
+        arc = Arc.Arc(fro, to, heading1)
 
-        theta1 = Utility.thetaTwoPoints(center, fro.fieldRef)
-        theta2 = Utility.thetaTwoPoints(center, to.fieldRef)
+        graphics.drawGuideLine(screen, colors.BLACK, *arc.center.screenRef, arc.theta1)
+        graphics.drawGuideLine(screen, colors.BLACK, *arc.center.screenRef, arc.theta2)
 
-        graphics.drawArc(screen, colors.BLACK, centerS, radius, theta1, theta2, 3)
+        graphics.drawGuideLine(screen, colors.RED, *fro.screenRef, arc.heading1)
+        graphics.drawGuideLine(screen, colors.GREEN, *to.screenRef, arc.heading2)
+
+        graphics.drawArc(screen, colors.BLACK, arc.center.screenRef, arc.radius, arc.theta1, arc.theta2, arc.parity, 3)
     
 
 
@@ -178,7 +176,7 @@ def getHoverables() -> Iterator[Hoverable]:
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
 
-        for hoverable in program.getHoverablesPath(state.mode == Mode.ADD_CURVE):
+        for hoverable in program.getHoverablesPath():
             yield hoverable
 
         yield fieldSurface

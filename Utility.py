@@ -63,6 +63,12 @@ def distancePointToLine(x0, y0, x1, y1, x2, y2, signed: bool = False):
     else:
         return abs(ans)
 
+# Which side of the line the point is on.
+# point (xp, yp), line at (xl, yl) with theta
+def lineParity(xp, yp, xl, yl, theta):
+    x1,y1 = xl - math.cos(theta), yl - math.sin(theta)
+    return distancePointToLine(xp, yp, x1, y1, xl, yl, True) >= 0
+
 def vector(x0, y0, theta, magnitude):
     return [x0 + magnitude*math.cos(theta), y0 + magnitude*math.sin(theta)]
 
@@ -89,7 +95,7 @@ def pointOnLineClosestToPoint(pointX: int, pointY: int, firstX: int, firstY: int
 
 # Get the theta between positive x and the line from point A to point B
 def thetaTwoPoints(pointA: tuple, pointB: tuple) -> float:
-    return math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
+    return (math.atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])) % (3.1415*2)
 
 # Get the absolute heading (0 radians point up, clockwise positive) from A to B
 def headingTwoPoints(pointA: tuple, pointB: tuple) -> float:
@@ -109,13 +115,13 @@ def boundAngleRadians(angle: float) -> float:
 def deltaInHeading(targetHeading: float, currentHeading: float) -> float:
     return boundAngleRadians(targetHeading - currentHeading)
 
-def deltaInHeadingUnbounded(targetHeading: float, currentHeading: float) -> float:
-    diff = targetHeading - currentHeading
-    PI = 3.1415
-    if diff > 2 * PI:
-        diff -= 2 * PI
-    if diff < -2 * PI:
-        diff += 2 * PI
+# If parity == true, must return negative. if parity == false, must return positive.
+def deltaInHeadingParity(targetHeading: float, currentHeading: float, parity: bool) -> float:
+    diff = (targetHeading - currentHeading) % (3.1415*2)
+    if parity and diff > 0:
+        diff -= 3.1415*2
+    elif not parity and diff < 0:
+        diff += 3.1415*2
     return diff
 
 def circleCenterFromThreePoints(x1, y1, x2, y2, x3, y3) -> tuple:
@@ -171,6 +177,7 @@ def circleCenterFromTwoPointsAndTheta(x1, y1, x2, y2, theta) -> tuple:
     a = (x1 - x2) * math.cos(theta) + (y1 - y2) * math.sin(theta)
     b = (y1 - y2) * math.cos(theta) - (x1 - x2) * math.sin(theta)
     c = a / (2 * b)
+    
 
     x = (x1+x2)/2 + c * (y1 - y2)
     y = (y1+y2)/2 + c * (x2 - x1)

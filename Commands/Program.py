@@ -114,7 +114,7 @@ class Program:
             command.updatePosition(x, y)
             y += dy
 
-    def getHoverablesPath(self, drawCurvePoints: bool = False) -> Iterator[Hoverable]:
+    def getHoverablesPath(self) -> Iterator[Hoverable]:
 
         # Yield nodes first
         node = self.first
@@ -127,8 +127,7 @@ class Program:
         edge = self.first.next
         while edge is not None:
 
-            if drawCurvePoints:
-                yield edge.curve
+            yield edge.headingPoint
             yield edge
 
             edge = edge.next.next
@@ -155,12 +154,12 @@ class Program:
         return
         yield
 
-    def drawPath(self, screen: pygame.Surface, drawCurvePoints: bool):
+    def drawPath(self, screen: pygame.Surface):
 
         # Draw the edges first
         edge = self.first.next
         while edge is not None:
-            edge.draw(screen, drawCurvePoints)
+            edge.draw(screen)
             edge = edge.next.next
 
         # Draw the nodes next

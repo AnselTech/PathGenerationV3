@@ -39,18 +39,7 @@ class Node(Draggable, ABC):
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
 
-        oldPos = self.position
         self.position = self.program.snapNewPoint(userInput.mousePosition, self)
-
-        # If new position causes a curve to be in an impossible position, revert
-        if self.previous is not None:
-            output = self.previous.curve.compute()
-            if output[0] is False:
-                self.position = oldPos
-        if self.next is not None:
-            output = self.next.curve.compute()
-            if output[0] is False:
-                self.position = oldPos
 
         self.program.recompute()
 

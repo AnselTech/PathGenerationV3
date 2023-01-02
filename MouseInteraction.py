@@ -134,6 +134,7 @@ def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program
         if type(state.objectHovering) == StraightEdge:
             pos = state.objectHovering.getClosestPoint(userInput.mousePosition)
             heading = state.objectHovering.heading
+            return None, None
             return pos, heading
         elif type(state.objectHovering) == StartNode:
             pos = state.objectHovering.position

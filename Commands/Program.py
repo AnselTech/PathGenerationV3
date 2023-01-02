@@ -25,7 +25,8 @@ class Program:
     # add a edge and node to self.last, and then point to the new last node
     # Segment should be straight
     def addNodeForward(self, position: PointRef):
-        self.last.next = StraightEdge(self, previous = self.last)
+        heading = Utility.thetaTwoPoints(self.last.position.fieldRef, position.fieldRef)
+        self.last.next = StraightEdge(self, previous = self.last, heading1 = heading)
         self.last = self.last.next
         self.last.next = TurnNode(self, position, previous = self.last)
         self.last = self.last.next
@@ -34,7 +35,12 @@ class Program:
     # Segment should be curved with constraint with beforeHeading fixed
     def addNodeCurve(self, position: PointRef):
 
-        self.last.next = StraightEdge(self, previous = self.last)
+        if self.first is self.last:
+            heading = 0
+        else:
+            heading = self.last.previous.afterHeading
+
+        self.last.next = StraightEdge(self, previous = self.last, heading1 = heading)
         self.last = self.last.next
         self.last.next = TurnNode(self, position, previous = self.last)
         self.last = self.last.next

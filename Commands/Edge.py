@@ -37,18 +37,18 @@ class Edge(Hoverable, ABC):
 # A draggable point used to set heading1 of StraightEge
 class HeadingPoint(Draggable):
 
-    def __init__(self, program, edge):
+    def __init__(self, program, edge, heading = None):
         super().__init__()
 
         self.program = program
-        self.edge = edge
+        self.edge: 'StraightEdge' = edge
 
         self.drawRadius = 4
         self.drawRadiusBig = 5
         self.hoverRadius = 20
         self.distanceToNode = 10
 
-        self.heading = None
+        self.heading = heading
 
     def compute(self):
         nodePos: PointRef = self.edge.previous.position
@@ -58,9 +58,13 @@ class HeadingPoint(Draggable):
     def beDraggedByMouse(self, userInput: UserInput):
         self.heading = Utility.thetaTwoPoints(self.edge.previous.position.fieldRef, userInput.mousePosition.fieldRef)
         
+        # Snap to straight edge if sufficiently close
+        if abs(self.edge.straightHeading - self.heading) < 0.12:
+            self.heading = self.edge.straightHeading
+
         # Snap to heading of previous edge if sufficiently close
-        prevEdge = self.edge.previous.previous
-        if prevEdge is not None and abs(prevEdge.afterHeading - self.heading) < 0.15:
+        prevEdge: 'StraightEdge' = self.edge.previous.previous
+        if prevEdge is not None and abs(prevEdge.afterHeading - self.heading) < 0.12:
             self.heading = prevEdge.afterHeading
         
         self.compute()
@@ -79,7 +83,7 @@ class HeadingPoint(Draggable):
 
 # linear
 class StraightEdge(Edge):
-    def __init__(self, program, previous: Node = None, next: Node = None):
+    def __init__(self, program, previous: Node = None, next: Node = None, heading1: float = None):
 
         self.straightCommand: StraightCommand = StraightCommand(self)
         self.curveCommand: CurveCommand = CurveCommand(self)
@@ -87,7 +91,11 @@ class StraightEdge(Edge):
         super().__init__(program, self.straightCommand, previous = previous, next = next)
         self.distance: float = None
         self.arc: Arc.Arc = Arc.Arc()
-        self.headingPoint: HeadingPoint = HeadingPoint(program, self)
+        self.headingPoint: HeadingPoint = HeadingPoint(program, self, heading1)
+        
+        self.distance = None
+        self.straightHeading = None
+
 
     def getMidpoint(self) -> PointRef:
         return self.previous.position + (self.next.position - self.previous.position) * 0.5
@@ -95,11 +103,7 @@ class StraightEdge(Edge):
 
     def compute(self) -> float:
 
-        if self.headingPoint.heading is None:
-            if self.previous.previous is None:
-                self.headingPoint.heading = self.previous.afterHeading
-            else:
-                self.headingPoint.heading = self.previous.previous.afterHeading
+        self.straightHeading = Utility.thetaTwoPoints(self.previous.position.fieldRef, self.next.position.fieldRef)
 
         self.headingPoint.compute()
         
@@ -108,6 +112,9 @@ class StraightEdge(Edge):
         self.arc.set(self.previous.position, self.next.position, self.headingPoint.heading)
         self.beforeHeading = self.arc.heading1
         self.afterHeading = self.arc.heading2
+
+        self.command = self.straightCommand if self.arc.isStraight else self.curveCommand
+
         return self.afterHeading
 
     # Check whether mouse is near the segment using a little math
@@ -142,10 +149,9 @@ class StraightEdge(Edge):
             color = colors.BLACK
             thick = 3
 
-        if False: # draw line
+        if self.arc.isStraight: # draw line
             graphics.drawLine(screen, color, *self.previous.position.screenRef, *self.next.position.screenRef, thick)
         else: # draw curve
-            
             graphics.drawArc(screen, color, self.arc.center.screenRef, self.arc.radius, self.arc.theta1, self.arc.theta2, self.arc.parity, thick+1)
 
         self.headingPoint.draw(screen)

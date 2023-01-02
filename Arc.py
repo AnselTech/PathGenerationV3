@@ -1,6 +1,6 @@
 from SingletonState.ReferenceFrame import PointRef, Ref
 from dataclasses import dataclass
-import Utility
+import Utility, math
 
 @dataclass
 class Arc:
@@ -13,8 +13,11 @@ class Arc:
     heading1: float = None
     heading2: float = None
     parity: bool = None
+    isStraight: bool = None
 
-    def __init__(self, fro: PointRef = None, to: PointRef = None, heading1: float = None):
+    def __init__(self, fro: PointRef = None, to: PointRef = None, heading1: float = None, isStraight: bool = False):
+        self.isStraight = isStraight
+
         if fro is not None and to is not None and heading1 is not None:
             self.set(fro, to, heading1)
 
@@ -22,6 +25,18 @@ class Arc:
 
         self.fro = fro
         self.to = to
+
+        if math.isclose(Utility.thetaTwoPoints(fro.fieldRef, to.fieldRef), heading1):
+            self.isStraight = True
+            self.center = None
+            self.theta1 = None
+            self.theta2 = None
+            self.heading1 = heading1
+            self.heading2 = heading1
+            self.parity = None
+            return
+
+        self.isStraight = False
 
         dx = to.fieldRef[0] - fro.fieldRef[0]
         dy = to.fieldRef[1] - fro.fieldRef[1]

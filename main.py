@@ -142,7 +142,7 @@ def drawShadow():
         graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
         graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
 
-        robotImage.draw(screen, toPos, -theta)
+        #robotImage.draw(screen, toPos, -theta)
 
     elif state.mode == Mode.ADD_CURVE:
 

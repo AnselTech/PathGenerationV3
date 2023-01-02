@@ -104,7 +104,7 @@ class CommandToggle:
 class Command(Hoverable, ABC):
 
 
-    def __init__(self, parent, imagePath: str, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
+    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
 
         super().__init__()
 
@@ -115,8 +115,6 @@ class Command(Hoverable, ABC):
         self.y = 0
         self.colors = colors
         self.margin = 2
-
-        self.image = graphics.getImage(imagePath, 0.08)
 
         self.toggle: CommandToggle = toggle
         if self.toggle is not None:
@@ -168,7 +166,7 @@ class Command(Hoverable, ABC):
         # icon
         width = self.height * 0.9
         pygame.draw.rect(screen, self.colors[0], [self.x, self.y, width, self.height])
-        graphics.drawSurface(screen, self.image, self.x + width/2, self.y + self.height/2)
+        graphics.drawSurface(screen, self.getIcon(), self.x + width/2, self.y + self.height/2)
 
         # toggle
         if self.toggle is not None:
@@ -179,6 +177,10 @@ class Command(Hoverable, ABC):
         if self.slider is not None:
             self.slider.draw(screen)
 
+    @abstractmethod
+    def getIcon(self) -> pygame.Surface:
+        pass
+
 class TurnCommand(Command):
     def __init__(self, parent):
 
@@ -186,7 +188,15 @@ class TurnCommand(Command):
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed", 1)
-        super().__init__(parent, "Images/Commands/Turn.png", BLUE, toggle = toggle, slider = slider)
+
+        self.imageLeft = graphics.getImage("Images/Commands/TurnLeft.png", 0.08)
+        self.imageRight = graphics.getImage("Images/Commands/TurnRight.png", 0.08)
+
+        super().__init__(parent, BLUE, toggle = toggle, slider = slider)
+
+    def getIcon(self) -> pygame.Surface:
+        clockwise = self.parent.direction == 1
+        return self.imageRight if clockwise else self.imageLeft
 
 class StraightCommand(Command):
     def __init__(self, parent):
@@ -195,17 +205,29 @@ class StraightCommand(Command):
 
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed", 1)
-        super().__init__(parent, "Images/Commands/Straight.png", RED, toggle = toggle, slider = slider)
+
+        self.image = graphics.getImage("Images/Commands/Straight.png", 0.08)
+
+        super().__init__(parent, RED, toggle = toggle, slider = slider)
+
+    def getIcon(self) -> pygame.Surface:
+        return self.image
 
 class CurveCommand(Command):
     def __init__(self, parent):
 
         GREEN = [[80, 217, 87], [149, 230, 153]]
 
+        self.imageLeft = graphics.getImage("Images/Commands/CurveLeft.png", 0.08)
+        self.imageRight = graphics.getImage("Images/Commands/CurveRight.png", 0.08)
+
         toggle = CommandToggle("PREC", "FAST")
         slider = CommandSlider(0, 1, 0.01, "Speed", 1)
-        super().__init__(parent, "Images/Commands/Curve.png", GREEN, toggle = toggle, slider = slider)
+        super().__init__(parent, GREEN, toggle = toggle, slider = slider)
 
+    def getIcon(self) -> pygame.Surface:
+        clockwise = self.parent.arc.parity
+        return self.imageRight if clockwise else self.imageLeft
 
 class ShootCommand(Command):
     pass

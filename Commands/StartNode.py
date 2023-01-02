@@ -10,7 +10,6 @@ class StartNode(Node):
 
         defaultStartPosition: PointRef = PointRef(Ref.FIELD, (24, 48))
         super().__init__(program, defaultStartPosition, 20, previous = previous, next = next)
-        self.afterHeading = 0
 
     def compute(self):
         if self.next is None:

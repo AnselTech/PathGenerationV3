@@ -250,8 +250,8 @@ def drawArc(screen: pygame.Surface, color: tuple, center: tuple, radius: float, 
 
     dt = Utility.deltaInHeadingUnbounded(theta2, theta1)
 
-    K = 10 # constant for how many lines to draw (the more the smoother)
-    numberLines = int(K * abs(dt))
+    K = 1 # constant for how many lines to draw (the more the smoother)
+    numberLines = int(K * abs(dt*radius))
 
     x1, y1 = center[0] + radius * math.cos(theta1), center[1] - radius * math.sin(theta1)
     for i in range(1, numberLines+1):

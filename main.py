@@ -156,20 +156,14 @@ def drawShadow():
             heading1 = 0
         else:
             heading1 = program.last.previous.afterHeading
-
-        heading2 = Utility.thetaFromArc(heading1, dx, dy)
-
-        t = Utility.thetaTwoPoints(to.fieldRef, fro.fieldRef)
-        if Utility.deltaInHeadingUnbounded(t, heading1) < 0:
-            theta1 = heading1 - 3.1415/2
-            theta2 = heading2 - 3.1415/2
-        else:
-            theta1 = heading1 + 3.1415/2
-            theta2 = heading2 + 3.1415/2
         
         center = Utility.circleCenterFromTwoPointsAndTheta(*fro.fieldRef, *to.fieldRef, heading1)
         centerS = PointRef(Ref.FIELD, center).screenRef
         radius = Utility.distanceTuples(fro.screenRef, centerS)
+
+        theta1 = Utility.thetaTwoPoints(center, fro.fieldRef)
+        theta2 = Utility.thetaTwoPoints(center, to.fieldRef)
+
         graphics.drawArc(screen, colors.BLACK, centerS, radius, theta1, theta2, 3)
     
 

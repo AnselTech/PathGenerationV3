@@ -125,6 +125,25 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
         
     pygame.display.update()
 
+def drawShadowSegment(fro: PointRef, to: PointRef):
+    theta = Utility.thetaTwoPoints(fro.screenRef, to.screenRef)
+    x,y = to.screenRef[0] + Utility.SCREEN_SIZE * math.cos(theta), to.screenRef[1] + Utility.SCREEN_SIZE * math.sin(theta)
+    graphics.drawThinLine(screen, colors.GREEN, *to.screenRef, x, y)
+    graphics.drawLine(screen, colors.BLACK, *fro.screenRef, *to.screenRef, 3, 140)
+    graphics.drawCircle(screen, *to.screenRef, colors.BLACK, 5, 140)
+
+def drawShadowArc(fro: PointRef, to: PointRef, heading1: float):
+
+    arc = Arc.Arc(fro, to, heading1)
+
+    graphics.drawGuideLine(screen, colors.BLACK, *arc.center.screenRef, arc.theta1)
+    graphics.drawGuideLine(screen, colors.BLACK, *arc.center.screenRef, arc.theta2)
+
+    graphics.drawGuideLine(screen, colors.RED, *fro.screenRef, arc.heading1)
+    graphics.drawGuideLine(screen, colors.GREEN, *to.screenRef, arc.heading2)
+
+    graphics.drawArc(screen, [80,80,80], arc.center.screenRef, arc.radius, arc.theta1, arc.theta2, arc.parity, 3, 255)
+
 def drawShadow():
 
     if state.objectHovering is not fieldSurface:
@@ -132,39 +151,26 @@ def drawShadow():
 
     if state.mode == Mode.ADD_SEGMENT:
 
-        toPos = program.snapNewPoint(userInput.mousePosition)
-
-        fro = program.last.position.screenRef
-        to = toPos.screenRef
-        theta = Utility.thetaTwoPoints(fro, to)
-        x,y = to[0] + Utility.SCREEN_SIZE * math.cos(theta), to[1] + Utility.SCREEN_SIZE * math.sin(theta)
-        graphics.drawThinLine(screen, colors.GREEN, *to, x, y)
-        graphics.drawLine(screen, colors.BLACK, *fro, *to, 3, 140)
-        graphics.drawCircle(screen, *to, colors.BLACK, 5, 140)
-
-        #robotImage.draw(screen, toPos, -theta)
+        fro = program.last.position
+        to = userInput.mousePosition
+        drawShadowSegment(fro, to)
 
     elif state.mode == Mode.ADD_CURVE:
 
-        to = program.snapNewPoint(userInput.mousePosition)
+        to, isStraight = program.snapNewPoint(userInput.mousePosition)
         fro = program.last.position
 
-        if program.last.previous is None:
-            heading1 = 0
-        else:
-            heading1 = program.last.previous.afterHeading
-        
-        arc = Arc.Arc(fro, to, heading1)
+        if isStraight:
+            drawShadowSegment(fro, to)
+        elif Utility.distanceTuples(fro.fieldRef, to.fieldRef) > 0.1:
 
-        graphics.drawGuideLine(screen, colors.BLACK, *arc.center.screenRef, arc.theta1)
-        graphics.drawGuideLine(screen, colors.BLACK, *arc.center.screenRef, arc.theta2)
+            if program.last.previous is None:
+                heading1 = 0
+            else:
+                heading1 = program.last.previous.afterHeading
 
-        graphics.drawGuideLine(screen, colors.RED, *fro.screenRef, arc.heading1)
-        graphics.drawGuideLine(screen, colors.GREEN, *to.screenRef, arc.heading2)
-
-        graphics.drawArc(screen, colors.BLACK, arc.center.screenRef, arc.radius, arc.theta1, arc.theta2, arc.parity, 3)
-    
-
+            drawShadowArc(fro, to, heading1)
+            
 
 # returns a generator object to iterate through all the hoverable objects,
 # to determine which object is being hovered by the mouse in order

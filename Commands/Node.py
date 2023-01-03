@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from SingletonState.ReferenceFrame import PointRef, Ref
+from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
 import pygame, graphics, Utility, colors, math
@@ -39,11 +39,18 @@ class Node(Draggable, ABC):
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
 
-        self.position = self.program.snapNewPoint(userInput.mousePosition, self)
+        self.position = userInput.mousePosition.copy()
+
+        if self.previous is not None:
+
+            prevEdge = self.previous
+            prevNode: 'Node' = prevEdge.previous
+            
 
         # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
         if self.previous is not None and self.previous.arc.isStraight:
             self.previous.headingPoint.setStraight()
+            
         if self.next is not None and self.next.arc.isStraight:
             self.next.headingPoint.setStraight()
 

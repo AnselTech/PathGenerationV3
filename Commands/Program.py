@@ -3,7 +3,7 @@ from Commands.Node import *
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from MouseInterfaces.Hoverable import Hoverable
-from SingletonState.ReferenceFrame import PointRef, Ref
+from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
 import pygame, Utility, math
 from typing import Iterator
@@ -25,6 +25,7 @@ class Program:
     # add a edge and node to self.last, and then point to the new last node
     # Segment should be straight
     def addNodeForward(self, position: PointRef):
+        
         heading = Utility.thetaTwoPoints(self.last.position.fieldRef, position.fieldRef)
         self.last.next = StraightEdge(self, previous = self.last, heading1 = heading)
         self.last = self.last.next
@@ -34,6 +35,11 @@ class Program:
 
     # Segment should be curved with constraint with beforeHeading fixed
     def addNodeCurve(self, position: PointRef):
+
+        position, isStraight = self.snapNewPoint(position)
+        if isStraight:
+            self.addNodeForward(position)
+            return
 
         if self.first is self.last:
             heading = 0
@@ -46,10 +52,18 @@ class Program:
         self.last = self.last.next
         self.recompute()
 
-    
-    def snapNewPoint(self, position: PointRef, node: Node = None) -> PointRef:
+    # returns the adjusted position. true if straight, false if curve
+    def snapNewPoint(self, position: PointRef) -> PointRef:
         # TODO
-        return position.copy()
+
+        if self.first is not self.last:
+            previousHeading = self.last.previous.afterHeading
+            currentHeading = Utility.thetaTwoPoints(self.last.position.fieldRef, position.fieldRef)
+            if abs(previousHeading - currentHeading) < 0.12:
+                distance = Utility.distanceTuples(self.last.position.fieldRef, position.fieldRef)
+                return self.last.position + VectorRef(Ref.FIELD, magnitude = distance, heading = previousHeading), True
+
+        return position.copy(), False
 
     # split edge into two and insert node into linked list where original edge was
     def insertNode(self, edge: StraightEdge, position: PointRef):
@@ -84,6 +98,7 @@ class Program:
         # node parameter should be dereferenced after function scope ends
 
         self.recompute()
+
 
     # recalculate all the state for each point/edge and command after the list of points is modified
     def recompute(self):

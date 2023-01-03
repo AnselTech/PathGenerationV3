@@ -64,19 +64,26 @@ class HeadingPoint(Draggable):
         self.heading = Utility.thetaTwoPoints(self.edge.previous.position.fieldRef, userInput.mousePosition.fieldRef)
         
         # Snap to straight edge if sufficiently close
-        if abs(self.edge.straightHeading - self.heading) < 0.12:
+        if Utility.headingDiff(self.edge.straightHeading, self.heading) < 0.12:
             self.heading = self.edge.straightHeading
 
         # Snap to heading of previous edge if sufficiently close
         prevEdge: 'StraightEdge' = self.edge.previous.previous
-        if prevEdge is not None and abs(prevEdge.afterHeading - self.heading) < 0.12:
+        if prevEdge is not None and Utility.headingDiff(prevEdge.afterHeading, self.heading) < 0.12:
             self.heading = prevEdge.afterHeading
+
+        # Snap to heading of next edge if suffiently close
+        nextEdge: 'StraightEdge' = self.edge.next.next
+        heading2 = Arc.Arc(self.edge.previous.position, self.edge.next.position, self.heading).heading2
+        if nextEdge is not None and Utility.headingDiff(nextEdge.beforeHeading, heading2) < 0.12:
+            dx = self.edge.next.position.fieldRef[0] - self.edge.previous.position.fieldRef[0]
+            dy = self.edge.next.position.fieldRef[1] - self.edge.previous.position.fieldRef[1]
+            self.heading = Utility.thetaFromArc(nextEdge.beforeHeading, dx, dy)
         
         self.compute()
         self.program.recompute()
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
-        print((self.position - userInput.mousePosition).magnitude(Ref.SCREEN))
         return Utility.distanceTuples(self.position.screenRef, userInput.mousePosition.screenRef) < self.hoverRadius
 
     def draw(self, screen: pygame.Surface):

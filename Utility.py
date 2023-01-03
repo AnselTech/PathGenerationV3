@@ -115,6 +115,9 @@ def boundAngleRadians(angle: float) -> float:
 def deltaInHeading(targetHeading: float, currentHeading: float) -> float:
     return boundAngleRadians(targetHeading - currentHeading)
 
+def headingDiff(headingA: float, headingB: float):
+    return abs(deltaInHeading(headingA, headingB))
+
 # If parity == true, must return negative. if parity == false, must return positive.
 def deltaInHeadingParity(targetHeading: float, currentHeading: float, parity: bool) -> float:
     diff = (targetHeading - currentHeading) % (3.1415*2)

@@ -120,20 +120,25 @@ class StraightEdge(Edge):
         self.headingPoint.compute()
         
         self.distance = Utility.distanceTuples(self.previous.position.fieldRef, self.next.position.fieldRef)
-        
+        self.distanceStr = str(round(self.distance,1)) + "\""
+
         self.arc.set(self.previous.position, self.next.position, self.headingPoint.heading)
         self.beforeHeading = self.arc.heading1
         self.afterHeading = self.arc.heading2
+
+        self.beforeHeadingStr = str(round(self.beforeHeading * 180 / 3.1415,1)) + u"\u00b0"
+        self.afterHeadingStr = str(round(self.afterHeading * 180 / 3.1415,1)) + u"\u00b0"
+        if not self.arc.isStraight:
+            deltaTheta = Utility.deltaInHeadingParity(self.arc.theta2, self.arc.theta1, self.arc.parity)
+            arcLength = abs(deltaTheta) * self.arc.radius
+            self.arcLengthStr = str(round(arcLength, 1)) + "\""
 
         self.command = self.straightCommand if self.arc.isStraight else self.curveCommand
 
         return self.afterHeading
 
-    # Check whether mouse is near the segment using a little math
     def checkIfHovering(self, userInput: UserInput) -> bool:
-        a = self.previous.position.screenRef
-        b = self.next.position.screenRef
-        return Utility.pointTouchingLine(*userInput.mousePosition.screenRef, *a, *b, 13)
+        return self.arc.isTouching(userInput.mousePosition)
 
     def getClosestPoint(self, position: PointRef) -> PointRef:
         positionOnSegment = Utility.pointOnLineClosestToPoint(*position.fieldRef, *self.previous.position.fieldRef, *self.next.position.fieldRef)
@@ -172,5 +177,4 @@ class StraightEdge(Edge):
         if isHovering:
             midpoint = self.getMidpoint().screenRef
             heading = (self.beforeHeading + self.afterHeading) / 2
-            text = str(round(self.distance,2)) + "\""
-            graphics.drawTextRotate(screen, graphics.FONT15, text, colors.BLACK, *midpoint, heading)
+            graphics.drawTextRotate(screen, graphics.FONT15, self.distanceStr, colors.BLACK, *midpoint, heading)

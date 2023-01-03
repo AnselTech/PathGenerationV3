@@ -85,6 +85,7 @@ def main():
         # Draw everything on the screen
         drawEverything(shadowPos, shadowHeading, segmentShadow)
 
+
                 
 
 # Draw the vex field, full path, and panel

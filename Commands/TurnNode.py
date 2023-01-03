@@ -16,8 +16,6 @@ class TurnNode(Node):
 
     # Given previous heading, return the resultant heading after the turn
     def compute(self) -> float:
-        print(self.previous)
-        print(self.next)
         if self.next is None or math.isclose(self.previous.afterHeading, self.next.beforeHeading):
             self.direction = 0
         elif Utility.deltaInHeading(self.next.beforeHeading, self.previous.afterHeading) < 0:

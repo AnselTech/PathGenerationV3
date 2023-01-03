@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from Sliders.Slider import Slider
-import pygame, graphics
+import pygame, graphics, colors
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Clickable import Clickable
 from SingletonState.UserInput import UserInput
@@ -116,6 +116,8 @@ class Command(Hoverable, ABC):
         self.colors = colors
         self.margin = 2
 
+        self.INFO_DX = self.width * 0.33
+
         self.toggle: CommandToggle = toggle
         if self.toggle is not None:
             self.toggle.init(self)
@@ -168,6 +170,9 @@ class Command(Hoverable, ABC):
         pygame.draw.rect(screen, self.colors[0], [self.x, self.y, width, self.height])
         graphics.drawSurface(screen, self.getIcon(), self.x + width/2, self.y + self.height/2)
 
+        # command info
+        self.drawInfo(screen)
+
         # toggle
         if self.toggle is not None:
             self.toggle.bottom.draw(screen)
@@ -177,8 +182,14 @@ class Command(Hoverable, ABC):
         if self.slider is not None:
             self.slider.draw(screen)
 
+        
+
     @abstractmethod
     def getIcon(self) -> pygame.Surface:
+        pass
+
+    # override with subclasses
+    def drawInfo(self, screen: pygame.Surface):
         pass
 
 class TurnCommand(Command):
@@ -198,6 +209,13 @@ class TurnCommand(Command):
         clockwise = self.parent.direction == 1
         return self.imageRight if clockwise else self.imageLeft
 
+    def drawInfo(self, screen: pygame.Surface):
+        x = self.x + self.INFO_DX
+        y = self.y + self.height/2
+
+        graphics.drawText(screen, graphics.FONT15, self.parent.next.beforeHeadingStr, colors.BLACK, x, y)
+
+
 class StraightCommand(Command):
     def __init__(self, parent):
 
@@ -212,6 +230,15 @@ class StraightCommand(Command):
 
     def getIcon(self) -> pygame.Surface:
         return self.image
+
+    def drawInfo(self, screen: pygame.Surface):
+        x = self.x + self.INFO_DX
+        dy = 12
+        y0 = self.y + self.height/2 - dy
+        y1 = self.y + self.height/2 + dy
+
+        graphics.drawText(screen, graphics.FONT15, self.parent.distanceStr, colors.BLACK, x, y0)
+        graphics.drawText(screen, graphics.FONT15, self.parent.beforeHeadingStr, colors.BLACK, x, y1)
 
 class CurveCommand(Command):
     def __init__(self, parent):
@@ -228,6 +255,16 @@ class CurveCommand(Command):
     def getIcon(self) -> pygame.Surface:
         clockwise = self.parent.arc.parity
         return self.imageRight if clockwise else self.imageLeft
+
+    def drawInfo(self, screen: pygame.Surface):
+        x = self.x + self.INFO_DX
+        dy = 12
+        y0 = self.y + self.height/2 - dy
+        y1 = self.y + self.height/2 + dy
+
+        graphics.drawText(screen, graphics.FONT15, self.parent.arcLengthStr, colors.BLACK, x, y0)
+        graphics.drawText(screen, graphics.FONT15, self.parent.afterHeadingStr, colors.BLACK, x, y1)
+
 
 class ShootCommand(Command):
     pass

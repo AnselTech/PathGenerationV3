@@ -251,9 +251,6 @@ def drawArc(screen: pygame.Surface, color: tuple, center: tuple, radius: float, 
 
     dt = Utility.deltaInHeadingParity(theta2, theta1, parity)
 
-    if parity and dt > 0:
-        dt -= 3.1415*2
-
     K = 1 # constant for how many lines to draw (the more the smoother)
     numberLines = int(K * abs(dt*radius))
 

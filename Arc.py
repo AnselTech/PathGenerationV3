@@ -51,3 +51,24 @@ class Arc:
         self.heading2 = Utility.thetaFromArc(heading1, dx, dy)
 
         self.parity = Utility.lineParity(*to.fieldRef, *fro.fieldRef, heading1)
+
+    def isTouching(self, pos: PointRef):
+
+        # handle base case for straight line
+        if self.isStraight:
+            return Utility.pointTouchingLine(*pos.screenRef, *self.fro.screenRef, *self.to.screenRef, 13)
+        # Otherwise, it's arc
+
+        distance = Utility.distanceTuples(self.center.screenRef, pos.screenRef)
+        if abs(self.radius - distance) > 13: # no match in distance
+            return False
+
+        theta = Utility.thetaTwoPoints(self.center.fieldRef, pos.fieldRef)
+        
+        a = Utility.deltaInHeading(self.theta1, self.theta2)
+        b = Utility.deltaInHeading(self.theta1, theta)
+        if self.parity:
+            return 0 < b < a
+        else:
+            return 0 > b > a
+

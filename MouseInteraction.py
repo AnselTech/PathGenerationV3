@@ -127,23 +127,34 @@ def handleDragging(userInput: UserInput, state: SoftwareState, fieldSurface: Fie
             state.objectHovering = state.objectDragged
             state.objectHovering.setHoveringObject()
 
+# return (position, heading)
+def getPointOnEdge(state: SoftwareState, edge: StraightEdge, position: PointRef) -> Tuple[PointRef, float]:
+    # Straight. Find closest point on line
+    if edge.arc.isStraight:
+        return state.objectHovering.getClosestPoint(position), edge.beforeHeading
+    else:
+        # Curved. Find closest point on arc
+        arc: Arc = edge.arc
+        theta = Utility.thetaTwoPoints(arc.center.fieldRef, position.fieldRef)
+        heading = theta + 3.1415/2 * (-1 if arc.parity else 1)
+        return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radiusF, heading = theta), heading
+
+
 def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program) -> Tuple[PointRef, float]:
 
 
     if state.mode == Mode.MOUSE_SELECT:
 
         if type(state.objectHovering) == StraightEdge:
-            pos = state.objectHovering.getClosestPoint(userInput.mousePosition)
-            heading = state.objectHovering.heading
-            return None, None
-            return pos, heading
+            return getPointOnEdge(state, state.objectHovering, userInput.mousePosition)
         elif type(state.objectHovering) == StartNode:
-            pos = state.objectHovering.position
-            heading = state.objectHovering.afterHeading
-            return pos, heading
+            if state.objectHovering.next is not None:
+                pos = state.objectHovering.position
+                heading = state.objectHovering.next.beforeHeading
+                return pos, heading
         elif type(state.objectHovering) == TurnNode:
             pos = state.objectHovering.position
-            heading = state.objectHovering.beforeHeading
+            heading = state.objectHovering.previous.afterHeading
             return pos, heading
     return None, None
 
@@ -151,13 +162,5 @@ def handleHoverPathAdd(userInput: UserInput, state: SoftwareState, program: Prog
 
     if state.mode == Mode.ADD_SEGMENT or state.mode == Mode.ADD_CURVE:
         if type(state.objectHovering) == StraightEdge:
-            # Straight. Find closest point on line
-            if state.objectHovering.arc.isStraight:
-                return state.objectHovering.getClosestPoint(userInput.mousePosition)
-            else:
-                # Curved. Find closest point on arc
-                arc: Arc = state.objectHovering.arc
-                theta = Utility.thetaTwoPoints(arc.center.fieldRef, userInput.mousePosition.fieldRef)
-                return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radiusF, heading = theta)
-
+            return getPointOnEdge(state, state.objectHovering, userInput.mousePosition)[0]
     return None

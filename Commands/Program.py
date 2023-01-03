@@ -69,7 +69,14 @@ class Program:
     def insertNode(self, edge: StraightEdge, position: PointRef):
         
         # add another edge after the original one
-        newEdge: Edge = StraightEdge(self, next = edge.next)
+        if edge.arc.isStraight:
+            heading = edge.beforeHeading
+        else:
+            # calculate the heading that would result if the arc was unchanged with the new node's insertion
+            dx = position.fieldRef[0] - edge.previous.position.fieldRef[0]
+            dy = position.fieldRef[1] - edge.previous.position.fieldRef[1]
+            heading = Utility.thetaFromArc(edge.beforeHeading, dx, dy)
+        newEdge: Edge = StraightEdge(self, next = edge.next, heading1 = heading)
         edge.next.previous = newEdge
         
         # Insert the node between the two edges
@@ -83,7 +90,8 @@ class Program:
 
         if node.next is None:
             # If this is the last node, dereference this and the segment before it
-            node.previous.previous.next = None
+            self.last = node.previous.previous
+            self.last.next = None
 
         else:
             # Otherwise, delete the node and merge the two adjacent edges

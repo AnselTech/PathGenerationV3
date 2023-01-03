@@ -2,7 +2,7 @@ from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.SoftwareState import SoftwareState, Mode
 from SingletonState.UserInput import UserInput
 from SingletonState.FieldTransform import FieldTransform
-from SingletonState.ReferenceFrame import PointRef, Ref
+from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from VisibleElements.FieldSurface import FieldSurface
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
@@ -12,6 +12,7 @@ from Commands.Edge import StraightEdge
 from Commands.TurnNode import TurnNode
 import Utility
 from typing import Iterator, Tuple
+from Arc import Arc
 
 import pygame
 
@@ -148,9 +149,15 @@ def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program
 
 def handleHoverPathAdd(userInput: UserInput, state: SoftwareState, program: Program) -> PointRef:
 
-    if state.mode == Mode.ADD_SEGMENT:
+    if state.mode == Mode.ADD_SEGMENT or state.mode == Mode.ADD_CURVE:
         if type(state.objectHovering) == StraightEdge:
-            pos = state.objectHovering.getClosestPoint(userInput.mousePosition)
-            return pos
+            # Straight. Find closest point on line
+            if state.objectHovering.arc.isStraight:
+                return state.objectHovering.getClosestPoint(userInput.mousePosition)
+            else:
+                # Curved. Find closest point on arc
+                arc: Arc = state.objectHovering.arc
+                theta = Utility.thetaTwoPoints(arc.center.fieldRef, userInput.mousePosition.fieldRef)
+                return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radius, heading = theta)
 
     return None

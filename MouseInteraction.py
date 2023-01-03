@@ -158,6 +158,6 @@ def handleHoverPathAdd(userInput: UserInput, state: SoftwareState, program: Prog
                 # Curved. Find closest point on arc
                 arc: Arc = state.objectHovering.arc
                 theta = Utility.thetaTwoPoints(arc.center.fieldRef, userInput.mousePosition.fieldRef)
-                return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radius, heading = theta)
+                return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radiusF, heading = theta)
 
     return None

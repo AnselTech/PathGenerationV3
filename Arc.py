@@ -10,6 +10,7 @@ class Arc:
     theta1: float = None
     theta2: float = None
     radius: float = None
+    radiusF: float = None
     heading1: float = None
     heading2: float = None
     parity: bool = None
@@ -34,6 +35,8 @@ class Arc:
             self.heading1 = heading1
             self.heading2 = heading1
             self.parity = None
+            self.radius = None
+            self.radiusF = None
             return
 
         self.isStraight = False
@@ -43,6 +46,7 @@ class Arc:
         
         self.center = PointRef(Ref.FIELD, Utility.circleCenterFromTwoPointsAndTheta(*fro.fieldRef, *to.fieldRef, heading1))
         self.radius = Utility.distanceTuples(fro.screenRef, self.center.screenRef)
+        self.radiusF = Utility.distanceTuples(fro.fieldRef, self.center.fieldRef)
 
         self.theta1 = Utility.thetaTwoPoints(self.center.fieldRef, fro.fieldRef)
         self.theta2 = Utility.thetaTwoPoints(self.center.fieldRef, to.fieldRef)

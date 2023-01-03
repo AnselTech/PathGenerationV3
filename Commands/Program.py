@@ -69,11 +69,11 @@ class Program:
     def insertNode(self, edge: StraightEdge, position: PointRef):
         
         # add another edge after the original one
-        edge.next.previous = StraightEdge(self, next = edge.next)
-        newEdge: Edge = edge.next.previous
+        newEdge: Edge = StraightEdge(self, next = edge.next)
+        edge.next.previous = newEdge
         
         # Insert the node between the two edges
-        edge.next = TurnNode(self, position, previous = edge, next = edge.next.previous)
+        edge.next = TurnNode(self, position, previous = edge, next = newEdge)
         newEdge.previous = edge.next
 
         self.recompute()

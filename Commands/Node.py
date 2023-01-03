@@ -41,11 +41,14 @@ class Node(Draggable, ABC):
 
         self.position = userInput.mousePosition.copy()
 
-        if self.previous is not None:
-
-            prevEdge = self.previous
-            prevNode: 'Node' = prevEdge.previous
-            
+        # For straight edges only, snap to previous heading if close. Only for third node onward
+        if self.previous is not None and self.previous.arc.isStraight and self.previous.previous.previous is not None:
+            prevNode = self.previous.previous
+            mouseHeading = Utility.thetaTwoPoints(prevNode.position.fieldRef, self.position.fieldRef)
+            previousHeading = prevNode.previous.afterHeading
+            if Utility.headingDiff(mouseHeading, previousHeading) < 0.06:
+                distance = Utility.distanceTuples(prevNode.position.fieldRef, self.position.fieldRef)
+                self.position = prevNode.position + VectorRef(Ref.FIELD, magnitude = distance, heading = previousHeading)
 
         # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
         if self.previous is not None and self.previous.arc.isStraight:

@@ -16,6 +16,9 @@ class TurnNode(Node):
 
     # Given previous heading, return the resultant heading after the turn
     def compute(self) -> float:
+
+        super().compute()
+
         if self.next is None or Utility.headingDiff(self.previous.afterHeading, self.next.beforeHeading) < 0.005:
             self.direction = 0
         elif Utility.deltaInHeading(self.next.beforeHeading, self.previous.afterHeading) < 0:
@@ -24,6 +27,8 @@ class TurnNode(Node):
             self.direction = -1
 
     def draw(self, screen: pygame.Surface):
+
+        super().draw(screen)
 
         isHovering = self.isHovering or self.command.isAnyHovering()
 

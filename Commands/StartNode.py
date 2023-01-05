@@ -12,13 +12,18 @@ class StartNode(Node):
         super().__init__(program, defaultStartPosition, 20, previous = previous, next = next)
 
     def compute(self):
+
+        super().compute()
+
         if self.next is None:
             self.rotatedImage = startImage
         else:
             self.rotatedImage = pygame.transform.rotate(startImage, self.next.beforeHeading * 180 / 3.1415)
         self.rotatedImageH = graphics.getLighterImage(self.rotatedImage, 0.8)
 
-    def draw(self, screen: pygame.Surface): 
+    def draw(self, screen: pygame.Surface):
+
+        super().draw(screen)
 
         isHovering = self.isHovering or self.command.isAnyHovering()
 

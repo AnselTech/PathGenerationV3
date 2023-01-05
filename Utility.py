@@ -72,7 +72,7 @@ def lineParity(xp, yp, xl, yl, theta):
 def vector(x0, y0, theta, magnitude):
     return [x0 + magnitude*math.cos(theta), y0 + magnitude*math.sin(theta)]
 
-def pointTouchingLine(mouseX: int, mouseY: int, x1: int, y1: int, x2: int, y2: int, lineHitboxThickness: int):
+def pointTouchingLine(mouseX: int, mouseY: int, x1: int, y1: int, x2: int, y2: int, lineHitboxThickness: int) -> bool:
 
     if x1 == x2 and y1 == y2:
         return False

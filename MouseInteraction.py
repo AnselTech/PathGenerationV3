@@ -9,6 +9,7 @@ from MouseInterfaces.Clickable import Clickable
 from Commands.Program import Program
 from Commands.StartNode import StartNode
 from Commands.Edge import StraightEdge
+from Commands.Node import Node
 from Commands.TurnNode import TurnNode
 import Utility
 from typing import Iterator, Tuple
@@ -34,7 +35,11 @@ def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput:
 def handleRightClick(state: SoftwareState, userInput: UserInput):
 
     # If right click, cycle the mouse mode (excluding playback)
-    if userInput.isMouseOnField:
+    if isinstance(state.objectHovering, Node):
+        node: Node = state.objectHovering
+        node.shoot.active = not node.shoot.active
+        node.program.recompute()
+    elif userInput.isMouseOnField:
         state.mode = state.mode.next()
         
 # Handle zooming through mousewheel. Zoom "origin" should be at the mouse location

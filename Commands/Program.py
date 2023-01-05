@@ -149,8 +149,10 @@ class Program:
         node = self.first
         yield node
         while node.next is not None:
-            node = node.next.next
+            node: Node = node.next.next
             yield node
+            if node.shoot.active:
+                yield node.shoot
         
         # Yield edges next
         edge = self.first.next

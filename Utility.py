@@ -118,6 +118,9 @@ def deltaInHeading(targetHeading: float, currentHeading: float) -> float:
 def headingDiff(headingA: float, headingB: float):
     return abs(deltaInHeading(headingA, headingB))
 
+def headingsEqual(headingA: float, headingB: float) -> bool:
+    return abs(deltaInHeading(headingA, headingB)) < 0.001
+
 # If parity == true, must return negative. if parity == false, must return positive.
 def deltaInHeadingParity(targetHeading: float, currentHeading: float, parity: bool) -> float:
     diff = (targetHeading - currentHeading) % (3.1415*2)

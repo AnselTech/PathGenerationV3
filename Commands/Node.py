@@ -3,61 +3,7 @@ from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
 import pygame, graphics, Utility, colors, math
-from Commands.Command import Command, TurnCommand
-
-# Every node has the option to shoot discs into the target goal.
-# Right click to toggle shooting. Visually appears as a yellow vector
-# Draggable to adjust aim
-class Shoot(Draggable):
-
-    def __init__(self, program, parent: 'Node'):
-
-        super().__init__()
-
-        self.program = program
-        self.parent: 'Node' = parent
-
-        self.target: PointRef = PointRef(Ref.FIELD, point = (132, 132)) # red goal center
-
-        self.active = False
-        self.headingCorrection = 0 # [Heading to goal] + self.headingCorrection gives shooting heading
-        self.heading = None
-        self.magnitude = 10 # magnitude of vector in pixels
-        self.hoverRadius = 10
-
-    def compute(self):
-        self.heading: float = (self.target - self.parent.position).theta() + self.headingCorrection
-        self.position: PointRef = self.parent.position + VectorRef(Ref.FIELD, magnitude = self.magnitude, heading = self.heading)
-        vector: VectorRef = (self.position - self.parent.position)
-        self.hoverPosition1: PointRef = self.parent.position + vector * 0.5
-        self.hoverPosition2: PointRef = self.parent.position + vector * 1.2
-        print(self.parent.position.fieldRef)
-
-    # Hovering if touching the top half of the vector
-    def checkIfHovering(self, userInput: UserInput) -> bool:
-
-        if not self.active:
-            return False
-
-        return Utility.pointTouchingLine(
-            *userInput.mousePosition.screenRef,
-            *self.hoverPosition1.screenRef,
-            *self.hoverPosition2.screenRef,
-            self.hoverRadius
-        )
-
-    # Adjust headingCorrection based on where the mouse is dragging the arrow
-    def beDraggedByMouse(self, userInput: UserInput):
-        mouseHeading = Utility.thetaTwoPoints(self.parent.position.fieldRef, userInput.mousePosition.fieldRef)
-        shootHeading = (self.target - self.parent.position).theta()
-        self.headingCorrection = Utility.deltaInHeading(mouseHeading, shootHeading)
-        self.program.recompute()
-
-    def draw(self, screen: pygame.Surface, color: tuple, thick: bool):
-        thickness = 5 if thick else 3
-        a = 2 if thick else 1.6
-        graphics.drawVector(screen, color, *self.parent.position.screenRef, *self.position.screenRef, thickness, a)
-
+from Commands.Command import Command, TurnCommand, ShootCommand
 
 class Node(Draggable, ABC):
 
@@ -71,8 +17,6 @@ class Node(Draggable, ABC):
         self.program = program
         self.position: PointRef = position.copy()
         self.hoverRadius = hoverRadius
-
-        self.shoot: Shoot = Shoot(program, self)
 
 
         self.command: Command = TurnCommand(self)
@@ -124,18 +68,8 @@ class Node(Draggable, ABC):
             graphics.drawGuideLine(screen, colors.RED, *self.position.screenRef, self.previous.afterHeading)
 
     def compute(self):
-        self.shoot.compute()
+        pass
 
     def draw(self, screen: pygame.Surface):
 
-        thick = False
-
-        if self.shoot.active:
-            color = (255,230,0)
-            if self.shoot.isHovering:
-                thick = True
-        elif self.isHovering:
-            color = (255,215,0,150)
-
-        if self.shoot.active or self.isHovering:
-            self.shoot.draw(screen, color, thick)
+        pass

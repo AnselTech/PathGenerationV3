@@ -173,7 +173,13 @@ class Program:
         while current is not None:
 
             # no command if the turn node has no turn
-            if type(current) == TurnNode and current.direction == 0:
+            if type(current) == TurnNode and current.shoot.active:
+                if not Utility.headingsEqual(current.previous.afterHeading, current.shoot.heading):
+                    yield current.shoot.turnToShootCommand
+                yield current.shoot.shootCommand
+                if current.next is not None and not Utility.headingsEqual(current.shoot.heading, current.next.beforeHeading):
+                    yield current.command
+            elif type(current) == TurnNode and current.direction == 0:
                 pass
             elif type(current) == StartNode: # start node has no command
                 pass

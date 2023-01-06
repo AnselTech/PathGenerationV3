@@ -193,7 +193,9 @@ class Command(Hoverable, ABC):
         pass
 
 class TurnCommand(Command):
-    def __init__(self, parent):
+    def __init__(self, parent, isShoot = False):
+
+        self.isShoot = isShoot
 
         BLUE = [[57, 126, 237], [122, 169, 245]]
 
@@ -213,7 +215,8 @@ class TurnCommand(Command):
         x = self.x + self.INFO_DX
         y = self.y + self.height/2
 
-        graphics.drawText(screen, graphics.FONT15, self.parent.next.beforeHeadingStr, colors.BLACK, x, y)
+        text = self.parent.headingStr if self.isShoot else self.parent.next.beforeHeadingStr
+        graphics.drawText(screen, graphics.FONT15, text, colors.BLACK, x, y)
 
 
 class StraightCommand(Command):
@@ -267,4 +270,20 @@ class CurveCommand(Command):
 
 
 class ShootCommand(Command):
-    pass
+    def __init__(self, parent):
+
+        YELLOW = [[255, 235, 41], [240, 232, 145]]
+
+        self.image = graphics.getImage("Images/Commands/shoot.png", 0.15)
+
+        slider = CommandSlider(1500, 3600, 1, "Speed (rpm)", 3300)
+        super().__init__(parent, YELLOW, slider = slider)
+
+    def getIcon(self) -> pygame.Surface:
+        return self.image
+
+    def drawInfo(self, screen: pygame.Surface):
+        x = self.x + self.INFO_DX + 5
+        y = self.y + self.height/2
+
+        graphics.drawText(screen, graphics.FONT20, "Shoot", colors.BLACK, x, y)

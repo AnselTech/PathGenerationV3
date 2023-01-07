@@ -16,14 +16,14 @@ class CommandSlider(Slider):
         self.default = default
 
     def getX(self):
-        return self.parent.x + 200
+        return self.parent.x + 175
 
     def getY(self):
         return self.parent.y + self.parent.height / 2 + 7
 
     def init(self, parent: 'Command'):
         self.parent: 'Command' = parent
-        width = 50
+        width = 65
         super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20)
 
 
@@ -48,7 +48,7 @@ class ToggleOption(Clickable):
         self.parent: 'Command' = parent
 
     def getX(self):
-        return self.parent.x + 124
+        return self.parent.x + 104
 
     def getY(self):
         return self.parent.y + 10 + (0 if self.isTop else self.height)
@@ -109,14 +109,14 @@ class Command(Hoverable, ABC):
         super().__init__()
 
         self.parent = parent
-        self.width = 270
+        self.width = 260
         self.height = 60
         self.x = 0
         self.y = 0
         self.colors = colors
         self.margin = 2
 
-        self.INFO_DX = self.width * 0.33
+        self.INFO_DX = self.width * 0.30
 
         self.toggle: CommandToggle = toggle
         if self.toggle is not None:

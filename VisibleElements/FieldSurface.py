@@ -33,8 +33,8 @@ class FieldSurface(Draggable):
     
     # Called when the field was just pressed at the start of the drag.
     # Get the current mouse and pan position so that new pan based on changes in mouse position can be calculated
-    def startDragging(self, mousePosition: PointRef):
-        self.startDragX, self.startDragY = mousePosition.screenRef
+    def startDragging(self, userInput: UserInput):
+        self.startDragX, self.startDragY = userInput.mousePosition.screenRef
         self.startPanX, self.startPanY = self.transform.pan
 
     # Called every frame that the object is being dragged.

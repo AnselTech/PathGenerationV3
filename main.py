@@ -189,6 +189,7 @@ def getHoverables() -> Iterator[Hoverable]:
         yield fieldSurface
     
     else:
+        yield program.scroller
         for command in program.getHoverablesCommands():
             for hoverable in command.getHoverables():
                 yield hoverable

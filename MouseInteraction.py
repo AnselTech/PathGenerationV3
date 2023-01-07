@@ -99,7 +99,7 @@ def handleStartingPressingObject(userInput: UserInput, state: SoftwareState, fie
     # if the mouse is down on some object, try to drag that object
     if isinstance(state.objectHovering, Draggable):
         state.objectDragged = state.objectHovering
-        state.objectDragged._startDragging(userInput.mousePosition)
+        state.objectDragged._startDragging(userInput)
 
     elif isinstance(state.objectHovering, Clickable):
         objectClicked: Clickable = state.objectHovering

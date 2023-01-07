@@ -2,6 +2,7 @@ from Commands.Edge import Edge, StraightEdge
 from Commands.Node import *
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
+from Commands.Scroller import Scroller
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
@@ -19,6 +20,8 @@ class Program:
         # linked list of nodes and edges. First element is the start node
         self.first: Node = StartNode(self)
         self.last: Node = self.first
+
+        self.scroller: Scroller = Scroller(self, Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 19, 10, 13, Utility.SCREEN_SIZE - 20)
         
         self.recompute()
         
@@ -136,10 +139,15 @@ class Program:
     def recomputeCommands(self):
 
         # recompute commands
-        x = Utility.SCREEN_SIZE + 17
-        y = 18
+        x = Utility.SCREEN_SIZE + 14
+        y = 18 - self.scroller.contentY
         dy = 70
-        for command in self.getHoverablesCommands():
+
+        commands = list(self.getHoverablesCommands())
+        contentHeight = len(commands) * dy
+        self.scroller.update(contentHeight)
+
+        for command in commands:
             command.updatePosition(x, y)
             y += dy
 
@@ -207,6 +215,8 @@ class Program:
             node.draw(screen)
 
     def drawCommands(self, screen: pygame.Surface):
+
+        self.scroller.draw(screen)
 
         # Draw the commands
         for command in self.getHoverablesCommands():

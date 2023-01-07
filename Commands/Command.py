@@ -192,6 +192,10 @@ class Command(Hoverable, ABC):
     def drawInfo(self, screen: pygame.Surface):
         pass
 
+    @abstractmethod
+    def getCode(self) -> str:
+        pass
+
 class TurnCommand(Command):
     def __init__(self, parent, isShoot = False):
 
@@ -217,6 +221,11 @@ class TurnCommand(Command):
 
         text = self.parent.headingStr if self.isShoot else self.parent.next.beforeHeadingStr
         graphics.drawText(screen, graphics.FONT15, text, colors.BLACK, x, y)
+    
+    def getCode(self) -> str:
+        mode = "GTU_TURN_PRECISE" if self.toggle.isTopActive else "GTU_TURN"
+        deg = round(self.parent.goalHeading * 180 / 3.1415, 1)
+        return f"goTurnU(robot, {mode}, getRadians({deg}));"
 
 
 class StraightCommand(Command):
@@ -243,6 +252,12 @@ class StraightCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.distanceStr, colors.BLACK, x, y0)
         graphics.drawText(screen, graphics.FONT15, self.parent.beforeHeadingStr, colors.BLACK, x, y1)
 
+    def getCode(self) -> str:
+        mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
+        dist = round(self.parent.distance, 1)
+        deg = round(self.parent.beforeHeading * 180 / 3.1415, 1)
+        return f"goForwardU(robot, {mode}, GFU_TURN, {dist}, getRadians({deg}));"
+
 class CurveCommand(Command):
     def __init__(self, parent):
 
@@ -268,6 +283,12 @@ class CurveCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.arcLengthStr, colors.BLACK, x, y0)
         graphics.drawText(screen, graphics.FONT15, self.parent.afterHeadingStr, colors.BLACK, x, y1)
 
+    def getCode(self) -> str:
+        mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
+        dist = round(self.parent.arcLength, 1)
+        deg1 = round(self.parent.beforeHeading * 180 / 3.1415, 1)
+        deg2 = round(self.parent.afterHeading * 180 / 3.1415, 1)
+        return f"goCurveU(robot, {mode}, GCU_CURVE, {dist}, getRadians({deg1}), getRadians({deg2}));"
 
 class ShootCommand(Command):
     def __init__(self, parent):
@@ -287,3 +308,6 @@ class ShootCommand(Command):
         y = self.y + self.height/2
 
         graphics.drawText(screen, graphics.FONT20, "Shoot", colors.BLACK, x, y)
+
+    def getCode(self) -> str:
+        return f"shoot();"

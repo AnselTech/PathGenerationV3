@@ -130,8 +130,8 @@ class StraightEdge(Edge):
         self.afterHeadingStr = str(round(self.afterHeading * 180 / 3.1415,1)) + u"\u00b0"
         if not self.arc.isStraight:
             deltaTheta = Utility.deltaInHeadingParity(self.arc.theta2, self.arc.theta1, self.arc.parity)
-            arcLength = abs(deltaTheta) * self.arc.radius
-            self.arcLengthStr = str(round(arcLength, 1)) + "\""
+            self.arcLength = abs(deltaTheta) * self.arc.radius
+            self.arcLengthStr = str(round(self.arcLength, 1)) + "\""
 
         self.command = self.straightCommand if self.arc.isStraight else self.curveCommand
 

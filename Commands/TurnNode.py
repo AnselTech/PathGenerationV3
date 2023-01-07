@@ -47,6 +47,8 @@ class Shoot(Draggable):
         else:
             self.direction = -1
 
+        self.goalHeading = self.heading
+
 
     # Hovering if touching the top half of the vector
     def checkIfHovering(self, userInput: UserInput) -> bool:
@@ -111,8 +113,11 @@ class TurnNode(Node):
             self.direction = 0
         elif Utility.deltaInHeading(before, self.next.beforeHeading) < 0:
             self.direction = 1
+            self.goalHeading = self.next.beforeHeading
         else:
             self.direction = -1
+            self.goalHeading = self.next.beforeHeading
+
        
 
     def draw(self, screen: pygame.Surface):

@@ -25,6 +25,8 @@ class Program:
 
         self.scroller: Scroller = Scroller(self, Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 19, 10, 13, Utility.SCREEN_SIZE - 20)
         
+        self.code: str = None
+
         self.recompute()
         
     # add a edge and node to self.last, and then point to the new last node
@@ -152,6 +154,42 @@ class Program:
         for command in commands:
             command.updatePosition(x, y)
             y += dy
+
+        self.recomputeGeneratedCode(commands)
+
+    def recomputeGeneratedCode(self, commands: list[Command]):
+
+        if self.first.next is None:
+            return "// (Empty path. no code generated)"
+
+        def setFlywheelSpeedCommand(code, commands):
+            for command in commands:
+                if type(command) == ShootCommand:
+                    speed = int(command.slider.getValue())
+                    return code + f"robot.flywheel->setVelocity({speed}); // Preemptively set speed for next shot\n"
+            return code
+
+        x,y = self.first.position.fieldRef
+        startHeading = round(self.first.next.beforeHeading * 180 / 3.1415, 1)
+
+        code = "// Generated C++ Code through PathGeneration v3 by Ansel Chang\n\n"
+        code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
+        
+        code = setFlywheelSpeedCommand(code, commands)
+
+        for i in range(len(commands)):
+            command = commands[i]
+            isShooter = type(command) == ShootCommand
+
+            if isShooter:
+                code += "\n"
+            
+            code += command.getCode() + "\n"
+
+            if isShooter:
+                code = setFlywheelSpeedCommand(code, commands[i+1:]) + "\n"
+
+        self.code = code
 
     def getHoverablesPath(self, state: SoftwareState) -> Iterator[Hoverable]:
 

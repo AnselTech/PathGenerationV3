@@ -31,6 +31,8 @@ class SoftwareState:
         self.objectHovering: Hoverable = None # object the mouse is currently hovering over
         self.objectDragged: Draggable = None # object the mouse is currently dragging
 
+        self.isCode = False # whether displaying code (as opposed to block commands)
+
     def __str__(self):
         return "Software State:\nHovering: {}\nDragged: {}".format(self.objectHovering, self.objectDragged)
 

@@ -3,6 +3,7 @@ from Commands.Node import *
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from Commands.Scroller import Scroller
+from Commands.TextButton import TextButton
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
@@ -25,7 +26,8 @@ class Program:
 
         self.scroller: Scroller = Scroller(self, Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 19, 10, 13, Utility.SCREEN_SIZE - 20)
         
-        self.code: str = None
+        self.code: str = ""
+        self.codeLines: list[str] = []
 
         self.recompute()
         
@@ -160,7 +162,8 @@ class Program:
     def recomputeGeneratedCode(self, commands: list[Command]):
 
         if self.first.next is None:
-            return "// (Empty path. no code generated)"
+            self.code = "// (Empty path. no code generated)"
+            self.codeLines = []
 
         def setFlywheelSpeedCommand(code, commands):
             for command in commands:
@@ -190,6 +193,7 @@ class Program:
                 code = setFlywheelSpeedCommand(code, commands[i+1:]) + "\n"
 
         self.code = code
+        self.codeLines = self.code.split("\n")
 
     def getHoverablesPath(self, state: SoftwareState) -> Iterator[Hoverable]:
 
@@ -260,6 +264,13 @@ class Program:
         self.scroller.draw(screen)
 
         # Draw the commands
-        for command in self.getHoverablesCommands():
-            command.draw(screen)
+        if self.state.isCode:
+            x = Utility.SCREEN_SIZE + 10
+            y = 10
+            for text in self.codeLines:
+                graphics.drawText(screen, graphics.FONTCODE, text, colors.BLACK, x, y, 0, 0.5)
+                y += 11
+        else:
+            for command in self.getHoverablesCommands():
+                command.draw(screen)
 

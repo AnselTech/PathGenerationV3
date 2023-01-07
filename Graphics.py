@@ -26,6 +26,8 @@ FONT25 = pygame.font.Font(FONT_PATH, 25)
 FONT30 = pygame.font.Font(FONT_PATH, 30)
 FONT40 = pygame.font.Font(FONT_PATH, 40)
 
+FONTCODE = pygame.font.SysFont("arial", 8)
+
 def getFont(size):
     if size < 25:
         return FONT20

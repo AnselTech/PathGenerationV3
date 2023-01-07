@@ -50,6 +50,15 @@ class Node(Draggable, ABC):
                 distance = Utility.distanceTuples(prevNode.position.fieldRef, self.position.fieldRef)
                 self.position = prevNode.position + VectorRef(Ref.FIELD, magnitude = distance, heading = previousHeading)
 
+        # For straight edges only, snap to next heading if close
+        if self.next is not None and self.next.arc.isStraight and self.next.next.next is not None:
+            nextNode = self.next.next
+            mouseHeading = Utility.thetaTwoPoints(self.position.fieldRef, nextNode.position.fieldRef)
+            nextHeading = nextNode.next.beforeHeading
+            if Utility.headingDiff(mouseHeading, nextHeading) < 0.06:
+                distance = Utility.distanceTuples(nextNode.position.fieldRef, self.position.fieldRef)
+                self.position = nextNode.position - VectorRef(Ref.FIELD, magnitude = distance, heading = nextHeading)
+
         # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
         if self.previous is not None and self.previous.arc.isStraight:
             self.previous.headingPoint.setStraight()

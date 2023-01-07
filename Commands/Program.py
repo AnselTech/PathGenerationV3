@@ -30,6 +30,7 @@ class Program:
         self.codeLines: list[str] = []
 
         self.recompute()
+        self.recomputeGeneratedCode(None)
         
     # add a edge and node to self.last, and then point to the new last node
     # Segment should be straight
@@ -160,10 +161,10 @@ class Program:
         self.recomputeGeneratedCode(commands)
 
     def recomputeGeneratedCode(self, commands: list[Command]):
-
         if self.first.next is None:
             self.code = "// (Empty path. no code generated)"
             self.codeLines = []
+            return
 
         def setFlywheelSpeedCommand(code, commands):
             for command in commands:
@@ -174,8 +175,8 @@ class Program:
 
         x,y = self.first.position.fieldRef
         startHeading = round(self.first.next.beforeHeading * 180 / 3.1415, 1)
-
-        code = "// Generated C++ Code through PathGeneration v3 by Ansel Chang\n\n"
+        
+        code = "// GENERATED C++ CODE FROM PathGen 3.0\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
         
         code = setFlywheelSpeedCommand(code, commands)
@@ -192,7 +193,7 @@ class Program:
             if isShooter:
                 code = setFlywheelSpeedCommand(code, commands[i+1:]) + "\n"
 
-        self.code = code
+        self.code = code + "// ================================================\n"
         self.codeLines = self.code.split("\n")
 
     def getHoverablesPath(self, state: SoftwareState) -> Iterator[Hoverable]:
@@ -261,7 +262,6 @@ class Program:
 
     def drawCommands(self, screen: pygame.Surface):
 
-        self.scroller.draw(screen)
 
         # Draw the commands
         if self.state.isCode:
@@ -271,6 +271,9 @@ class Program:
                 graphics.drawText(screen, graphics.FONTCODE, text, colors.BLACK, x, y, 0, 0.5)
                 y += 11
         else:
+
+            self.scroller.draw(screen)
+
             for command in self.getHoverablesCommands():
                 command.draw(screen)
 

@@ -83,7 +83,7 @@ def main():
                 handleRightClick(state, userInput)
 
         if userInput.isKeyPressed(pygame.K_p):
-            print(program.getCode())
+            print(program.code)
 
         # Draw everything on the screen
         drawEverything(shadowPos, shadowHeading, segmentShadow)
@@ -194,10 +194,11 @@ def getHoverables() -> Iterator[Hoverable]:
         yield fieldSurface
     
     else:
-        yield program.scroller
-        for command in program.getHoverablesCommands():
-            for hoverable in command.getHoverables():
-                yield hoverable
+        if not state.isCode:
+            yield program.scroller
+            for command in program.getHoverablesCommands():
+                for hoverable in command.getHoverables():
+                    yield hoverable
 
     # weird python hack to make it return an empty iterator if nothing hoverable
     return

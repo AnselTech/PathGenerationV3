@@ -18,6 +18,8 @@ import Commands.StartNode as StartNode
 import Commands.TurnNode as TurnNode
 
 from Commands.TextButton import TextButton
+from Commands.PrintButton import PrintButton
+from Commands.SaveButton import SaveButton
 
 from MouseSelector.MouseSelector import MouseSelector
 
@@ -46,7 +48,10 @@ if __name__ == '__main__':
     program: Program = Program(state)
     mouseSelector: MouseSelector = MouseSelector(state)
     robotImage: RobotImage = RobotImage(fieldTransform)
+
     textButton: TextButton = TextButton(state)
+    printButton: PrintButton = PrintButton(program)
+    saveButton: SaveButton = SaveButton(program)
 
 
 def main():
@@ -115,7 +120,11 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
 
     # Draw mouse selector buttons
     mouseSelector.draw(screen)
+
+    # Draw interface buttons
     textButton.draw(screen)
+    printButton.draw(screen)
+    saveButton.draw(screen)
 
     # Draw panel background
     border = 5
@@ -186,7 +195,10 @@ def getHoverables() -> Iterator[Hoverable]:
 
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
+
         yield textButton
+        yield printButton
+        yield saveButton
 
         for hoverable in program.getHoverablesPath(state):
             yield hoverable

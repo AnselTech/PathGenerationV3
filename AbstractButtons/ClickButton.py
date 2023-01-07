@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from AbstractButton import AbstactButton
+from AbstractButtons.AbstractButton import AbstactButton
 import pygame
 
 """

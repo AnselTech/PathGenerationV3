@@ -31,6 +31,16 @@ class Program:
 
         self.recompute()
         self.recomputeGeneratedCode(None)
+
+    # Load a program (presumably from serialized file), and recompute
+    def loadProgram(self, linkedList: Node):
+        self.first = linkedList
+        current = self.first
+        while current.next is not None:
+            current = current.next
+        self.last = current
+
+        self.recompute()
         
     # add a edge and node to self.last, and then point to the new last node
     # Segment should be straight

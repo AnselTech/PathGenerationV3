@@ -15,7 +15,9 @@ Stores a list of commands, which make up the path
 
 class Program:
 
-    def __init__(self):
+    def __init__(self, state: SoftwareState):
+
+        self.state = state
 
         # linked list of nodes and edges. First element is the start node
         self.first: Node = StartNode(self)
@@ -151,7 +153,7 @@ class Program:
             command.updatePosition(x, y)
             y += dy
 
-    def getHoverablesPath(self) -> Iterator[Hoverable]:
+    def getHoverablesPath(self, state: SoftwareState) -> Iterator[Hoverable]:
 
         # Yield nodes first
         node = self.first
@@ -165,8 +167,9 @@ class Program:
         # Yield edges next
         edge = self.first.next
         while edge is not None:
-
-            yield edge.headingPoint
+            
+            if not state.mode == Mode.MOUSE_SELECT:
+                yield edge.headingPoint
             yield edge
 
             edge = edge.next.next
@@ -199,12 +202,12 @@ class Program:
         return
         yield
 
-    def drawPath(self, screen: pygame.Surface):
+    def drawPath(self, screen: pygame.Surface, state: SoftwareState):
 
         # Draw the edges first
         edge = self.first.next
         while edge is not None:
-            edge.draw(screen)
+            edge.draw(screen, not state.mode == Mode.MOUSE_SELECT)
             edge = edge.next.next
 
         # Draw the nodes next

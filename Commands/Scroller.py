@@ -46,7 +46,6 @@ class Scroller(Draggable):
         self.barY = self.startBarY + userInput.mousePosition.screenRef[1] - self.mouseStartY
         self.barY = Utility.clamp(self.barY, 0, self.displayHeight - self.barHeight)
         self.contentY = (self.barY / (self.displayHeight - self.barHeight)) * (self.contentHeight - self.displayHeight)
-        print((self.barY / (self.displayHeight - self.barHeight)))
         self.program.recomputeCommands()
 
     def draw(self, screen: pygame.Surface):

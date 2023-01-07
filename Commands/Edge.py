@@ -154,7 +154,7 @@ class StraightEdge(Edge):
         if not math.isclose(self.beforeHeading, self.afterHeading):
             graphics.drawGuideLine(screen, colors.RED, *self.previous.position.screenRef, self.beforeHeading)
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, drawHeadingPoint: bool):
 
         isHovering = self.isHovering or self.command.isAnyHovering()
 
@@ -171,7 +171,8 @@ class StraightEdge(Edge):
         else: # draw curve
             graphics.drawArc(screen, color, self.arc.center.screenRef, self.arc.radius, self.arc.theta1, self.arc.theta2, self.arc.parity, thick+1)
 
-        self.headingPoint.draw(screen)
+        if drawHeadingPoint:
+            self.headingPoint.draw(screen)
 
         # Draw distance label text
         if isHovering:

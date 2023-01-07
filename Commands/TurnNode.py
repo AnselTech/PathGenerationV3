@@ -1,4 +1,5 @@
 from Commands.Node import *
+from SingletonState.SoftwareState import Mode, SoftwareState
 
 def init():
     global turnCImage, turnCCImage, turnCImageH, turnCCImageH
@@ -125,7 +126,7 @@ class TurnNode(Node):
         elif self.isHovering:
             color = (255,215,0,150)
 
-        if self.shoot.active or self.isHovering:
+        if self.shoot.active or (self.isHovering and self.program.state.mode != Mode.MOUSE_SELECT):
             self.shoot.draw(screen, color, thick)
 
 

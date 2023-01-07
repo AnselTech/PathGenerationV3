@@ -39,9 +39,9 @@ if __name__ == '__main__':
     userInput: UserInput = UserInput(pygame.mouse, pygame.key)
     StartNode.init()
     TurnNode.init()
-    program: Program = Program()
 
     state: SoftwareState = SoftwareState()
+    program: Program = Program(state)
     mouseSelector: MouseSelector = MouseSelector(state)
     robotImage: RobotImage = RobotImage(fieldTransform)
 
@@ -98,7 +98,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
         state.objectHovering.drawHovered(screen)
 
     # Draw path specified by commands
-    program.drawPath(screen)
+    program.drawPath(screen, state)
 
     # Draw robot if mouse is hovering over point or line
     if shadowPos is not None:
@@ -183,7 +183,7 @@ def getHoverables() -> Iterator[Hoverable]:
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
 
-        for hoverable in program.getHoverablesPath():
+        for hoverable in program.getHoverablesPath(state):
             yield hoverable
 
         yield fieldSurface

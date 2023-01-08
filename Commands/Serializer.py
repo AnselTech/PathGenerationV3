@@ -21,6 +21,9 @@ class Segment:
     curveCommandSlider: float
     shootHeadingCorrection: float
     shootActive: bool
+    shootCommandSlider: float
+    shootTurnCommandToggle: bool
+    turnCommandToggle: bool
     afterPosition: Tuple[float, float] # field ref
 
 # Serializable class representing all the data for the path
@@ -47,6 +50,9 @@ class State:
             edge.curveCommand.slider.getValue(),
             node.shoot.headingCorrection,
             node.shoot.active,
+            node.shoot.shootCommand.slider.getValue(),
+            node.shoot.turnToShootCommand.toggle.isTopActive,
+            node.command.toggle.isTopActive,
             node.position.fieldRef
         ))
 
@@ -75,8 +81,12 @@ class State:
 
             node.shoot.headingCorrection = segment.shootHeadingCorrection
             node.shoot.active = segment.shootActive
+            node.shoot.turnToShootCommand.toggle.isTopActive = segment.shootTurnCommandToggle
+            node.shoot.shootCommand.slider.setValue(segment.shootCommandSlider)
+            node.command.toggle.isTopActive = segment.turnCommandToggle
 
             previousNode = node
 
         program.last = previousNode # update the pointer to the last node
+        program.recompute()
             

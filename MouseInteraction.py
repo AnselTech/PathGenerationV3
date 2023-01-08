@@ -11,10 +11,11 @@ from Commands.StartNode import StartNode
 from Commands.Edge import StraightEdge
 from Commands.Node import Node
 from Commands.TurnNode import TurnNode
+import Commands.Serializer as Serializer
 import Utility
 from typing import Iterator, Tuple
 from Arc import Arc
-
+import pickle
 import pygame
 
 # Handle left clicks for dealing with the field
@@ -169,3 +170,13 @@ def handleHoverPathAdd(userInput: UserInput, state: SoftwareState, program: Prog
         if type(state.objectHovering) == StraightEdge:
             return getPointOnEdge(state, state.objectHovering, userInput.mousePosition)[0]
     return None
+
+# When a .pg3 save file dragged into the screen, load all the data into the program
+def handleLoadedFile(program: Program, filename):
+    if filename is None:
+        return
+
+    if filename.endswith(".pg3"):
+        with open(filename, "rb") as file:
+            state: Serializer.State = pickle.load(file)
+            state.load(program)

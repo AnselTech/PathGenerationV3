@@ -31,16 +31,6 @@ class Program:
 
         self.recompute()
         self.recomputeGeneratedCode(None)
-
-    # Load a program (presumably from serialized file), and recompute
-    def loadProgram(self, linkedList: Node):
-        self.first = linkedList
-        current = self.first
-        while current.next is not None:
-            current = current.next
-        self.last = current
-
-        self.recompute()
         
     # add a edge and node to self.last, and then point to the new last node
     # Segment should be straight
@@ -184,6 +174,8 @@ class Program:
             return code
 
         x,y = self.first.position.fieldRef
+        x = round(x, 1)
+        y = round(y, 1)
         startHeading = round(self.first.next.beforeHeading * 180 / 3.1415, 1)
         
         code = "// GENERATED C++ CODE FROM PathGen 3.0\n\n"

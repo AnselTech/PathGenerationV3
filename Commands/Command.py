@@ -129,8 +129,9 @@ class Command(Hoverable, ABC):
     def updatePosition(self, x, y):
         self.x = x
         self.y = y
-        self.slider.x = self.slider.getX()
-        self.slider.y = self.slider.getY()
+        if self.slider is not None:
+            self.slider.x = self.slider.getX()
+            self.slider.y = self.slider.getY()
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         x,y = userInput.mousePosition.screenRef
@@ -204,12 +205,11 @@ class TurnCommand(Command):
         BLUE = [[57, 126, 237], [122, 169, 245]]
 
         toggle = CommandToggle("PREC", "FAST")
-        slider = CommandSlider(0, 1, 0.01, "Speed", 1)
 
         self.imageLeft = graphics.getImage("Images/Commands/TurnLeft.png", 0.08)
         self.imageRight = graphics.getImage("Images/Commands/TurnRight.png", 0.08)
 
-        super().__init__(parent, BLUE, toggle = toggle, slider = slider)
+        super().__init__(parent, BLUE, toggle = toggle)
 
     def getIcon(self) -> pygame.Surface:
         clockwise = self.parent.direction == 1

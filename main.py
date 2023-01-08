@@ -76,6 +76,9 @@ def main():
         # If the X key is pressed, delete hovered PathPoint/segment
         handleDeleting(userInput, state, program)
 
+        # Handle dragging .pg3 file into program to load
+        handleLoadedFile(program, userInput.loadedFile)
+
         shadowPos, shadowHeading = handleHoverPath(userInput, state, program)
         segmentShadow = handleHoverPathAdd(userInput, state, program)
 

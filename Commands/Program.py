@@ -329,7 +329,7 @@ class Program:
                 if controllerInput.isDone:
                     break
             else:
-                print("Command ended from timeout")
+                print("Command ended from timeout: ", command.getCode())
         
         # wait for robot to come to a complete stop in the simulation
         while Utility.hypo(simulator.xVelocity, simulator.yVelocity) > 0.05:

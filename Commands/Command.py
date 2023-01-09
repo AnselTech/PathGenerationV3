@@ -5,9 +5,11 @@ from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Clickable import Clickable
 from SingletonState.UserInput import UserInput
 from SingletonState.SoftwareState import Mode
+from SingletonState.ReferenceFrame import Ref
 from AbstractButtons.ToggleButton import ToggleButton
 from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
+from Simulation.Simulator import Simulator
 from Simulation.PID import PID
 from typing import Iterable
 import Utility
@@ -243,8 +245,8 @@ class TurnCommand(Command):
         return f"goTurnU(robot, {mode}, getRadians({deg}));"
 
     def initSimulationController(self, simulationState: SimulationState):
-        tolerance = 2 # tolerance interval in degrees
-        self.pid = PID(3, 0, 0, tolerance = tolerance * 3.1415 / 180)
+        tolerance = 5 # tolerance interval in degrees
+        self.pid = PID(12, 0, 0.2, tolerance = tolerance * 3.1415 / 180)
         self.targetHeading = self.parent.heading if self.isShoot else self.parent.next.beforeHeading
 
     # make a PID turn
@@ -285,19 +287,16 @@ class StraightCommand(Command):
         return f"goForwardU(robot, {mode}, GFU_TURN, {dist}, getRadians({deg}));"
 
     def initSimulationController(self, simulationState: SimulationState):
-        self.distancePID = PID(3, 0, 0, disableOvershoot = True)
+        minSpeed = Simulator.MAX_VELOCITY * 0.05
+        self.distancePID = PID(4, 0, 0.2, min = minSpeed, tolerance = 0.3, toleranceRepeated = 3)
         self.turnPID = PID(0.1, 0, 0)
-        self.startLeft = simulationState.robotLeftEncoder
-        self.startRight = simulationState.robotRightEncoder
+        self.startPosition = simulationState.robotPosition
         self.targetDistance = self.parent.distance
         self.targetHeading = self.parent.beforeHeading
 
 
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
-
-        deltaLeft = simulationState.robotLeftEncoder - self.startLeft
-        deltaRight = simulationState.robotRightEncoder - self.startRight
-        currentDistance = (deltaLeft + deltaRight) / 2
+        currentDistance = (simulationState.robotPosition - self.startPosition).magnitude(Ref.FIELD)
         velocity = self.distancePID.tick(self.targetDistance - currentDistance)
 
         headingError = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)

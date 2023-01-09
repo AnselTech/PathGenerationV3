@@ -10,7 +10,7 @@ class Simulator:
     MAX_VELOCITY = 25 # linear velocity of a wheel / robot, inches per second
     TIMESTEP = 0.05 # the duration of each timestep in seconds
 
-    MAX_ACCEL = 0.75 # maximum change in velocity in inches/sec per second
+    MAX_ACCEL = 2 # maximum change in velocity in inches/sec per second
     LATERAL_FRICTION = 0.1 # coefficient of friction perpendicular to heading of robot (Between 0 and 1)
 
     def __init__(self, start: SimulationState):

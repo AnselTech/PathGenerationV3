@@ -5,6 +5,8 @@ from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Clickable import Clickable
 from SingletonState.UserInput import UserInput
 from AbstractButtons.ToggleButton import ToggleButton
+from Simulation.ControllerInputState import ControllerInputState
+from Simulation.SimulationState import SimulationState
 from typing import Iterable
 
 class CommandSlider(Slider):
@@ -195,6 +197,11 @@ class Command(Hoverable, ABC):
 
     @abstractmethod
     def getCode(self) -> str:
+        pass
+
+    # Run a single tick of the simulation. Given the simulation state, return what the controller values are
+    @abstractmethod
+    def simulateTick(simulationState: SimulationState) -> ControllerInputState:
         pass
 
 class TurnCommand(Command):

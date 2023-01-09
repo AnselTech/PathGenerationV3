@@ -7,6 +7,9 @@ from Commands.TextButton import TextButton
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
+from Simulation.ControllerInputState import ControllerInputState
+from Simulation.SimulationState import SimulationState
+from Simulation.Simulator import Simulator
 import pygame, Utility, math
 from typing import Iterator
 
@@ -279,3 +282,25 @@ class Program:
             for command in self.getHoverablesCommands():
                 command.draw(screen)
 
+    def generateSimulation(self):
+
+        self.simulationList: list[SimulationState] = []
+
+        # handle base case of nonexistent path
+        if self.first.next is None:
+            return
+
+        currentState: SimulationState = SimulationState(self.first.position, self.first.next.beforeHeading)
+        simulator: Simulator = Simulator(currentState)
+        self.simulationList.append(currentState)
+
+        for command in self.getHoverablesCommands():
+
+            while True: # repeat while command is not finished
+                controllerInput: ControllerInputState = command.simulateTick(currentState)
+                currentState = simulator.simulateTick(controllerInput)
+                self.simulationList.append(currentState)
+
+                # When command is finished, go onto the next
+                if controllerInput.isDone:
+                    break

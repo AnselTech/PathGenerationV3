@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     state: SoftwareState = SoftwareState()
     program: Program = Program(state)
-    mouseSelector: MouseSelector = MouseSelector(state)
+    mouseSelector: MouseSelector = MouseSelector(state, program)
     robotImage: RobotImage = RobotImage(fieldTransform)
 
     textButton: TextButton = TextButton(state)

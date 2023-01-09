@@ -8,7 +8,8 @@ SelectorButtons change the SoftwareState mode
 """
 class SelectorButton(ToggleButton):
 
-    def __init__(self, state: SoftwareState, mode: Mode, tooltipString: str, position: tuple, imageOff: pygame.Surface, imageHovered: pygame.Surface, imageOn: pygame.Surface):
+    def __init__(self, program, state: SoftwareState, mode: Mode, tooltipString: str, position: tuple, imageOff: pygame.Surface, imageHovered: pygame.Surface, imageOn: pygame.Surface):
+        self.program = program
         self.state: SoftwareState = state
         self.myMode: Mode = mode
         self.tooltip: Tooltip = Tooltip(tooltipString)

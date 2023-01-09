@@ -1,5 +1,6 @@
 from SingletonState.SoftwareState import SoftwareState, Mode
 from MouseSelector.SelectorButton import SelectorButton
+from MouseSelector.SimulateButton import SimulateButton
 from MouseInterfaces.Hoverable import Hoverable
 import pygame, Utility, graphics
 from typing import Tuple, Iterator
@@ -29,7 +30,7 @@ class MouseSelector:
 
         return off, hovered, on
     
-    def __init__(self, state: SoftwareState):
+    def __init__(self, state: SoftwareState, program):
 
         self.state: SoftwareState = state
 
@@ -38,16 +39,16 @@ class MouseSelector:
         dx = 45
         bx = Utility.SCREEN_SIZE - dx*4 - 10
 
-        self.mouseSelect: SelectorButton = SelectorButton(state, Mode.MOUSE_SELECT,
+        self.mouseSelect: SelectorButton = SelectorButton(program, state, Mode.MOUSE_SELECT,
             "View or modify the existing path", (bx, by), *self.getImage("select"))
 
-        self.addSegment: SelectorButton = SelectorButton(state, Mode.ADD_SEGMENT,
+        self.addSegment: SelectorButton = SelectorButton(program, state, Mode.ADD_SEGMENT,
             "Left click to add a new segment", (bx+dx, by), *self.getImage("straight"))
 
-        self.addCurve: SelectorButton = SelectorButton(state, Mode.ADD_CURVE,
+        self.addCurve: SelectorButton = SelectorButton(program, state, Mode.ADD_CURVE,
             "Left click to add a new curve", (bx+dx*2, by), *self.getImage("curve"))
 
-        self.playback: SelectorButton = SelectorButton(state, Mode.PLAYBACK,
+        self.playback: SelectorButton = SimulateButton(program, state, Mode.PLAYBACK,
             "Run a simulation of the current path", (bx+dx*3, by), *self.getImage("play"))
 
         self.buttons: list[SelectorButton] = [self.mouseSelect, self.addSegment, self.addCurve, self.playback]

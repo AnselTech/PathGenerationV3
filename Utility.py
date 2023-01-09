@@ -189,3 +189,7 @@ def circleCenterFromTwoPointsAndTheta(x1, y1, x2, y2, theta) -> tuple:
     y = (y1+y2)/2 + c * (x2 - x1)
 
     return x,y
+
+def headingToString(headingRadians):
+    headingRadians %= 3.1415*2
+    return str(round(headingRadians * 180 / 3.1415, 1)) + u"\u00b0"

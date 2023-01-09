@@ -48,6 +48,7 @@ class Shoot(Draggable):
             self.direction = -1
 
         self.goalHeading = self.heading
+        self.goalHeadingStr = Utility.headingToString(self.goalHeading)
 
 
     # Hovering if touching the top half of the vector
@@ -102,21 +103,25 @@ class TurnNode(Node):
     # Given previous heading, return the resultant heading after the turn
     def compute(self) -> float:
 
-        self.shoot.compute()
+        self.shoot.compute()   
+
+        if self.next is not None:
+            self.goalHeading = self.next.beforeHeading
+            if self.next.reversed:
+                self.goalHeading += 3.1415
+            self.goalHeadingStr = Utility.headingToString(self.goalHeading)
 
         if self.shoot.active:
             before = self.shoot.heading
         else:
-            before = self.previous.afterHeading
-        
-        if self.next is None or Utility.headingsEqual(before, self.next.beforeHeading):
+            before = self.previous.goalHeading
+
+        if self.next is None or Utility.headingsEqual(before, self.goalHeading):
             self.direction = 0
-        elif Utility.deltaInHeading(before, self.next.beforeHeading) < 0:
+        elif Utility.deltaInHeading(before, self.goalHeading) > 0:
             self.direction = 1
-            self.goalHeading = self.next.beforeHeading
         else:
             self.direction = -1
-            self.goalHeading = self.next.beforeHeading
 
        
 

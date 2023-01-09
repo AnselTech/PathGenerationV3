@@ -236,22 +236,20 @@ class TurnCommand(Command):
         x = self.x + self.INFO_DX
         y = self.y + self.height/2
 
-        text = self.parent.headingStr if self.isShoot else self.parent.next.beforeHeadingStr
-        graphics.drawText(screen, graphics.FONT15, text, colors.BLACK, x, y)
+        graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y)
     
     def getCode(self) -> str:
         mode = "GTU_TURN_PRECISE" if self.toggle.isTopActive else "GTU_TURN"
-        deg = round(self.parent.goalHeading * 180 / 3.1415, 1)
-        return f"goTurnU(robot, {mode}, getRadians({deg}));"
+        return f"goTurnU(robot, {mode}, getRadians({self.parent.goalHeadingStr}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         tolerance = 5 # tolerance interval in degrees
         self.pid = PID(12, 0, 0.2, tolerance = tolerance * 3.1415 / 180)
-        self.targetHeading = self.parent.heading if self.isShoot else self.parent.next.beforeHeading
+        print(self.parent.goalHeading)
 
     # make a PID turn
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
-        error = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)
+        error = Utility.deltaInHeading(self.parent.goalHeading, simulationState.robotHeading)
         turnVelocity = self.pid.tick(error)
         return ControllerInputState(turnVelocity, -turnVelocity, self.pid.isDone())
 
@@ -278,28 +276,24 @@ class StraightCommand(Command):
         y1 = self.y + self.height/2 + dy
 
         graphics.drawText(screen, graphics.FONT15, self.parent.distanceStr, colors.BLACK, x, y0)
-        graphics.drawText(screen, graphics.FONT15, self.parent.beforeHeadingStr, colors.BLACK, x, y1)
+        graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y1)
 
     def getCode(self) -> str:
         mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
-        dist = round(self.parent.distance, 1)
-        deg = round(self.parent.beforeHeading * 180 / 3.1415, 1)
-        return f"goForwardU(robot, {mode}, GFU_TURN, {dist}, getRadians({deg}));"
+        return f"goForwardU(robot, {mode}, GFU_TURN, {self.parent.distanceStr}, getRadians({self.parent.goalHeadingStr}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         minSpeed = Simulator.MAX_VELOCITY * 0.05
         self.distancePID = PID(4, 0, 0.2, min = minSpeed, tolerance = 0.3, toleranceRepeated = 3)
         self.turnPID = PID(0.1, 0, 0)
         self.startPosition = simulationState.robotPosition
-        self.targetDistance = self.parent.distance
-        self.targetHeading = self.parent.beforeHeading
-
 
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         currentDistance = (simulationState.robotPosition - self.startPosition).magnitude(Ref.FIELD)
-        velocity = self.distancePID.tick(self.targetDistance - currentDistance)
+        currentDistance *= -1 if self.parent.reversed else 1
+        velocity = self.distancePID.tick(self.parent.distance - currentDistance)
 
-        headingError = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)
+        headingError = Utility.deltaInHeading(self.parent.goalHeading, simulationState.robotHeading)
         deltaVelocity = self.turnPID.tick(headingError)
         
         left = velocity + deltaVelocity
@@ -328,15 +322,15 @@ class CurveCommand(Command):
         y0 = self.y + self.height/2 - dy
         y1 = self.y + self.height/2 + dy
 
-        graphics.drawText(screen, graphics.FONT15, self.parent.arcLengthStr, colors.BLACK, x, y0)
-        graphics.drawText(screen, graphics.FONT15, self.parent.afterHeadingStr, colors.BLACK, x, y1)
+        graphics.drawText(screen, graphics.FONT15, self.parent.goalRadiusStr, colors.BLACK, x, y0)
+        graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y1)
 
     def getCode(self) -> str:
         mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
-        dist = round(self.parent.arcLength, 1)
-        deg1 = round(self.parent.beforeHeading * 180 / 3.1415, 1)
-        deg2 = round(self.parent.afterHeading * 180 / 3.1415, 1)
-        return f"goCurveU(robot, {mode}, GCU_CURVE, {dist}, getRadians({deg1}), getRadians({deg2}));"
+        r = self.parent.goalRadiusStr
+        deg1 = self.parent.goalBeforeHeadingStr
+        deg2 = self.parent.goalHeadingStr
+        return f"goCurveU(robot, {mode}, GCU_CURVE, getRadians({deg1}), getRadians({deg2}), radius = {r});"
 
     def initSimulationController(self, simulationState: SimulationState):
         # temporarily, this controller just does nothing for 20 ticks

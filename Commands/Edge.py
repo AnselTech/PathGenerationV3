@@ -124,19 +124,20 @@ class StraightEdge(Edge):
 
         self.headingPoint.compute()
         
-        self.distance = Utility.distanceTuples(self.previous.position.fieldRef, self.next.position.fieldRef)
+        self.distance = (-1 if self.reversed else 1) * Utility.distanceTuples(self.previous.position.fieldRef, self.next.position.fieldRef)
         self.distanceStr = str(round(self.distance,1)) + "\""
 
         self.arc.set(self.previous.position, self.next.position, self.headingPoint.heading)
         self.beforeHeading = self.arc.heading1
         self.afterHeading = self.arc.heading2
 
-        self.beforeHeadingStr = str(round(self.beforeHeading * 180 / 3.1415,1)) + u"\u00b0"
-        self.afterHeadingStr = str(round(self.afterHeading * 180 / 3.1415,1)) + u"\u00b0"
+        self.goalBeforeHeading = self.beforeHeading + (3.1415 if self.reversed else 0)
+        self.goalBeforeHeadingStr = Utility.headingToString(self.goalBeforeHeading)
+        self.goalHeading = self.afterHeading + (3.1415 if self.reversed else 0)
+        self.goalHeadingStr = Utility.headingToString(self.goalHeading)
         if not self.arc.isStraight:
-            deltaTheta = Utility.deltaInHeadingParity(self.arc.theta2, self.arc.theta1, self.arc.parity)
-            self.arcLength = abs(deltaTheta) * self.arc.radius
-            self.arcLengthStr = str(round(self.arcLength, 1)) + "\""
+            self.goalRadius = self.arc.radius * (-1 if self.reversed else 1)
+            self.goalRadiusStr = str(round(self.goalRadius, 1)) + "\""
 
         self.command = self.straightCommand if self.arc.isStraight else self.curveCommand
 

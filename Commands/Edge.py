@@ -104,6 +104,8 @@ class StraightEdge(Edge):
         self.distance: float = None
         self.arc: Arc.Arc = Arc.Arc()
         self.headingPoint: HeadingPoint = HeadingPoint(program, self, heading1)
+
+        self.reversed = False
         
         self.distance = None
         self.straightHeading = None
@@ -112,6 +114,9 @@ class StraightEdge(Edge):
     def getMidpoint(self) -> PointRef:
         return self.previous.position + (self.next.position - self.previous.position) * 0.5
         
+    def toggleReversed(self):
+        self.reversed = not self.reversed
+        self.program.recompute()
 
     def compute(self) -> float:
 
@@ -160,10 +165,10 @@ class StraightEdge(Edge):
 
         # draw line between self.startPos and self.endPos
         if isHovering:
-            color = colors.DARKBLUE
+            color = [120, 60, 0] if self.reversed else [0,0,100]
             thick = 4
         else:
-            color = colors.BLACK
+            color = [220, 110, 0] if self.reversed else [0, 0, 200]
             thick = 3
 
         if self.arc.isStraight: # draw line

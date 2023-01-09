@@ -40,7 +40,9 @@ def handleRightClick(state: SoftwareState, userInput: UserInput):
         node: Node = state.objectHovering
         node.shoot.active = not node.shoot.active
         node.program.recompute()
-    elif userInput.isMouseOnField:
+    elif type(state.objectHovering) == StraightEdge:
+        state.objectHovering.toggleReversed() # toggle going forward/reverse on edge
+    elif type(state.objectHovering) == FieldSurface:
         state.mode = state.mode.next()
         
 # Handle zooming through mousewheel. Zoom "origin" should be at the mouse location

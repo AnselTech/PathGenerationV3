@@ -302,7 +302,10 @@ class StraightCommand(Command):
         headingError = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)
         deltaVelocity = self.turnPID.tick(headingError)
         
-        return ControllerInputState(velocity + deltaVelocity, velocity - deltaVelocity, self.distancePID.isDone())
+        left = velocity + deltaVelocity
+        right = velocity - deltaVelocity
+        print(left, right)
+        return ControllerInputState(left, right, self.distancePID.isDone())
 
 class CurveCommand(Command):
     def __init__(self, parent):

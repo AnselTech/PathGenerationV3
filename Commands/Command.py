@@ -244,7 +244,7 @@ class TurnCommand(Command):
 
     def initSimulationController(self, simulationState: SimulationState):
         tolerance = 2 # tolerance interval in degrees
-        self.pid = PID(1, 0, 0, tolerance = tolerance * 3.1415 / 180)
+        self.pid = PID(3, 0, 0, tolerance = tolerance * 3.1415 / 180)
         self.targetHeading = self.parent.heading if self.isShoot else self.parent.next.beforeHeading
 
     # make a PID turn
@@ -285,26 +285,26 @@ class StraightCommand(Command):
         return f"goForwardU(robot, {mode}, GFU_TURN, {dist}, getRadians({deg}));"
 
     def initSimulationController(self, simulationState: SimulationState):
-        self.distancePID = PID(1, 0, 0, tolerance = 0.2)
-        self.turnPID = PID(1, 0, 0)
+        self.distancePID = PID(3, 0, 0, disableOvershoot = True)
+        self.turnPID = PID(0.1, 0, 0)
         self.startLeft = simulationState.robotLeftEncoder
         self.startRight = simulationState.robotRightEncoder
         self.targetDistance = self.parent.distance
         self.targetHeading = self.parent.beforeHeading
+
 
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
 
         deltaLeft = simulationState.robotLeftEncoder - self.startLeft
         deltaRight = simulationState.robotRightEncoder - self.startRight
         currentDistance = (deltaLeft + deltaRight) / 2
-        velocity = self.distancePID.tick(currentDistance)
+        velocity = self.distancePID.tick(self.targetDistance - currentDistance)
 
         headingError = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)
         deltaVelocity = self.turnPID.tick(headingError)
         
         left = velocity + deltaVelocity
         right = velocity - deltaVelocity
-        print(left, right)
         return ControllerInputState(left, right, self.distancePID.isDone())
 
 class CurveCommand(Command):

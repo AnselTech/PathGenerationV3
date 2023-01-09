@@ -296,7 +296,7 @@ class Program:
 
             # If at the end of simulation list, end simulation
             if len(self.simulationList) == self.simulationTick:
-                self.state = self.modeBeforePlayback
+                self.state.mode = self.modeBeforePlayback
                 return
 
         # Draw the robot at the simulation state
@@ -328,6 +328,13 @@ class Program:
                 # When command is finished, go onto the next
                 if controllerInput.isDone:
                     break
+            else:
+                print("Command ended from timeout")
+        
+        # wait for robot to come to a complete stop in the simulation
+        while Utility.hypo(simulator.xVelocity, simulator.yVelocity) > 0.05:
+            currentState = simulator.simulateTick(ControllerInputState(0, 0, None))
+            self.simulationList.append(currentState)
 
         self.previousTickTime = timer()
         self.simulationTick = 0

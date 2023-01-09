@@ -120,6 +120,8 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
 
     drawShadow()
 
+    program.drawSimulation(screen, robotImage)
+
 
     # Draw mouse selector buttons
     mouseSelector.draw(screen)

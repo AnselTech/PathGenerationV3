@@ -8,6 +8,4 @@ class SimulateButton(SelectorButton):
 
     # Simulation code
     def toggleButtonOn(self) -> None:
-        super().toggleButtonOn()
-
         self.program.generateSimulation()

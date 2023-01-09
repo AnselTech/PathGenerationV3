@@ -7,7 +7,9 @@ from SingletonState.UserInput import UserInput
 from AbstractButtons.ToggleButton import ToggleButton
 from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
+from Simulation.PID import PID
 from typing import Iterable
+import Utility
 
 class CommandSlider(Slider):
     def __init__(self, min: float, max: float, step: float, text: str, default: float = 0):
@@ -199,9 +201,13 @@ class Command(Hoverable, ABC):
     def getCode(self) -> str:
         pass
 
+    # subclasses can initialize anything needed before running simulation
+    def initSimulationController(self, simulationState: SimulationState):
+        pass
+
     # Run a single tick of the simulation. Given the simulation state, return what the controller values are
     @abstractmethod
-    def simulateTick(simulationState: SimulationState) -> ControllerInputState:
+    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         pass
 
 class TurnCommand(Command):
@@ -234,6 +240,17 @@ class TurnCommand(Command):
         deg = round(self.parent.goalHeading * 180 / 3.1415, 1)
         return f"goTurnU(robot, {mode}, getRadians({deg}));"
 
+    def initSimulationController(self, simulationState: SimulationState):
+        tolerance = 2 # tolerance interval in degrees
+        self.pid = PID(1, 0, 0, tolerance = tolerance * 3.1415 / 180)
+        self.targetHeading = self.parent.heading if self.isShoot else self.parent.next.beforeHeading
+
+    # make a PID turn
+    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
+        error = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)
+        turnVelocity = self.pid.tick(error)
+        return ControllerInputState(turnVelocity, -turnVelocity, self.pid.isDone())
+
 
 class StraightCommand(Command):
     def __init__(self, parent):
@@ -264,6 +281,26 @@ class StraightCommand(Command):
         dist = round(self.parent.distance, 1)
         deg = round(self.parent.beforeHeading * 180 / 3.1415, 1)
         return f"goForwardU(robot, {mode}, GFU_TURN, {dist}, getRadians({deg}));"
+
+    def initSimulationController(self, simulationState: SimulationState):
+        self.distancePID = PID(1, 0, 0, tolerance = 0.2)
+        self.turnPID = PID(1, 0, 0)
+        self.startLeft = simulationState.robotLeftEncoder
+        self.startRight = simulationState.robotRightEncoder
+        self.targetDistance = self.parent.distance
+        self.targetHeading = self.parent.beforeHeading
+
+    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
+
+        deltaLeft = simulationState.robotLeftEncoder - self.startLeft
+        deltaRight = simulationState.robotRightEncoder - self.startRight
+        currentDistance = (deltaLeft + deltaRight) / 2
+        velocity = self.distancePID.tick(currentDistance)
+
+        headingError = Utility.deltaInHeading(self.targetHeading, simulationState.robotHeading)
+        deltaVelocity = self.turnPID.tick(headingError)
+        
+        return ControllerInputState(velocity + deltaVelocity, velocity - deltaVelocity, self.distancePID.isDone())
 
 class CurveCommand(Command):
     def __init__(self, parent):
@@ -297,6 +334,15 @@ class CurveCommand(Command):
         deg2 = round(self.parent.afterHeading * 180 / 3.1415, 1)
         return f"goCurveU(robot, {mode}, GCU_CURVE, {dist}, getRadians({deg1}), getRadians({deg2}));"
 
+    def initSimulationController(self, simulationState: SimulationState):
+        # temporarily, this controller just does nothing for 20 ticks
+        self.idleTicks = 0
+        self.maxIdleTicks = 20
+
+    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
+        self.idleTicks += 1
+        return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)
+
 class ShootCommand(Command):
     def __init__(self, parent):
 
@@ -318,3 +364,12 @@ class ShootCommand(Command):
 
     def getCode(self) -> str:
         return f"shoot();"
+
+    def initSimulationController(self, simulationState: SimulationState):
+        # temporarily, this controller just does nothing for 20 ticks
+        self.idleTicks = 0
+        self.maxIdleTicks = 20
+
+    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
+        self.idleTicks += 1
+        return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)

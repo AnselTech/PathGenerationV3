@@ -10,8 +10,10 @@ from SingletonState.SoftwareState import SoftwareState, Mode
 from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
 from Simulation.Simulator import Simulator
+from RobotImage import RobotImage
 import pygame, Utility, math
 from typing import Iterator
+from timeit import default_timer as timer
 
 """
 Stores a list of commands, which make up the path
@@ -216,7 +218,7 @@ class Program:
         edge = self.first.next
         while edge is not None:
             
-            if not state.mode == Mode.MOUSE_SELECT:
+            if not state.mode == Mode.MOUSE_SELECT and not state.mode == Mode.PLAYBACK:
                 yield edge.headingPoint
             yield edge
 
@@ -255,7 +257,7 @@ class Program:
         # Draw the edges first
         edge = self.first.next
         while edge is not None:
-            edge.draw(screen, not state.mode == Mode.MOUSE_SELECT)
+            edge.draw(screen, not state.mode == Mode.MOUSE_SELECT and not state.mode == Mode.PLAYBACK)
             edge = edge.next.next
 
         # Draw the nodes next
@@ -282,7 +284,27 @@ class Program:
             for command in self.getHoverablesCommands():
                 command.draw(screen)
 
-    def generateSimulation(self):
+    def drawSimulation(self, screen: pygame.Surface, robotImage: RobotImage):
+
+        if not self.state.mode == Mode.PLAYBACK:
+            return
+
+        # Update simulation tick
+        if (timer() - self.previousTickTime) > Simulator.TIMESTEP:
+            self.simulationTick += 1
+            self.previousTickTime = timer()
+
+            # If at the end of simulation list, end simulation
+            if len(self.simulationList) == self.simulationTick:
+                self.state = self.modeBeforePlayback
+                return
+
+        # Draw the robot at the simulation state
+        simulationState: SimulationState = self.simulationList[self.simulationTick]
+        robotImage.draw(screen, simulationState.robotPosition, simulationState.robotHeading)
+
+    # Return whether the simulation has actually been generated
+    def generateSimulation(self) -> bool:
 
         self.simulationList: list[SimulationState] = []
 
@@ -290,11 +312,13 @@ class Program:
         if self.first.next is None:
             return
 
-        currentState: SimulationState = SimulationState(self.first.position, self.first.next.beforeHeading)
+        currentState: SimulationState = SimulationState(self.first.position, self.first.next.beforeHeading, 0, 0)
         simulator: Simulator = Simulator(currentState)
         self.simulationList.append(currentState)
 
         for command in self.getHoverablesCommands():
+
+            command.initSimulationController(currentState)
 
             while True: # repeat while command is not finished
                 controllerInput: ControllerInputState = command.simulateTick(currentState)
@@ -304,3 +328,8 @@ class Program:
                 # When command is finished, go onto the next
                 if controllerInput.isDone:
                     break
+
+        self.previousTickTime = timer()
+        self.simulationTick = 0
+        self.modeBeforePlayback = self.state.mode
+        self.state.mode = Mode.PLAYBACK

@@ -20,6 +20,7 @@ class Simulator:
         self.xVelocity, self.yVelocity = 0,0
         self.angularVelocity = 0
         self.leftVelocity, self.rightVelocity = 0,0
+        self.leftEncoderDistance, self.rightEncoderDistance = 0
 
     def simulateTick(self, input: ControllerInputState) -> SimulationState:
 
@@ -33,6 +34,10 @@ class Simulator:
             clampedRightVelocity = Utility.clamp(clampedRightVelocity, self.rightVelocity - 
             self.MAX_ACCEL, self.rightVelocity + self.MAX_ACCEL)
 
+            # update encoder distances
+            self.leftEncoderDistance += clampedLeftVelocity * self.TIMESTEP
+            self.rightEncoderDistance += clampedRightVelocity * self.TIMESTEP
+
             # Store the left and right velocities for the next tick
             self.leftVelocity = clampedLeftVelocity
             self.rightVelocity = clampedRightVelocity
@@ -40,7 +45,7 @@ class Simulator:
             # Save the start locations to calculate the change in position later
             prevX, prevY = self.xPosition, self.yPosition
             
-            if(clampedLeftVelocity == clampedRightVelocity):
+            if clampedLeftVelocity == clampedRightVelocity:
                 # Special case where we have no rotation
                 # radius = "INFINITE"
                 omega = 0
@@ -118,4 +123,4 @@ class Simulator:
             self.yPosition = Utility.clamp(self.yPosition, 0, 144)
 
             position = PointRef(Ref.FIELD, (self.xPosition, self.yPosition))
-            return SimulationState(position, self.heading)
+            return SimulationState(position, self.heading, self.leftEncoderDistance, self. rightEncoderDistance)

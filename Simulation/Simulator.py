@@ -16,11 +16,12 @@ class Simulator:
     def __init__(self, start: SimulationState):
 
         self.xPosition, self.yPosition = start.robotPosition.fieldRef
+        self.heading = start.robotHeading
         self.deltaX, self.deltaY = 0,0
         self.xVelocity, self.yVelocity = 0,0
         self.angularVelocity = 0
         self.leftVelocity, self.rightVelocity = 0,0
-        self.leftEncoderDistance, self.rightEncoderDistance = 0
+        self.leftEncoderDistance, self.rightEncoderDistance = start.robotLeftEncoder, start.robotRightEncoder
 
     def simulateTick(self, input: ControllerInputState) -> SimulationState:
 

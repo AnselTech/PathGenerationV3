@@ -320,7 +320,7 @@ class Program:
 
             command.initSimulationController(currentState)
 
-            while True: # repeat while command is not finished
+            for i in range(200): # repeat while command is not finished, or 200 ticks reached (timeout)
                 controllerInput: ControllerInputState = command.simulateTick(currentState)
                 currentState = simulator.simulateTick(controllerInput)
                 self.simulationList.append(currentState)

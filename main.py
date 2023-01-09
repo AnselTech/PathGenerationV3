@@ -205,8 +205,9 @@ def getHoverables() -> Iterator[Hoverable]:
         yield printButton
         yield saveButton
 
-        for hoverable in program.getHoverablesPath(state):
-            yield hoverable
+        if not state.mode == Mode.PLAYBACK:
+            for hoverable in program.getHoverablesPath(state):
+                yield hoverable
 
         yield fieldSurface
     

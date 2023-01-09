@@ -4,6 +4,7 @@ import pygame, graphics, colors
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Clickable import Clickable
 from SingletonState.UserInput import UserInput
+from SingletonState.SoftwareState import Mode
 from AbstractButtons.ToggleButton import ToggleButton
 from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
@@ -147,12 +148,13 @@ class Command(Hoverable, ABC):
 
     def getHoverables(self) -> Iterable[Hoverable]:
 
-        if self.toggle is not None:
-            yield self.toggle.top
-            yield self.toggle.bottom
+        if not self.parent.program.state.mode == Mode.PLAYBACK:
+            if self.toggle is not None:
+                yield self.toggle.top
+                yield self.toggle.bottom
 
-        if self.slider is not None:
-            yield self.slider
+            if self.slider is not None:
+                yield self.slider
 
         yield self
 

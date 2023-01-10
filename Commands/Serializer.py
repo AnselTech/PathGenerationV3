@@ -71,9 +71,9 @@ class State:
             previousNode.next = edge
 
             edge.straightCommand.toggle.isTopActive = segment.straightCommandToggle
-            edge.straightCommand.slider.setValue(segment.straightCommandSlider)
+            edge.straightCommand.slider.setValue(segment.straightCommandSlider, disableCallback = True)
             edge.curveCommand.toggle.isTopActive = segment.curveCommandToggle
-            edge.curveCommand.slider.setValue(segment.curveCommandSlider)
+            edge.curveCommand.slider.setValue(segment.curveCommandSlider, disableCallback = True)
 
             position = PointRef(Ref.FIELD, segment.afterPosition)
             node: TurnNode = TurnNode(program, position, previous = edge)
@@ -82,7 +82,7 @@ class State:
             node.shoot.headingCorrection = segment.shootHeadingCorrection
             node.shoot.active = segment.shootActive
             node.shoot.turnToShootCommand.toggle.isTopActive = segment.shootTurnCommandToggle
-            node.shoot.shootCommand.slider.setValue(segment.shootCommandSlider)
+            node.shoot.shootCommand.slider.setValue(segment.shootCommandSlider, disableCallback = True)
             node.command.toggle.isTopActive = segment.turnCommandToggle
 
             previousNode = node

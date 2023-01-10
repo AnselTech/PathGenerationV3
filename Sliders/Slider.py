@@ -72,14 +72,14 @@ class Slider(Draggable, TooltipOwner):
             return self.val
 
     # Manually override the slider position. One example would when playing a simulation, and the slider moves by itself
-    def setValue(self, val: float, isFirst: bool = False):
+    def setValue(self, val: float, isFirst: bool = False, disableCallback: bool = False):
         val = round(val, self.rounding)
         newVal = Utility.clamp(val, self.min, self.max)
         if isFirst or newVal != self.val:
             self.val = newVal
             self.tooltip = Tooltip(str(self.val))
 
-            if not isFirst and self.onSet is not None:
+            if not isFirst and not disableCallback and self.onSet is not None:
                 self.onSet() # run callback
 
     # reset to value

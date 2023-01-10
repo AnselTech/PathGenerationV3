@@ -161,7 +161,7 @@ def drawShadowArc(fro: PointRef, to: PointRef, heading1: float):
     graphics.drawGuideLine(screen, colors.RED, *fro.screenRef, arc.heading1)
     graphics.drawGuideLine(screen, colors.GREEN, *to.screenRef, arc.heading2)
 
-    graphics.drawArc(screen, [80,80,80], arc.center.screenRef, arc.radius, arc.theta1, arc.theta2, arc.parity, 3, 255)
+    graphics.drawArc(screen, [80,80,80], arc.center.screenRef, arc.radius.screenRef, arc.theta1, arc.theta2, arc.parity, 3, 255)
 
 def drawShadow():
 

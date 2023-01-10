@@ -77,7 +77,7 @@ class Slider(Draggable, TooltipOwner):
         newVal = Utility.clamp(val, self.min, self.max)
         if isFirst or newVal != self.val:
             self.val = newVal
-            self.tooltip = Tooltip(str(self.val))
+            self.tooltip = Tooltip(f"{self.text}: {self.val}")
 
             if not isFirst and not disableCallback and self.onSet is not None:
                 self.onSet() # run callback
@@ -93,10 +93,6 @@ class Slider(Draggable, TooltipOwner):
     def draw(self, screen: pygame.Surface):
         graphics.drawRoundedLine(screen, colors.LINEGREY, self.x, self.y, self.x + self.width, self.y, 20)
         graphics.drawCircle(screen, self.getCircleX(), self.y, self.color, 8)
-
-        if self.text != "":
-            graphics.drawText(screen, graphics.FONT15, self.text, colors.BLACK, self.x + self.textX, self.y + self.textY, 0.5, 0.5)
-
 
     # Draw tooltip for value
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:

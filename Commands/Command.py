@@ -17,24 +17,27 @@ from typing import Iterable
 import Utility
 
 class CommandSlider(Slider):
-    def __init__(self, min: float, max: float, step: float, text: str, default: float = 0):
+    def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0):
+        
         self.min = min
         self.max = max
         self.step = step
         self.text = text
         self.default = default
+        self.dy = dy
+
+        self.parent: 'Command' = parent
+        width = 65
+        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20, onSet = parent.onSliderUpdate)
+        
+        
 
     def getX(self):
         return self.parent.x + 175
 
     def getY(self):
-        return self.parent.y + self.parent.height / 2 + 7
-
-    def init(self, parent: 'Command', onSet = None):
-        self.parent: 'Command' = parent
-        width = 65
-        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20, onSet = onSet)
-
+        return self.parent.y + self.parent.height / 2 + self.dy
+        
 
 class ToggleOption(Clickable):
 
@@ -101,7 +104,9 @@ class ToggleOption(Clickable):
 
 
 class CommandToggle(Clickable, TooltipOwner):
-    def __init__(self, options: list[str]):
+    def __init__(self, parent: 'Command', options: list[str]):
+
+        self.parent = parent
 
         self.options: list[str] = options
         self.tooltips: list[Tooltip] = [Tooltip(optionString) for optionString in self.options]
@@ -121,10 +126,7 @@ class CommandToggle(Clickable, TooltipOwner):
         self.height = 30
 
         super().__init__()
-        
-    def init(self, parent: 'Command', onSet = None):
-        self.parent = parent
-        self.onSet = onSet
+
 
     # return active option as int/string
     def get(self, datatype) -> str:
@@ -159,8 +161,8 @@ class CommandToggle(Clickable, TooltipOwner):
 
         changed: bool = self.activeOption != self.hoveringOption
         self.activeOption = self.hoveringOption
-        if changed and self.onSet is not None:
-            self.onSet()
+        if changed:
+            self.parent.onToggleClick()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
         self.tooltips[self.tooltipOption].draw(screen, mousePosition)
@@ -173,9 +175,6 @@ class CommandToggle(Clickable, TooltipOwner):
 
         # draw backdrop
         pygame.draw.rect(screen, self.disabled, [x, y, self.width, self.height])
-
-        # draw left border
-        graphics.drawThinLine(screen, self.enabledH, x-1, y, x-1, y + self.height)
 
         for i in range(self.N):
 
@@ -192,7 +191,8 @@ class CommandToggle(Clickable, TooltipOwner):
             x += dx
 
             # draw border
-            graphics.drawThinLine(screen, self.enabledH, x-1, y, x-1, y + self.height)
+            if i != self.N-1:
+                graphics.drawThinLine(screen, self.enabledH, x-1, y, x-1, y + self.height)
 
         # kinda bad to do this here, but reset which one was hovered
         self.tooltipOption = self.hoveringOption
@@ -217,12 +217,15 @@ class Command(Hoverable, ABC):
         self.INFO_DX = self.width * 0.30
 
         self.toggle: CommandToggle = toggle
-        if self.toggle is not None:
-            self.toggle.init(self, self.parent.program.recomputeGeneratedCode)
-
         self.slider: CommandSlider = slider
-        if self.slider is not None:
-            self.slider.init(self, self.parent.program.recomputeGeneratedCode)
+
+    # called by the toggle owned by this command when toggle is toggled
+    def onToggleClick(self):
+        self.parent.program.recomputeGeneratedCode()
+
+    # called by the slider owned by this command when slider is dragged
+    def onSliderUpdate(self):
+        self.parent.program.recomputeGeneratedCode()
 
     def updatePosition(self, x, y):
         self.x = x
@@ -309,13 +312,14 @@ class TurnCommand(Command):
         self.isShoot = isShoot
 
         BLUE = [[57, 126, 237], [122, 169, 245]]
+        super().__init__(parent, BLUE)
 
-        toggle = CommandToggle(["Tuned for precision", "Tuned for speed"])
+        self.toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed"])
 
         self.imageLeft = graphics.getImage("Images/Commands/TurnLeft.png", 0.08)
         self.imageRight = graphics.getImage("Images/Commands/TurnRight.png", 0.08)
 
-        super().__init__(parent, BLUE, toggle = toggle)
+        
 
     def getIcon(self) -> pygame.Surface:
         clockwise = self.parent.direction == 1
@@ -347,13 +351,60 @@ class StraightCommand(Command):
     def __init__(self, parent):
 
         RED = [[245, 73, 73], [237, 119, 119]]
+        super().__init__(parent, RED)
 
-        toggle = CommandToggle(["Tuned for precision", "Tuned for speed", "No slowdown", "Timed"])
-        slider = CommandSlider(0, 1, 0.01, "Speed", 1)
+        self.DELTA_SLIDER_Y = 13
+
+        toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed", "No slowdown", "Timed"])
+        self.speedSlider = CommandSlider(self, 0, 1, 0.01, "Speed", 1, 0)
+        self.timeSlider = CommandSlider(self, 0.1, 5, 0.01, "Time (s)", 1, self.DELTA_SLIDER_Y)
+
+        self.toggle = toggle
+        self.isTime: bool = False
 
         self.image = graphics.getImage("Images/Commands/Straight.png", 0.08)
 
-        super().__init__(parent, RED, toggle = toggle, slider = slider)
+        
+
+    def getHoverables(self) -> Iterable[Hoverable]:
+
+        if not self.parent.program.state.mode == Mode.PLAYBACK:
+            yield self.toggle
+            yield self.speedSlider
+            if self.toggle.get(int) == 3:
+                yield self.timeSlider
+
+        yield self
+
+    def draw(self, screen):
+        super().draw(screen)
+        self.speedSlider.draw(screen)
+        if self.toggle.get(int) == 3:
+            self.timeSlider.draw(screen)
+
+    # called by the toggle owned by this command when toggle is toggled
+    def onToggleClick(self):
+        super().onToggleClick()
+        if self.toggle.get(int) == 3:
+            self.slider = self.timeSlider
+            self.isTime = True
+            self.speedSlider.dy = -self.DELTA_SLIDER_Y
+        else:
+            self.slider = self.speedSlider
+            self.isTime = False
+            self.speedSlider.dy = 0
+        self._updateSliderPosition()
+
+    def updatePosition(self, x, y):
+        self.x = x
+        self.y = y
+        self._updateSliderPosition()
+
+    def _updateSliderPosition(self):
+        self.timeSlider.x = self.timeSlider.getX()
+        self.timeSlider.y = self.timeSlider.getY()
+        self.speedSlider.x = self.speedSlider.getX()
+        self.speedSlider.y = self.speedSlider.getY()
 
     def getIcon(self) -> pygame.Surface:
         return self.image
@@ -364,15 +415,24 @@ class StraightCommand(Command):
         y0 = self.y + self.height/2 - dy
         y1 = self.y + self.height/2 + dy
 
-        graphics.drawText(screen, graphics.FONT15, self.parent.distanceStr, colors.BLACK, x, y0)
+        string = f"{self.timeSlider.getValue()} s" if self.isTime else self.parent.distanceStr
+        graphics.drawText(screen, graphics.FONT15, string, colors.BLACK, x, y0)
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y1)
 
     def getCode(self) -> str:
-        mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
-        speed = round(self.slider.getValue(), 2)
-        distance = round(self.parent.distance, 2)
+        
+        speed = round(self.speedSlider.getValue(), 2)
         heading = round(self.parent.goalHeading * 180 / 3.1415, 2)
-        return f"goForwardU(robot, {mode}({speed}), GFU_TURN, {distance}, getRadians({heading}));"
+
+        if self.toggle.get(int) == 3:
+            time = self.timeSlider.getValue()
+            return f"goForwardTimedU(robot, GFU_TURN, {time}, {speed}, getRadians({heading}));"
+        elif self.toggle.get(int) == 2:
+            return "[unknown]"
+        else:
+            mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
+            distance = round(self.parent.distance, 2)
+            return f"goForwardU(robot, {mode}({speed}), GFU_TURN, {distance}, getRadians({heading}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         minSpeed = Simulator.MAX_VELOCITY * 0.05
@@ -396,13 +456,14 @@ class CurveCommand(Command):
     def __init__(self, parent):
 
         GREEN = [[80, 217, 87], [149, 230, 153]]
+        super().__init__(parent, GREEN)
 
         self.imageLeft = graphics.getImage("Images/Commands/CurveLeft.png", 0.08)
         self.imageRight = graphics.getImage("Images/Commands/CurveRight.png", 0.08)
 
-        toggle = CommandToggle(["Tuned for precision", "Tuned for speed"])
-        slider = CommandSlider(0, 1, 0.01, "Speed", 1)
-        super().__init__(parent, GREEN, toggle = toggle, slider = slider)
+        self.toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed", "No slowdown"])
+        self.slider = CommandSlider(self, 0, 1, 0.01, "Speed", 1)
+        
 
     def getIcon(self) -> pygame.Surface:
         clockwise = self.parent.arc.parity
@@ -438,11 +499,11 @@ class ShootCommand(Command):
     def __init__(self, parent):
 
         YELLOW = [[255, 235, 41], [240, 232, 145]]
+        super().__init__(parent, YELLOW)
 
         self.image = graphics.getImage("Images/Commands/shoot.png", 0.15)
-
-        slider = CommandSlider(1500, 3600, 1, "Speed (rpm)", 3300)
-        super().__init__(parent, YELLOW, slider = slider)
+        self.slider = CommandSlider(self, 1500, 3600, 1, "Speed (rpm)", 3300)
+        
 
     def getIcon(self) -> pygame.Surface:
         return self.image

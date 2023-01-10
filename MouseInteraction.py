@@ -145,7 +145,7 @@ def getPointOnEdge(state: SoftwareState, edge: StraightEdge, position: PointRef)
         arc: Arc = edge.arc
         theta = Utility.thetaTwoPoints(arc.center.fieldRef, position.fieldRef)
         heading = theta + 3.1415/2 * (-1 if arc.parity else 1)
-        return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radiusF, heading = theta), heading
+        return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radius.fieldRef, heading = theta), heading
 
 
 def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program) -> Tuple[PointRef, float]:

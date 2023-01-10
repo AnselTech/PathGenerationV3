@@ -49,6 +49,9 @@ class Node(Draggable, ABC):
             if Utility.headingDiff(mouseHeading, previousHeading) < 0.06:
                 distance = Utility.distanceTuples(prevNode.position.fieldRef, self.position.fieldRef)
                 self.position = prevNode.position + VectorRef(Ref.FIELD, magnitude = distance, heading = previousHeading)
+            elif Utility.headingDiff(mouseHeading, previousHeading + 3.1415) < 0.06:
+                distance = Utility.distanceTuples(prevNode.position.fieldRef, self.position.fieldRef)
+                self.position = prevNode.position + VectorRef(Ref.FIELD, magnitude = distance, heading = previousHeading + 3.1415)
 
         # For straight edges only, snap to next heading if close
         if self.next is not None and self.next.arc.isStraight and self.next.next.next is not None:
@@ -58,6 +61,10 @@ class Node(Draggable, ABC):
             if Utility.headingDiff(mouseHeading, nextHeading) < 0.06:
                 distance = Utility.distanceTuples(nextNode.position.fieldRef, self.position.fieldRef)
                 self.position = nextNode.position - VectorRef(Ref.FIELD, magnitude = distance, heading = nextHeading)
+            if Utility.headingDiff(mouseHeading, nextHeading + 3.1415) < 0.06:
+                distance = Utility.distanceTuples(nextNode.position.fieldRef, self.position.fieldRef)
+                self.position = nextNode.position - VectorRef(Ref.FIELD, magnitude = distance, heading = nextHeading + 3.1415)
+
 
         # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
         if self.previous is not None and self.previous.arc.isStraight:

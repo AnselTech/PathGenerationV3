@@ -69,16 +69,24 @@ class HeadingPoint(Draggable):
 
         # Snap to heading of previous edge if sufficiently close
         prevEdge: 'StraightEdge' = self.edge.previous.previous
-        if prevEdge is not None and Utility.headingDiff(prevEdge.afterHeading, self.heading) < 0.12:
-            self.heading = prevEdge.afterHeading
+        if prevEdge is not None:
+            if Utility.headingDiff(prevEdge.afterHeading, self.heading) < 0.12:
+                self.heading = prevEdge.afterHeading
+            elif Utility.headingDiff(prevEdge.afterHeading + 3.1415, self.heading) < 0.12:
+                self.heading = prevEdge.afterHeading + 3.1415
 
         # Snap to heading of next edge if suffiently close
         nextEdge: 'StraightEdge' = self.edge.next.next
         heading2 = Arc.Arc(self.edge.previous.position, self.edge.next.position, self.heading).heading2
-        if nextEdge is not None and Utility.headingDiff(nextEdge.beforeHeading, heading2) < 0.12:
-            dx = self.edge.next.position.fieldRef[0] - self.edge.previous.position.fieldRef[0]
-            dy = self.edge.next.position.fieldRef[1] - self.edge.previous.position.fieldRef[1]
-            self.heading = Utility.thetaFromArc(nextEdge.beforeHeading, dx, dy)
+        if nextEdge is not None:
+            if Utility.headingDiff(nextEdge.beforeHeading, heading2) < 0.12:
+                dx = self.edge.next.position.fieldRef[0] - self.edge.previous.position.fieldRef[0]
+                dy = self.edge.next.position.fieldRef[1] - self.edge.previous.position.fieldRef[1]
+                self.heading = Utility.thetaFromArc(nextEdge.beforeHeading, dx, dy)
+            elif Utility.headingDiff(nextEdge.beforeHeading + 3.1415, heading2) < 0.12:
+                dx = self.edge.next.position.fieldRef[0] - self.edge.previous.position.fieldRef[0]
+                dy = self.edge.next.position.fieldRef[1] - self.edge.previous.position.fieldRef[1]
+                self.heading = Utility.thetaFromArc(nextEdge.beforeHeading + 3.1415, dx, dy)
         
         self.compute()
         self.program.recompute()

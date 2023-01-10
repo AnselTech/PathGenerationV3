@@ -213,15 +213,18 @@ class Program:
             yield node
             if node.shoot.active:
                 yield node.shoot
+
+        # Yield edge heading points next
+        if not state.mode == Mode.MOUSE_SELECT and not state.mode == Mode.PLAYBACK:
+            edge = self.first.next
+            while edge is not None:
+                yield edge.headingPoint
+                edge = edge.next.next        
         
         # Yield edges next
         edge = self.first.next
         while edge is not None:
-            
-            if not state.mode == Mode.MOUSE_SELECT and not state.mode == Mode.PLAYBACK:
-                yield edge.headingPoint
             yield edge
-
             edge = edge.next.next
 
         return
@@ -235,10 +238,10 @@ class Program:
 
             # no command if the turn node has no turn
             if type(current) == TurnNode and current.shoot.active:
-                if not Utility.headingsEqual(current.previous.afterHeading, current.shoot.heading):
+                if not Utility.headingsEqual(current.previous.goalHeading, current.shoot.heading):
                     yield current.shoot.turnToShootCommand
                 yield current.shoot.shootCommand
-                if current.next is not None and not Utility.headingsEqual(current.shoot.heading, current.next.beforeHeading):
+                if current.next is not None and not Utility.headingsEqual(current.shoot.heading, current.goalHeading):
                     yield current.command
             elif type(current) == TurnNode and current.direction == 0:
                 pass

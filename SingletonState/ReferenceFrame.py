@@ -145,7 +145,7 @@ class VectorRef:
         scalar = self.transform.zoom * Utility.FIELD_SIZE_IN_PIXELS / Utility.FIELD_SIZE_IN_INCHES
         return self._vxf * scalar, (144-self._vyf) * scalar
 
-    screenRef = property(_getScreenRef, _getFieldRef)
+    screenRef = property(_getScreenRef, _getScreenRef)
 
     # Return the magnitude of the vector based on the given reference frame
     def magnitude(self, referenceFrame: Ref) -> float:
@@ -182,6 +182,25 @@ class VectorRef:
     # Scales vector by some scalar. Does not modify but returns new VectorRef
     def __mul__(self, scalar: float) -> 'VectorRef':
         return VectorRef(Ref.FIELD, Utility.scaleTuple(self.fieldRef, scalar))
+
+class ScalarRef:
+
+    def __init__(self, referenceMode: Ref, value: float):
+        self.transform: FieldTransform = transform
+        self.fieldRef = value
+
+    # Given we only store the point in the field reference frame, convert to field reference frame before storing it
+    def _setScreenRef(self, valueScreenRef: tuple):
+        scalar = Utility.FIELD_SIZE_IN_INCHES / Utility.FIELD_SIZE_IN_PIXELS / self.transform.zoom
+        self.fieldRef = valueScreenRef * scalar
+
+    # Given we only store the point in the field reference frame, we need to convert it to return as screen reference frame
+    def _getScreenRef(self):
+        scalar = self.transform.zoom * Utility.FIELD_SIZE_IN_PIXELS / Utility.FIELD_SIZE_IN_INCHES
+        return self.fieldRef * scalar
+
+    screenRef = property(_getScreenRef, _getScreenRef)
+
 
 # Testing code
 if __name__ == "__main__":

@@ -136,7 +136,7 @@ class StraightEdge(Edge):
         self.goalHeading = self.afterHeading + (3.1415 if self.reversed else 0)
         self.goalHeadingStr = Utility.headingToString(self.goalHeading)
         if not self.arc.isStraight:
-            self.goalRadius = self.arc.radius * (-1 if self.reversed else 1)
+            self.goalRadius = self.arc.radius.fieldRef * (-1 if self.reversed else 1)
             self.goalRadiusStr = str(round(self.goalRadius, 1)) + "\""
 
         self.command = self.straightCommand if self.arc.isStraight else self.curveCommand
@@ -175,7 +175,7 @@ class StraightEdge(Edge):
         if self.arc.isStraight: # draw line
             graphics.drawLine(screen, color, *self.previous.position.screenRef, *self.next.position.screenRef, thick)
         else: # draw curve
-            graphics.drawArc(screen, color, self.arc.center.screenRef, self.arc.radius, self.arc.theta1, self.arc.theta2, self.arc.parity, thick+1)
+            graphics.drawArc(screen, color, self.arc.center.screenRef, self.arc.radius.screenRef, self.arc.theta1, self.arc.theta2, self.arc.parity, thick+1)
 
         if drawHeadingPoint:
             self.headingPoint.draw(screen)

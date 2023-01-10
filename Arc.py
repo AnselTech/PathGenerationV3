@@ -1,4 +1,4 @@
-from SingletonState.ReferenceFrame import PointRef, Ref
+from SingletonState.ReferenceFrame import PointRef, Ref, ScalarRef
 from dataclasses import dataclass
 import Utility, math
 
@@ -9,8 +9,7 @@ class Arc:
     center: PointRef = None
     theta1: float = None
     theta2: float = None
-    radius: float = None
-    radiusF: float = None
+    radius: ScalarRef = None
     heading1: float = None
     heading2: float = None
     parity: bool = None
@@ -45,8 +44,7 @@ class Arc:
         dy = to.fieldRef[1] - fro.fieldRef[1]
         
         self.center = PointRef(Ref.FIELD, Utility.circleCenterFromTwoPointsAndTheta(*fro.fieldRef, *to.fieldRef, heading1))
-        self.radius = Utility.distanceTuples(fro.screenRef, self.center.screenRef)
-        self.radiusF = Utility.distanceTuples(fro.fieldRef, self.center.fieldRef)
+        self.radius = ScalarRef(Ref.FIELD, Utility.distanceTuples(fro.fieldRef, self.center.fieldRef))
 
         self.theta1 = Utility.thetaTwoPoints(self.center.fieldRef, fro.fieldRef)
         self.theta2 = Utility.thetaTwoPoints(self.center.fieldRef, to.fieldRef)
@@ -64,7 +62,7 @@ class Arc:
         # Otherwise, it's arc
 
         distance = Utility.distanceTuples(self.center.screenRef, pos.screenRef)
-        if abs(self.radius - distance) > 13: # no match in distance
+        if abs(self.radius.screenRef - distance) > 13: # no match in distance
             return False
 
         theta = Utility.thetaTwoPoints(self.center.fieldRef, pos.fieldRef)

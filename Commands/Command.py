@@ -339,7 +339,7 @@ class CurveCommand(Command):
         r = round(self.parent.goalRadius, 2)
         deg1 = round(self.parent.goalBeforeHeading * 180 / 3.1415, 2)
         deg2 = round(self.parent.goalHeading * 180 / 3.1415, 2)
-        return f"goCurveU(robot, {mode}({speed}), GCU_CURVE, getRadians({deg1}), getRadians({deg2}), radius = {r});"
+        return f"goCurveU(robot, {mode}({speed}), GCU_CURVE, getRadians({deg1}), getRadians({deg2}), {r});"
 
     def initSimulationController(self, simulationState: SimulationState):
         # temporarily, this controller just does nothing for 20 ticks
@@ -370,7 +370,7 @@ class ShootCommand(Command):
         graphics.drawText(screen, graphics.FONT20, "Shoot", colors.BLACK, x, y)
 
     def getCode(self) -> str:
-        return f"shoot();"
+        return f"shoot(robot);"
 
     def initSimulationController(self, simulationState: SimulationState):
         # temporarily, this controller just does nothing for 20 ticks

@@ -185,12 +185,12 @@ class Program:
         x,y = self.first.position.fieldRef
         x = round(x, 1)
         y = round(y, 1)
-        startHeading = round(self.first.next.beforeHeading * 180 / 3.1415, 1)
+        startHeading = round(self.first.next.beforeHeading * 180 / 3.1415, 2)
         
         code = "// GENERATED C++ CODE FROM PathGen 3.0\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
-        
         code = setFlywheelSpeedCommand(code, commands)
+        code += f"robot.localizer->setHeading(getRadians({startHeading}));\n\n"
 
         for i in range(len(commands)):
             command = commands[i]

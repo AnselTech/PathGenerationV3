@@ -22,7 +22,7 @@ class Slider(Draggable, TooltipOwner):
         else:
             return 0
 
-    def __init__(self, x: int, y: int, width: int, min: float, max: float, step: float, color: tuple, text: str = "", defaultValue = None, onSet = lambda: None, textX = 0, textY = 0):
+    def __init__(self, x: int, y: int, width: int, min: float, max: float, step: float, color: tuple, text: str = "", defaultValue = None, onSet = None, textX = 0, textY = 0):
         self.x = x
         self.y = y
         self.width = width
@@ -79,7 +79,7 @@ class Slider(Draggable, TooltipOwner):
             self.val = newVal
             self.tooltip = Tooltip(str(self.val))
 
-            if not isFirst:
+            if not isFirst and self.onSet is not None:
                 self.onSet() # run callback
 
     # reset to value

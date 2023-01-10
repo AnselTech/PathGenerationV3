@@ -28,17 +28,19 @@ class CommandSlider(Slider):
     def getY(self):
         return self.parent.y + self.parent.height / 2 + 7
 
-    def init(self, parent: 'Command'):
+    def init(self, parent: 'Command', onSet = None):
         self.parent: 'Command' = parent
         width = 65
-        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20)
+        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20, onSet = onSet)
 
 
 class ToggleOption(Clickable):
 
-    def __init__(self, width: int, height: int, text: str, isTop: bool):
+    def __init__(self, width: int, height: int, text: str, isTop: bool, onSet = None):
 
         super().__init__()
+
+        self.onSet = onSet
 
         self.width = width
         self.height = height
@@ -50,9 +52,10 @@ class ToggleOption(Clickable):
         self.darkH = [150, 150, 150]
         self.isTop = isTop
 
-    def init(self, toggle: 'CommandToggle', parent: 'Command'):
+    def init(self, toggle: 'CommandToggle', parent: 'Command', onSet = None):
         self.toggle = toggle
         self.parent: 'Command' = parent
+        self.onSet = onSet
 
     def getX(self):
         return self.parent.x + 104
@@ -72,6 +75,8 @@ class ToggleOption(Clickable):
 
     def click(self):
         self.toggle.isTopActive = self.isTop
+        if self.onSet is not None:
+            self.onSet()
 
     def draw(self, screen: pygame.Surface):
 
@@ -103,9 +108,9 @@ class CommandToggle:
         self.top = ToggleOption(w, h, topStr, True)
         self.bottom = ToggleOption(w, h, bottomStr, False)
         
-    def init(self, parent: 'Command'):
-        self.top.init(self, parent)
-        self.bottom.init(self, parent)
+    def init(self, parent: 'Command', onSet = None):
+        self.top.init(self, parent, onSet)
+        self.bottom.init(self, parent, onSet)
 
 
 class Command(Hoverable, ABC):
@@ -127,11 +132,11 @@ class Command(Hoverable, ABC):
 
         self.toggle: CommandToggle = toggle
         if self.toggle is not None:
-            self.toggle.init(self)
+            self.toggle.init(self, self.parent.program.recomputeGeneratedCode)
 
         self.slider: CommandSlider = slider
         if self.slider is not None:
-            self.slider.init(self)
+            self.slider.init(self, self.parent.program.recomputeGeneratedCode)
 
     def updatePosition(self, x, y):
         self.x = x
@@ -235,17 +240,17 @@ class TurnCommand(Command):
     def drawInfo(self, screen: pygame.Surface):
         x = self.x + self.INFO_DX
         y = self.y + self.height/2
-
+        
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y)
     
     def getCode(self) -> str:
         mode = "GTU_TURN_PRECISE" if self.toggle.isTopActive else "GTU_TURN"
-        return f"goTurnU(robot, {mode}, getRadians({self.parent.goalHeadingStr}));"
+        num = round(self.parent.goalHeading * 180 / 3.1415, 2)
+        return f"goTurnU(robot, {mode}, getRadians({num}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         tolerance = 5 # tolerance interval in degrees
         self.pid = PID(12, 0, 0.2, tolerance = tolerance * 3.1415 / 180)
-        print(self.parent.goalHeading)
 
     # make a PID turn
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
@@ -280,7 +285,10 @@ class StraightCommand(Command):
 
     def getCode(self) -> str:
         mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
-        return f"goForwardU(robot, {mode}, GFU_TURN, {self.parent.distanceStr}, getRadians({self.parent.goalHeadingStr}));"
+        speed = round(self.slider.getValue(), 2)
+        distance = round(self.parent.distance, 2)
+        heading = round(self.parent.goalHeading * 180 / 3.1415, 2)
+        return f"goForwardU(robot, {mode}({speed}), GFU_TURN, {distance}, getRadians({heading}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         minSpeed = Simulator.MAX_VELOCITY * 0.05
@@ -327,10 +335,11 @@ class CurveCommand(Command):
 
     def getCode(self) -> str:
         mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
-        r = self.parent.goalRadiusStr
-        deg1 = self.parent.goalBeforeHeadingStr
-        deg2 = self.parent.goalHeadingStr
-        return f"goCurveU(robot, {mode}, GCU_CURVE, getRadians({deg1}), getRadians({deg2}), radius = {r});"
+        speed = round(self.slider.getValue(), 2)
+        r = round(self.parent.goalRadius, 2)
+        deg1 = round(self.parent.goalBeforeHeading * 180 / 3.1415, 2)
+        deg2 = round(self.parent.goalHeading * 180 / 3.1415, 2)
+        return f"goCurveU(robot, {mode}({speed}), GCU_CURVE, getRadians({deg1}), getRadians({deg2}), radius = {r});"
 
     def initSimulationController(self, simulationState: SimulationState):
         # temporarily, this controller just does nothing for 20 ticks

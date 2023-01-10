@@ -105,6 +105,7 @@ class HeadingPoint(Draggable):
 class StraightEdge(Edge):
     def __init__(self, program, previous: Node = None, next: Node = None, heading1: float = None):
 
+        self.program = program
         self.straightCommand: StraightCommand = StraightCommand(self)
         self.curveCommand: CurveCommand = CurveCommand(self)
 

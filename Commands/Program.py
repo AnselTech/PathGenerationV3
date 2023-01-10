@@ -130,6 +130,7 @@ class Program:
         edge = self.first.next
         if edge is None:
             self.first.compute()
+            self.recomputeCommands()
             return
         
         # Compute all the edges first to update beforeHeading and afterHeading for each node
@@ -165,7 +166,10 @@ class Program:
 
         self.recomputeGeneratedCode(commands)
 
-    def recomputeGeneratedCode(self, commands: list[Command]):
+    def recomputeGeneratedCode(self, commands: list[Command] = None):
+        if commands is None:
+            commands = list(self.getHoverablesCommands())
+
         if self.first.next is None:
             self.code = "// (Empty path. no code generated)"
             self.codeLines = []

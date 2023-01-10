@@ -3,6 +3,8 @@ from Sliders.Slider import Slider
 import pygame, graphics, colors
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Clickable import Clickable
+from MouseInterfaces.TooltipOwner import TooltipOwner
+from VisibleElements.Tooltip import Tooltip
 from SingletonState.UserInput import UserInput
 from SingletonState.SoftwareState import Mode
 from SingletonState.ReferenceFrame import Ref
@@ -98,19 +100,103 @@ class ToggleOption(Clickable):
         graphics.drawText(screen, graphics.FONT15, self.text, [0,0,0], x + self.width/2, y + self.height/2)
 
 
-class CommandToggle:
-    def __init__(self, topStr: str, bottomStr: str):
+class CommandToggle(Clickable, TooltipOwner):
+    def __init__(self, options: list[str]):
 
-        self.isTopActive = True
+        self.options: list[str] = options
+        self.tooltips: list[Tooltip] = [Tooltip(optionString) for optionString in self.options]
+
+        self.N = len(self.options)
+        self.activeOption: int = 0
+        self.hoveringOption: int = -1
+
+        # colors for different states
+        self.disabled = (200, 200, 200)
+        self.disabledH = (190, 190, 190)
+        self.enabled = (160, 160, 160)
+        self.enabledH = (150, 150, 150)
         
-        w = 50
-        h = 20
-        self.top = ToggleOption(w, h, topStr, True)
-        self.bottom = ToggleOption(w, h, bottomStr, False)
+        self.centerX = 130
+        self.width = 35
+        self.height = 30
+
+        super().__init__()
         
     def init(self, parent: 'Command', onSet = None):
-        self.top.init(self, parent, onSet)
-        self.bottom.init(self, parent, onSet)
+        self.parent = parent
+        self.onSet = onSet
+
+    # return active option as int/string
+    def get(self, datatype) -> str:
+        if datatype == str:
+            return self.options[self.activeOption]
+        elif datatype == int:
+            return self.activeOption
+        raise Exception("Invalid datatype")
+
+    def checkIfHovering(self, userInput: UserInput) -> bool:
+        mx, my = userInput.mousePosition.screenRef
+
+        leftX = self.parent.x + self.centerX - self.width/2
+        rightX = leftX + self.width
+        if mx < leftX or mx > rightX:
+            return False
+
+        topY = self.parent.y + self.parent.height/2 - self.height/2
+        bottomY = topY + self.height
+        if my < topY or my > bottomY:
+            return False
+
+        # at this point, something is definitely being hovered. just need to figure out what
+        ratio = (mx - leftX) / self.width # ratio from 0-1
+        self.hoveringOption = Utility.clamp(int(ratio * self.N), 0, self.N-1)
+        return True
+
+    def click(self):
+
+        if self.hoveringOption == -1:
+            raise Exception("clicked but not hovered, error")
+
+        changed: bool = self.activeOption != self.hoveringOption
+        self.activeOption = self.hoveringOption
+        if changed and self.onSet is not None:
+            self.onSet()
+
+    def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
+        self.tooltips[self.tooltipOption].draw(screen, mousePosition)
+
+    def draw(self, screen: pygame.Surface):
+
+        x = self.parent.x + self.centerX - self.width/2
+        y = self.parent.y + self.parent.height/2 - self.height/2
+        dx = self.width / self.N
+
+        # draw backdrop
+        pygame.draw.rect(screen, self.disabled, [x, y, self.width, self.height])
+
+        # draw left border
+        graphics.drawThinLine(screen, self.enabledH, x-1, y, x-1, y + self.height)
+
+        for i in range(self.N):
+
+            # get color based on whether enabled and/or hovered
+            if self.activeOption == i or self.hoveringOption == i:
+
+                if self.activeOption == i:
+                    color = self.enabledH if self.hoveringOption == i else self.enabled
+                elif self.hoveringOption == i:
+                    color = self.disabledH
+                # draw filled rect3
+                pygame.draw.rect(screen, color, [x, y, dx, self.height])
+
+            x += dx
+
+            # draw border
+            graphics.drawThinLine(screen, self.enabledH, x-1, y, x-1, y + self.height)
+
+        # kinda bad to do this here, but reset which one was hovered
+        self.tooltipOption = self.hoveringOption
+        self.hoveringOption = -1
 
 
 class Command(Hoverable, ABC):
@@ -157,8 +243,7 @@ class Command(Hoverable, ABC):
 
         if not self.parent.program.state.mode == Mode.PLAYBACK:
             if self.toggle is not None:
-                yield self.toggle.top
-                yield self.toggle.bottom
+                yield self.toggle
 
             if self.slider is not None:
                 yield self.slider
@@ -166,7 +251,7 @@ class Command(Hoverable, ABC):
         yield self
 
     def isAnyHovering(self) -> bool:
-        toggleHovering = self.toggle is not None and (self.toggle.top.isHovering or self.toggle.bottom.isHovering)
+        toggleHovering = self.toggle is not None and self.toggle.isHovering
         sliderHovering = self.slider is not None and self.slider.isHovering
         return self.isHovering or toggleHovering or sliderHovering or self.parent.isHovering
 
@@ -189,8 +274,7 @@ class Command(Hoverable, ABC):
 
         # toggle
         if self.toggle is not None:
-            self.toggle.bottom.draw(screen)
-            self.toggle.top.draw(screen)
+            self.toggle.draw(screen)
 
         # Slider
         if self.slider is not None:
@@ -226,7 +310,7 @@ class TurnCommand(Command):
 
         BLUE = [[57, 126, 237], [122, 169, 245]]
 
-        toggle = CommandToggle("PREC", "FAST")
+        toggle = CommandToggle(["Tuned for precision", "Tuned for speed"])
 
         self.imageLeft = graphics.getImage("Images/Commands/TurnLeft.png", 0.08)
         self.imageRight = graphics.getImage("Images/Commands/TurnRight.png", 0.08)
@@ -244,7 +328,7 @@ class TurnCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y)
     
     def getCode(self) -> str:
-        mode = "GTU_TURN_PRECISE" if self.toggle.isTopActive else "GTU_TURN"
+        mode = "GTU_TURN_PRECISE" if self.toggle.get(int) == 0 else "GTU_TURN"
         num = round(self.parent.goalHeading * 180 / 3.1415, 2)
         return f"goTurnU(robot, {mode}, getRadians({num}));"
 
@@ -264,7 +348,7 @@ class StraightCommand(Command):
 
         RED = [[245, 73, 73], [237, 119, 119]]
 
-        toggle = CommandToggle("PREC", "FAST")
+        toggle = CommandToggle(["Tuned for precision", "Tuned for speed", "No slowdown", "Timed"])
         slider = CommandSlider(0, 1, 0.01, "Speed", 1)
 
         self.image = graphics.getImage("Images/Commands/Straight.png", 0.08)
@@ -284,7 +368,7 @@ class StraightCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y1)
 
     def getCode(self) -> str:
-        mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
+        mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
         speed = round(self.slider.getValue(), 2)
         distance = round(self.parent.distance, 2)
         heading = round(self.parent.goalHeading * 180 / 3.1415, 2)
@@ -316,7 +400,7 @@ class CurveCommand(Command):
         self.imageLeft = graphics.getImage("Images/Commands/CurveLeft.png", 0.08)
         self.imageRight = graphics.getImage("Images/Commands/CurveRight.png", 0.08)
 
-        toggle = CommandToggle("PREC", "FAST")
+        toggle = CommandToggle(["Tuned for precision", "Tuned for speed"])
         slider = CommandSlider(0, 1, 0.01, "Speed", 1)
         super().__init__(parent, GREEN, toggle = toggle, slider = slider)
 
@@ -334,7 +418,7 @@ class CurveCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y1)
 
     def getCode(self) -> str:
-        mode = "GFU_DIST_PRECISE" if self.toggle.isTopActive else "GFU_DIST"
+        mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
         speed = round(self.slider.getValue(), 2)
         r = round(self.parent.goalRadius, 2)
         deg1 = round(self.parent.goalBeforeHeading * 180 / 3.1415, 2)

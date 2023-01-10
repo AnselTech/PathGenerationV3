@@ -423,15 +423,15 @@ class StraightCommand(Command):
         
         speed = round(self.speedSlider.getValue(), 2)
         heading = round(self.parent.goalHeading * 180 / 3.1415, 2)
+        distance = round(self.parent.distance, 2)
 
         if self.toggle.get(int) == 3:
             time = self.timeSlider.getValue()
             return f"goForwardTimedU(robot, GFU_TURN, {time}, {speed}, getRadians({heading}));"
         elif self.toggle.get(int) == 2:
-            return "[unknown]"
+            return f"goForwardU(robot, NO_SLOWDOWN({speed}), GFU_TURN, {distance}, getRadians({heading}));"
         else:
             mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
-            distance = round(self.parent.distance, 2)
             return f"goForwardU(robot, {mode}({speed}), GFU_TURN, {distance}, getRadians({heading}));"
 
     def initSimulationController(self, simulationState: SimulationState):
@@ -479,11 +479,19 @@ class CurveCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y1)
 
     def getCode(self) -> str:
-        mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
+        val = self.toggle.get(int)
+        if val == 0:
+            mode = "GFU_DIST_PRECISE"
+        elif val == 1:
+            mode = "GFU_DIST"
+        else:
+            mode = "NO_SLOWDOWN"
+
         speed = round(self.slider.getValue(), 2)
         r = round(self.parent.goalRadius, 2)
         deg1 = round(self.parent.goalBeforeHeading * 180 / 3.1415, 2)
         deg2 = round(self.parent.goalHeading * 180 / 3.1415, 2)
+        
         return f"goCurveU(robot, {mode}({speed}), GCU_CURVE, getRadians({deg1}), getRadians({deg2}), {r});"
 
     def initSimulationController(self, simulationState: SimulationState):

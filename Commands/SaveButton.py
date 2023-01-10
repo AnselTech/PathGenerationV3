@@ -4,6 +4,7 @@ from VisibleElements.Tooltip import Tooltip
 from SingletonState.ReferenceFrame import PointRef, Ref
 import Commands.Serializer as Serializer
 import Utility, graphics, pygame, pickle
+import os.path, os
 
 # A flip-flop button that toggles block/text mode
 class SaveButton(ClickButton):
@@ -25,9 +26,19 @@ class SaveButton(ClickButton):
 
     def clickEnabledButton(self) -> None:
         state = Serializer.State(self.program.first)
-        with open("save.pg3", "wb") as file:
+
+        if not os.path.exists("saves"):
+            os.makedirs("saves")
+
+        i = 1
+        filename = "saves/save.pg3"
+        while os.path.isfile(filename):
+            i += 1
+            filename = f"saves/save{i}.pg3"
+
+        with open(filename, "wb") as file:
             pickle.dump(state, file)
-        print("Saved as save.pg3!")
+        print(f"Saved as {filename}!")
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
         self.tooltip.draw(screen, mousePosition)

@@ -15,15 +15,16 @@ List of Segment objects"""
 @dataclass # information storing a segment and a node connected to it
 class Segment:
     beforeHeading: float # of edge
-    straightCommandToggle: bool
-    straightCommandSlider: float
-    curveCommandToggle: bool
+    straightCommandToggle: int
+    straightCommandSpeedSlider: float
+    straightCommandTimeSlider: float
+    curveCommandToggle: int
     curveCommandSlider: float
     shootHeadingCorrection: float
     shootActive: bool
     shootCommandSlider: float
-    shootTurnCommandToggle: bool
-    turnCommandToggle: bool
+    shootTurnCommandToggle: int
+    turnCommandToggle: int
     afterPosition: Tuple[float, float] # field ref
 
 # Serializable class representing all the data for the path
@@ -44,15 +45,16 @@ class State:
 
         self.path.append(Segment(
             edge.beforeHeading,
-            edge.straightCommand.toggle.isTopActive,
-            edge.straightCommand.slider.getValue(),
-            edge.curveCommand.toggle.isTopActive,
+            edge.straightCommand.toggle.activeOption,
+            edge.straightCommand.speedSlider.getValue(),
+            edge.straightCommand.timeSlider.getValue(),
+            edge.curveCommand.toggle.activeOption,
             edge.curveCommand.slider.getValue(),
             node.shoot.headingCorrection,
             node.shoot.active,
             node.shoot.shootCommand.slider.getValue(),
-            node.shoot.turnToShootCommand.toggle.isTopActive,
-            node.command.toggle.isTopActive,
+            node.shoot.turnToShootCommand.toggle.activeOption,
+            node.command.toggle.activeOption,
             node.position.fieldRef
         ))
 
@@ -70,9 +72,12 @@ class State:
             edge: StraightEdge = StraightEdge(program, previous = previousNode, heading1 = segment.beforeHeading)
             previousNode.next = edge
 
-            edge.straightCommand.toggle.isTopActive = segment.straightCommandToggle
-            edge.straightCommand.slider.setValue(segment.straightCommandSlider, disableCallback = True)
-            edge.curveCommand.toggle.isTopActive = segment.curveCommandToggle
+            edge.straightCommand.toggle.activeOption = segment.straightCommandToggle
+            edge.straightCommand.speedSlider.setValue(segment.straightCommandSpeedSlider, disableCallback = True)
+            edge.straightCommand.timeSlider.setValue(segment.straightCommandTimeSlider, disableCallback = True)
+            edge.straightCommand.speedSlider.dy = -edge.straightCommand.DELTA_SLIDER_Y if (segment.straightCommandToggle == 3) else 0
+            
+            edge.curveCommand.toggle.activeOption = segment.curveCommandToggle
             edge.curveCommand.slider.setValue(segment.curveCommandSlider, disableCallback = True)
 
             position = PointRef(Ref.FIELD, segment.afterPosition)
@@ -81,9 +86,9 @@ class State:
 
             node.shoot.headingCorrection = segment.shootHeadingCorrection
             node.shoot.active = segment.shootActive
-            node.shoot.turnToShootCommand.toggle.isTopActive = segment.shootTurnCommandToggle
+            node.shoot.turnToShootCommand.toggle.activeOption = segment.shootTurnCommandToggle
             node.shoot.shootCommand.slider.setValue(segment.shootCommandSlider, disableCallback = True)
-            node.command.toggle.isTopActive = segment.turnCommandToggle
+            node.command.toggle.activeOption = segment.turnCommandToggle
 
             previousNode = node
 

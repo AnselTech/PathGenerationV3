@@ -353,7 +353,7 @@ class StraightCommand(Command):
         RED = [[245, 73, 73], [237, 119, 119]]
         super().__init__(parent, RED)
 
-        self.DELTA_SLIDER_Y = 13
+        self.DELTA_SLIDER_Y = 14
 
         toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed", "No slowdown", "Timed"])
         self.speedSlider = CommandSlider(self, 0, 1, 0.01, "Speed", 1, 0)

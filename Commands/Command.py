@@ -201,6 +201,8 @@ class CommandToggle(Clickable, TooltipOwner):
 
 class Command(Hoverable, ABC):
 
+    COMMAND_HEIGHT = 60
+
 
     def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
 
@@ -208,7 +210,7 @@ class Command(Hoverable, ABC):
 
         self.parent = parent
         self.width = 260
-        self.height = 60
+        self.height = Command.COMMAND_HEIGHT
         self.x = 0
         self.y = 0
         self.colors = colors

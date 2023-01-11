@@ -4,6 +4,7 @@ from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from Commands.Scroller import Scroller
 from Commands.TextButton import TextButton
+from Commands.Between import Between
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
@@ -33,6 +34,8 @@ class Program:
         
         self.code: str = ""
         self.codeLines: list[str] = []
+
+        self.betwens: list[Between] = []
 
         self.recompute()
         self.recomputeGeneratedCode(None)
@@ -151,6 +154,8 @@ class Program:
 
     def recomputeCommands(self):
 
+        self.betweens: list[Between] = []
+
         # recompute commands
         x = Utility.SCREEN_SIZE + 14
         y = 18 - self.scroller.contentY
@@ -163,6 +168,9 @@ class Program:
         for command in commands:
             command.updatePosition(x, y)
             y += dy
+
+            if command is not commands[-1]: # if not last node
+                self.betweens.append(Between(y - (dy-Command.COMMAND_HEIGHT)/2))
 
         self.recomputeGeneratedCode(commands)
 
@@ -259,6 +267,14 @@ class Program:
         return
         yield
 
+    def getHoverablesOther(self):
+        for between in self.betweens:
+            yield between.plus
+            yield between
+
+        return
+        yield
+
     def drawPath(self, screen: pygame.Surface, state: SoftwareState):
 
         # Draw the edges first
@@ -290,6 +306,9 @@ class Program:
 
             for command in self.getHoverablesCommands():
                 command.draw(screen)
+
+            for between in self.betweens:
+                between.draw(screen)
 
     def drawSimulation(self, screen: pygame.Surface, robotImage: RobotImage):
 

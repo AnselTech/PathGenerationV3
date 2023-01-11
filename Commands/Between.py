@@ -1,6 +1,8 @@
-from AbstractButtons.ClickButton import ClickButton
+from MouseInterfaces.Clickable import Clickable
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.UserInput import UserInput
+from VisibleElements.Tooltip import Tooltip
+from MouseInterfaces.TooltipOwner import TooltipOwner
 import Utility, pygame, graphics
 
 """
@@ -10,29 +12,33 @@ When plus sign button is clicked, ACE command is added
 """
 
 def init():
-    global plusImage, plusImageBig
-    plusImage = graphics.getImage("Images/Buttons/plus.png", 0.1)
-    plusImageBig = graphics.getImage("Images/Buttons/plus.png", 0.15)
+    global plusImage, plusImageH, tooltip
+    plusImage = graphics.getImage("Images/Buttons/plus.png", 0.03)
+    plusImageH = graphics.getImage("Images/Buttons/plus2.png", 0.03)
+    tooltip = Tooltip("Add a new custom command")
 
-class Plus(ClickButton):
+class Plus(Clickable, TooltipOwner):
     
     def __init__(self, between: 'Between'):
 
         self.between = between
-        self.image = plusImage
-        self.imageBig = plusImageBig
-        self.x = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH / 2
+        self.x = (self.between.x1 + self.between.x2) / 2
 
         super().__init__()
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.between.y)) < 10
 
+    def click(self) -> None:
+        print("clicked")
+
+    def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
+        tooltip.draw(screen, mousePosition)
+
     def draw(self, screen: pygame.Surface):
-        # draw only when between is visible
-        if self.isHovering or self.between.isHovering:
-            image = self.imageBig if self.isHovering else self.image
-            graphics.drawSurface(screen, image, self.x, self.between.y)
+        
+        image = plusImageH if self.isHovering else plusImage
+        graphics.drawSurface(screen, image, self.x, self.between.y)
 
 
 # Object is hidden unless it is hovered.
@@ -42,11 +48,13 @@ class Between(Hoverable):
         self.y = y # center y
         
         width = Utility.PANEL_WIDTH * 0.8
-        self.x1 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH/2 - width/2 # left x
-        self.x2 = self.x1 + width
-        self.thickness = 3
+        self.x1 = Utility.SCREEN_SIZE + 30 # left x
+        self.x2 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 45
+        self.thickness = 2
 
-        self.hoverDY = 4
+        self.hoverDY = 13
+        self.hoverX1 = Utility.SCREEN_SIZE
+        self.hoverX2 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 30
 
         self.plus: Plus = Plus(self)
 
@@ -54,7 +62,7 @@ class Between(Hoverable):
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         mx, my = userInput.mousePosition.screenRef
-        if not userInput.isMouseOnField:
+        if mx < self.hoverX1 or mx > self.hoverX2:
             return False
         if my < self.y - self.hoverDY or my > self.y + self.hoverDY:
             return False
@@ -64,4 +72,5 @@ class Between(Hoverable):
         
         # Only draw when hovered
         if self.isHovering or self.plus.isHovering:
-            graphics.drawRoundedLine(screen, [250, 250, 250], self.x1, self.y, self.x2, self.y, self.thickness)
+            graphics.drawRoundedLine(screen, [200, 200, 200], self.x1, self.y, self.x2, self.y, self.thickness)
+            self.plus.draw(screen)

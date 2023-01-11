@@ -18,7 +18,7 @@ class Tooltip:
     def getTooltipSurface(self, messages):
 
         # generate temporary text surfaces for each line to figure out width and height of text
-        texts = [graphics.FONT20.render(message, True, TEXT_COLOR) for message in messages]
+        texts = [graphics.FONT15.render(message, True, TEXT_COLOR) for message in messages]
 
         outsideMargin = 7 # margin between text and tooltip surface
         insideMargin = 1 # margin between lines of text

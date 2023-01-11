@@ -21,6 +21,8 @@ from Commands.TextButton import TextButton
 from Commands.PrintButton import PrintButton
 from Commands.SaveButton import SaveButton
 
+import Commands.Between
+
 from MouseSelector.MouseSelector import MouseSelector
 
 import Utility, colors, math
@@ -43,6 +45,8 @@ if __name__ == '__main__':
     userInput: UserInput = UserInput(pygame.mouse, pygame.key)
     StartNode.init()
     TurnNode.init()
+    
+    Commands.Between.init()
 
     state: SoftwareState = SoftwareState()
     program: Program = Program(state)
@@ -217,6 +221,8 @@ def getHoverables() -> Iterator[Hoverable]:
             for command in program.getHoverablesCommands():
                 for hoverable in command.getHoverables():
                     yield hoverable
+            for command in program.getHoverablesOther():
+                yield command
 
     # weird python hack to make it return an empty iterator if nothing hoverable
     return

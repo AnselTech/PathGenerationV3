@@ -319,7 +319,7 @@ class Program:
         if self.first.next is None:
             return
 
-        currentState: SimulationState = SimulationState(self.first.position, self.first.next.beforeHeading, 0, 0)
+        currentState: SimulationState = SimulationState(self.first.position, self.first.startHeading, 0, 0)
         simulator: Simulator = Simulator(currentState)
         self.simulationList.append(currentState)
 

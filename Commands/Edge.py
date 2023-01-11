@@ -62,7 +62,11 @@ class HeadingPoint(Draggable):
 
     def beDraggedByMouse(self, userInput: UserInput):
         self.heading = Utility.thetaTwoPoints(self.edge.previous.position.fieldRef, userInput.mousePosition.fieldRef)
-        
+
+        # limit maximum arc length to 300 inches
+        if Arc.Arc(self.edge.previous.position, self.edge.next.position, self.heading).arcLengthField > 300:
+            return
+
         # Snap to straight edge if sufficiently close
         if Utility.headingDiff(self.edge.straightHeading, self.heading) < 0.12:
             self.heading = self.edge.straightHeading
@@ -146,7 +150,7 @@ class StraightEdge(Edge):
         self.goalHeadingStr = Utility.headingToString(self.goalHeading)
         if not self.arc.isStraight:
             self.goalRadius = self.arc.radius.fieldRef * (-1 if self.reversed else 1)
-            self.goalRadiusStr = str(round(self.goalRadius, 1)) + "\""
+            self.goalRadiusStr = "r: " + str(round(self.goalRadius, 1)) + "\""
 
         self.command = self.straightCommand if self.arc.isStraight else self.curveCommand
 

@@ -14,6 +14,7 @@ class Arc:
     heading2: float = None
     parity: bool = None
     isStraight: bool = None
+    arcLengthField: float = None
 
     def __init__(self, fro: PointRef = None, to: PointRef = None, heading1: float = None, isStraight: bool = False):
         self.isStraight = isStraight
@@ -54,6 +55,8 @@ class Arc:
 
         self.parity = Utility.lineParity(*to.fieldRef, *fro.fieldRef, heading1)
 
+        self.arcLengthField = abs(self.radius.fieldRef * Utility.deltaInHeadingParity(self.theta2, self.theta1, self.parity))
+
     def isTouching(self, pos: PointRef):
 
         # handle base case for straight line
@@ -67,10 +70,13 @@ class Arc:
 
         theta = Utility.thetaTwoPoints(self.center.fieldRef, pos.fieldRef)
         
-        a = Utility.deltaInHeading(self.theta1, self.theta2)
-        b = Utility.deltaInHeading(self.theta1, theta)
-        if self.parity:
-            return 0 < b < a
+        #a = Utility.deltaInHeading(self.theta1, self.theta2)
+        #b = Utility.deltaInHeading(self.theta1, theta)
+        c = Utility.deltaInHeadingParity(self.theta1, self.theta2, self.parity)
+        d = Utility.deltaInHeadingParity(self.theta1, theta, self.parity)
+        if c > 0:
+            return d > c
         else:
-            return 0 > b > a
+            return d < c
+
 

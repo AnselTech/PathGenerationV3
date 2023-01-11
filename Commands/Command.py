@@ -214,7 +214,7 @@ class Command(Hoverable, ABC):
         self.colors = colors
         self.margin = 2
 
-        self.INFO_DX = self.width * 0.30
+        self.INFO_DX = self.width * 0.32
 
         self.toggle: CommandToggle = toggle
         self.slider: CommandSlider = slider

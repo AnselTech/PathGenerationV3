@@ -204,11 +204,12 @@ class Command(Hoverable, ABC):
     COMMAND_HEIGHT = 60
 
 
-    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None):
+    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None, program = None):
 
         super().__init__()
 
         self.parent = parent
+        self.program = parent.program if program is None else program
         self.width = 260
         self.height = Command.COMMAND_HEIGHT
         self.x = 0
@@ -220,6 +221,8 @@ class Command(Hoverable, ABC):
 
         self.toggle: CommandToggle = toggle
         self.slider: CommandSlider = slider
+
+        self.nextCustomCommand: 'CustomCommand' = None
 
     # called by the toggle owned by this command when toggle is toggled
     def onToggleClick(self):
@@ -246,7 +249,7 @@ class Command(Hoverable, ABC):
 
     def getHoverables(self) -> Iterable[Hoverable]:
 
-        if not self.parent.program.state.mode == Mode.PLAYBACK:
+        if not self.program.state.mode == Mode.PLAYBACK:
             if self.toggle is not None:
                 yield self.toggle
 
@@ -258,7 +261,7 @@ class Command(Hoverable, ABC):
     def isAnyHovering(self) -> bool:
         toggleHovering = self.toggle is not None and self.toggle.isHovering
         sliderHovering = self.slider is not None and self.slider.isHovering
-        return self.isHovering or toggleHovering or sliderHovering or self.parent.isHovering
+        return self.isHovering or toggleHovering or sliderHovering or (self.parent is not None and self.parent.isHovering)
 
     def draw(self, screen: pygame.Surface):
 
@@ -540,3 +543,29 @@ class ShootCommand(Command):
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         self.idleTicks += 1
         return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)
+
+class CustomCommand(Command):
+
+    def __init__(self, program):
+
+        PURPLE = [[181, 51, 255], [209, 160, 238]]
+        super().__init__(None, PURPLE, program = program)
+
+        self.image = graphics.getImage("Images/Commands/Custom.png", 0.08)
+
+        self.code = ""
+
+    def getIcon(self) -> pygame.Surface:
+        return self.image
+
+    def drawInfo(self, screen: pygame.Surface):
+        pass
+
+    def getCode(self) -> str:
+        return self.code
+
+    def initSimulationController(self, simulationState: SimulationState):
+        pass
+
+    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
+        return ControllerInputState(0, 0, True)

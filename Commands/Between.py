@@ -3,6 +3,7 @@ from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.UserInput import UserInput
 from VisibleElements.Tooltip import Tooltip
 from MouseInterfaces.TooltipOwner import TooltipOwner
+from Commands.Command import Command, CustomCommand
 import Utility, pygame, graphics
 
 """
@@ -22,6 +23,7 @@ class Plus(Clickable, TooltipOwner):
     def __init__(self, between: 'Between'):
 
         self.between = between
+        self.program = self.between.beforeCommand.program
         self.x = (self.between.x1 + self.between.x2) / 2
 
         super().__init__()
@@ -30,7 +32,8 @@ class Plus(Clickable, TooltipOwner):
         return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.between.y)) < 10
 
     def click(self) -> None:
-        print("clicked")
+        self.between.beforeCommand.nextCustomCommand = CustomCommand(self.program)
+        self.program.recomputeCommands()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
         tooltip.draw(screen, mousePosition)
@@ -44,7 +47,8 @@ class Plus(Clickable, TooltipOwner):
 # Object is hidden unless it is hovered.
 class Between(Hoverable):
 
-    def __init__(self, y):
+    def __init__(self, beforeCommand: Command, y):
+        self.beforeCommand: Command = beforeCommand
         self.y = y # center y
         
         width = Utility.PANEL_WIDTH * 0.8

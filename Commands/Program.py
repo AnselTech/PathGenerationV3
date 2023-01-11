@@ -170,7 +170,7 @@ class Program:
             y += dy
 
             if command is not commands[-1]: # if not last node
-                self.betweens.append(Between(y - (dy-Command.COMMAND_HEIGHT)/2))
+                self.betweens.append(Between(command, y - (dy-Command.COMMAND_HEIGHT)/2))
 
         self.recomputeGeneratedCode(commands)
 
@@ -243,7 +243,8 @@ class Program:
         yield
 
     # Skip start node. Skip any nodes that don't turn
-    def getHoverablesCommands(self) -> Iterator[Command]:
+    # Does not include custom commands
+    def _getHoverablesCommands(self) -> Iterator[Command]:
 
         current = self.first
         while current is not None:
@@ -264,6 +265,17 @@ class Program:
 
             current = current.next
 
+        return
+        yield
+
+    # includes custom commands
+    def getHoverablesCommands(self) -> Iterator[Command]:
+        for command in self._getHoverablesCommands():
+            yield command
+            c = command.nextCustomCommand
+            while c is not None:
+                yield c
+                c = c.nextCustomCommand
         return
         yield
 

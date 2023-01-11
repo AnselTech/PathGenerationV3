@@ -15,10 +15,18 @@ class StartNode(Node):
 
         super().compute()
 
+        if self.next is not None:
+            self.startHeading = self.next.beforeHeading
+            if self.next.reversed:
+                self.startHeading += 3.1415
+        else:
+            self.startHeading = None
+        
+
         if self.next is None:
             self.rotatedImage = startImage
         else:
-            self.rotatedImage = pygame.transform.rotate(startImage, self.next.beforeHeading * 180 / 3.1415)
+            self.rotatedImage = pygame.transform.rotate(startImage, self.startHeading * 180 / 3.1415)
         self.rotatedImageH = graphics.getLighterImage(self.rotatedImage, 0.8)
 
     def draw(self, screen: pygame.Surface):

@@ -362,8 +362,8 @@ class StraightCommand(Command):
         self.toggle = toggle
         self.isTime: bool = False
 
-        self.image = graphics.getImage("Images/Commands/Straight.png", 0.08)
-
+        self.imageForward = graphics.getImage("Images/Commands/StraightForward.png", 0.08)
+        self.imageReverse = graphics.getImage("Images/Commands/StraightReverse.png", 0.08)
         
 
     def getHoverables(self) -> Iterable[Hoverable]:
@@ -407,7 +407,7 @@ class StraightCommand(Command):
         self.speedSlider.y = self.speedSlider.getY()
 
     def getIcon(self) -> pygame.Surface:
-        return self.image
+        return self.imageForward if self.parent.distance > 0 else self.imageReverse
 
     def drawInfo(self, screen: pygame.Surface):
         x = self.x + self.INFO_DX
@@ -458,8 +458,10 @@ class CurveCommand(Command):
         GREEN = [[80, 217, 87], [149, 230, 153]]
         super().__init__(parent, GREEN)
 
-        self.imageLeft = graphics.getImage("Images/Commands/CurveLeft.png", 0.08)
-        self.imageRight = graphics.getImage("Images/Commands/CurveRight.png", 0.08)
+        self.imageLeftForward = graphics.getImage("Images/Commands/CurveLeftForward.png", 0.08)
+        self.imageRightForward = graphics.getImage("Images/Commands/CurveRightForward.png", 0.08)
+        self.imageLeftReverse = graphics.getImage("Images/Commands/CurveLeftReverse.png", 0.08)
+        self.imageRightReverse = graphics.getImage("Images/Commands/CurveRightReverse.png", 0.08)
 
         self.toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed", "No slowdown"])
         self.slider = CommandSlider(self, 0, 1, 0.01, "Speed", 1)
@@ -467,7 +469,10 @@ class CurveCommand(Command):
 
     def getIcon(self) -> pygame.Surface:
         clockwise = self.parent.arc.parity
-        return self.imageRight if clockwise else self.imageLeft
+        if clockwise:
+            return self.imageRightReverse if self.parent.reversed else self.imageRightForward
+        else:
+            return self.imageLeftReverse if self.parent.reversed else self.imageLeftForward
 
     def drawInfo(self, screen: pygame.Surface):
         x = self.x + self.INFO_DX

@@ -154,7 +154,7 @@ class Program:
         # recompute commands
         x = Utility.SCREEN_SIZE + 14
         y = 18 - self.scroller.contentY
-        dy = 70
+        dy = 74
 
         commands = list(self.getHoverablesCommands())
         contentHeight = len(commands) * dy

@@ -14,7 +14,7 @@ from Simulation.SimulationState import SimulationState
 from Simulation.Simulator import Simulator
 from Simulation.PID import PID
 from typing import Iterable
-import Utility
+import Utility, texteditor
 
 class CommandSlider(Slider):
     def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0):
@@ -202,7 +202,7 @@ class CommandToggle(Clickable, TooltipOwner):
 class Command(Hoverable, ABC):
 
     COMMAND_HEIGHT = 60
-
+    COMMAND_WIDTH = 260
 
     def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None, program = None):
 
@@ -210,7 +210,7 @@ class Command(Hoverable, ABC):
 
         self.parent = parent
         self.program = parent.program if program is None else program
-        self.width = 260
+        self.width = Command.COMMAND_WIDTH
         self.height = Command.COMMAND_HEIGHT
         self.x = 0
         self.y = 0
@@ -544,6 +544,59 @@ class ShootCommand(Command):
         self.idleTicks += 1
         return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)
 
+class Textbox(Clickable):
+
+    def __init__(self, command: 'CustomCommand'):
+
+        self.command = command
+        
+        self.width = 170
+        self.height = 35
+
+        self.updateCode("// [insert code here]\ntest\ntest\ntest")
+
+        super().__init__()
+
+    def computePosition(self, commandX, commandY):
+
+        self.x = commandX + 72
+        self.y = commandY + Command.COMMAND_HEIGHT // 2 - self.height / 2
+
+    def checkIfHovering(self, userInput: UserInput) -> bool:
+
+        mx, my = userInput.mousePosition.screenRef
+
+        if mx < self.x or mx > self.x + self.width:
+            return False
+        if my < self.y or my > self.y + self.height:
+            return False
+        return True
+
+    def updateCode(self, code):
+        self.code: str = code
+        lines = self.code.split("\n")
+        if len(lines) >= 2:
+            lines = lines[0:4]
+
+        self.surfaces = []
+        for opacity in [150, 128]:
+            self.surfaces.append(pygame.Surface((self.width, self.height)))
+            self.surfaces[-1].set_alpha(opacity)
+            self.surfaces[-1].fill([255,255,255])
+
+            for i in range(0, len(lines)):
+                graphics.drawText(self.surfaces[-1], graphics.FONTCODE, lines[i], colors.BLACK, 7, 2 + i * 9, 0, 0)
+
+    def click(self):
+        self.updateCode(texteditor.open(self.code))
+        self.command.program.recomputeGeneratedCode()
+
+    def draw(self, screen: pygame.Surface):
+        surf = self.surfaces[1] if self.isHovering else self.surfaces[0]
+        screen.blit(surf, (self.x,self.y))
+
+
+
 class CustomCommand(Command):
 
     def __init__(self, program):
@@ -553,16 +606,25 @@ class CustomCommand(Command):
 
         self.image = graphics.getImage("Images/Commands/Custom.png", 0.08)
 
-        self.code = ""
+        self.textbox: Textbox = Textbox(self)
+
+    def updatePosition(self, x, y):
+        super().updatePosition(x,y)
+        self.textbox.computePosition(x, y)
+
+    def getHoverables(self) -> Iterable[Hoverable]:
+
+        yield self.textbox
+        yield self
 
     def getIcon(self) -> pygame.Surface:
         return self.image
 
     def drawInfo(self, screen: pygame.Surface):
-        pass
+        self.textbox.draw(screen)
 
     def getCode(self) -> str:
-        return self.code
+        return "\n" + self.textbox.code + "\n"
 
     def initSimulationController(self, simulationState: SimulationState):
         pass

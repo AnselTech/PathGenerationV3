@@ -32,7 +32,11 @@ class Plus(Clickable, TooltipOwner):
         return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.between.y)) < 10
 
     def click(self) -> None:
-        self.between.beforeCommand.nextCustomCommand = CustomCommand(self.program)
+
+        current = self.between.beforeCommand
+        while current.nextCustomCommand is not None:
+            current = current.nextCustomCommand
+        current.nextCustomCommand = CustomCommand(self.program)
         self.program.recomputeCommands()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:

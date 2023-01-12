@@ -137,15 +137,18 @@ def handleDragging(userInput: UserInput, state: SoftwareState, fieldSurface: Fie
 
 # return (position, heading)
 def getPointOnEdge(state: SoftwareState, edge: StraightEdge, position: PointRef) -> Tuple[PointRef, float]:
+    
+    invert = 3.1415 if edge.reversed else 0
+    
     # Straight. Find closest point on line
     if edge.arc.isStraight:
-        return state.objectHovering.getClosestPoint(position), edge.beforeHeading
+        return state.objectHovering.getClosestPoint(position), edge.beforeHeading + invert
     else:
         # Curved. Find closest point on arc
         arc: Arc = edge.arc
         theta = Utility.thetaTwoPoints(arc.center.fieldRef, position.fieldRef)
         heading = theta + 3.1415/2 * (-1 if arc.parity else 1)
-        return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radius.fieldRef, heading = theta), heading
+        return arc.center + VectorRef(Ref.FIELD, magnitude = arc.radius.fieldRef, heading = theta), heading + invert
 
 
 def handleHoverPath(userInput: UserInput, state: SoftwareState, program: Program) -> Tuple[PointRef, float]:

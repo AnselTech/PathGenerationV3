@@ -154,6 +154,7 @@ def drawShadowSegment(fro: PointRef, to: PointRef):
     graphics.drawThinLine(screen, colors.GREEN, *to.screenRef, x, y)
     graphics.drawLine(screen, colors.BLACK, *fro.screenRef, *to.screenRef, 3, 140)
     graphics.drawCircle(screen, *to.screenRef, colors.BLACK, 5, 140)
+    robotImage.draw(screen, to, Utility.thetaTwoPoints(fro.fieldRef, to.fieldRef))
 
 def drawShadowArc(fro: PointRef, to: PointRef, heading1: float):
 
@@ -166,6 +167,7 @@ def drawShadowArc(fro: PointRef, to: PointRef, heading1: float):
     graphics.drawGuideLine(screen, colors.GREEN, *to.screenRef, arc.heading2)
 
     graphics.drawArc(screen, [80,80,80], arc.center.screenRef, arc.radius.screenRef, arc.theta1, arc.theta2, arc.parity, 3, 255)
+    robotImage.draw(screen, to, arc.heading2)
 
 def drawShadow():
 
@@ -176,6 +178,7 @@ def drawShadow():
 
         fro = program.last.position
         to = userInput.mousePosition
+
         drawShadowSegment(fro, to)
 
     elif state.mode == Mode.ADD_CURVE:

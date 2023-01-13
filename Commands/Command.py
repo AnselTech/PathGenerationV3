@@ -10,6 +10,7 @@ from SingletonState.UserInput import UserInput
 from SingletonState.SoftwareState import Mode
 from SingletonState.ReferenceFrame import Ref
 from AbstractButtons.ToggleButton import ToggleButton
+from AbstractButtons.ClickButton import ClickButton
 from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
 from Simulation.Simulator import Simulator
@@ -547,14 +548,14 @@ class ShootCommand(Command):
 
 class Textbox(Clickable):
 
-    def __init__(self, command: 'CustomCommand'):
+    def __init__(self, command: 'CustomCommand', text):
 
         self.command = command
         
         self.width = 120
-        self.height = 25
+        self.height = 24
 
-        self.updateCode("// [insert code here]\ntest\ntest\ntest")
+        self.updateCode(text)
 
         super().__init__()
 
@@ -596,26 +597,57 @@ class Textbox(Clickable):
         surf = self.surfaces[1] if self.isHovering else self.surfaces[0]
         screen.blit(surf, (self.x,self.y))
 
+class DeleteButton(Clickable):
+
+    def __init__(self, program, command):
+
+        self.program = program
+        self.command = command
+
+        self.image = graphics.getImage("Images/trash.png", 0.05)
+        self.imageH = graphics.getImage("Images/trashH.png", 0.05)
+
+        self.dx = 220
+        self.dy = Command.COMMAND_HEIGHT / 2
+
+        super().__init__()
+
+    def computePosition(self, x, y):
+        self.x = x + self.dx
+        self.y = y + self.dy
+
+    def click(self):
+        self.program.deleteCommand(self.command)
+
+    def checkIfHovering(self, userInput: UserInput) -> bool:
+        return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.y)) < 20
+
+    def draw(self, screen: pygame.Surface):
+        image = self.imageH if self.isHovering else self.image
+        graphics.drawSurface(screen, image, self.x, self.y)
 
 
 class CustomCommand(Draggable, Command):
 
-    def __init__(self, program, nextCustomCommand = None):
+    def __init__(self, program, nextCustomCommand = None, text = "// [insert code here]"):
 
         PURPLE = [[181, 51, 255], [209, 160, 238]]
         Command.__init__(self, None, PURPLE, program = program, nextCustomCommand = nextCustomCommand)
 
         self.image = graphics.getImage("Images/Commands/Custom.png", 0.08)
 
-        self.textbox: Textbox = Textbox(self)
+        self.textbox: Textbox = Textbox(self, text)
+        self.delete: DeleteButton = DeleteButton(program, self)
 
     def updatePosition(self, x, y):
         super().updatePosition(x,y)
         self.textbox.computePosition(x, y)
+        self.delete.computePosition(x, y)
 
     def getHoverables(self) -> Iterable[Hoverable]:
 
         yield self.textbox
+        yield self.delete
         yield self
 
     def getIcon(self) -> pygame.Surface:
@@ -623,6 +655,7 @@ class CustomCommand(Draggable, Command):
 
     def drawInfo(self, screen: pygame.Surface):
         self.textbox.draw(screen)
+        self.delete.draw(screen)
 
     def getCode(self) -> str:
         return "\n" + self.textbox.code + "\n"

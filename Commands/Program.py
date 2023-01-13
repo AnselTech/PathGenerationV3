@@ -27,7 +27,7 @@ class Program:
         self.state = state
 
         # linked list of nodes and edges. First element is the start node
-        self.first: Node = StartNode(self)
+        self.first: StartNode = StartNode(self)
         self.last: Node = self.first
 
         self.scroller: Scroller = Scroller(self, Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 19, 10, 13, Utility.SCREEN_SIZE - 20)
@@ -222,9 +222,12 @@ class Program:
 
     def getHoverablesPath(self, state: SoftwareState) -> Iterator[Hoverable]:
 
+
+        yield self.first.headingPoint
+        yield self.first
+
         # Yield nodes first
         node = self.first
-        yield node
         while node.next is not None:
             node: Node = node.next.next
             yield node

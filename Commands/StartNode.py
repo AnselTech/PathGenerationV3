@@ -1,8 +1,50 @@
 from Commands.Node import *
+from MouseInterfaces.Draggable import Draggable
 
 def init():
     global startImage
     startImage = graphics.getImage("Images/Buttons/PathButtons/start.png", 0.1)
+
+class StartHeadingPoint(Draggable):
+
+    def __init__(self, node: 'StartNode'):
+
+        self.distanceToNode = 5
+        self.drawRadius = 4
+        self.drawRadiusBig = 5
+        self.hoverRadius = 20
+        self.distanceToNode = 6.5
+
+        self.node = node
+
+        super().__init__()
+    
+    def compute(self):
+        self.position: PointRef = self.node.position + VectorRef(Ref.FIELD, magnitude = self.distanceToNode, heading = self.node.startHeading)
+
+    def checkIfHovering(self, userInput: UserInput) -> bool:
+        return Utility.distanceTuples(self.position.screenRef, userInput.mousePosition.screenRef) < self.hoverRadius
+
+    def beDraggedByMouse(self, userInput: UserInput):
+        
+        # heading from startNode to mouse
+        self.node.startHeading = Utility.thetaTwoPoints(self.node.position.fieldRef, userInput.mousePosition.fieldRef)
+
+        # Snap to edge if close
+        if self.node.next is not None:
+            if Utility.headingDiff(self.node.next.beforeHeading, self.node.startHeading) < 0.12:
+                self.node.startHeading = self.node.next.beforeHeading
+
+        self.node.program.recompute()
+
+
+    def draw(self, screen: pygame.Surface):
+
+        graphics.drawRoundedLine(screen, colors.GREEN, *self.node.position.screenRef, *self.position.screenRef, 2)
+
+        r = self.drawRadiusBig if self.isHovering else self.drawRadius
+        graphics.drawCircle(screen, *self.position.screenRef, colors.GREEN, r)
+    
 
 class StartNode(Node):
 
@@ -11,16 +53,14 @@ class StartNode(Node):
         defaultStartPosition: PointRef = PointRef(Ref.FIELD, (24, 48))
         super().__init__(program, defaultStartPosition, 20, previous = previous, next = next)
 
+        self.startHeading = 0
+
+        self.headingPoint: StartHeadingPoint = StartHeadingPoint(self)
+
     def compute(self):
 
         super().compute()
-
-        if self.next is not None:
-            self.startHeading = self.next.beforeHeading
-            if self.next.reversed:
-                self.startHeading += 3.1415
-        else:
-            self.startHeading = None
+        self.headingPoint.compute()
         
 
         if self.next is None:
@@ -33,7 +73,11 @@ class StartNode(Node):
 
         super().draw(screen)
 
+        self.headingPoint.draw(screen)
+
         isHovering = self.isHovering or self.command.isAnyHovering()
 
         image = self.rotatedImageH if isHovering else self.rotatedImage
         graphics.drawSurface(screen, image, *self.position.screenRef)
+
+        

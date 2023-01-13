@@ -1,9 +1,10 @@
-import pygame, math, pygame.gfxdraw
+import pygame, math, pygame.gfxdraw, platform
 
 pygame.font.init()
 
 VERSION = "3.3.1"
 VERSION_LOWER = "v" + VERSION.replace(".", "_")
+IS_MAC: bool = platform.system() == "Darwin"
 
 SCREEN_SIZE = 700
 PANEL_WIDTH = 300

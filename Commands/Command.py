@@ -590,7 +590,31 @@ class Textbox(Clickable):
                 graphics.drawText(self.surfaces[-1], graphics.FONTCODE, lines[i], colors.BLACK, 7, 2 + i * 9, 0, 0)
 
     def click(self):
-        self.updateCode(texteditor.open(self.code))
+
+        if Utility.IS_MAC:
+            newCode = texteditor.open(self.code)
+        else:
+
+            newCode = ""
+
+            # For windows computers, just poll user input on command line
+            print("Type out your custom command manually. For each prompt, type in your line of code and press enter. Or, press 'q' to cancel or just enter to submit.")
+            i = 1
+            while True:
+                string = input(f"Input line {i}: ").strip()
+                if string == 'q':
+                    print("Operation cancelled.")
+                    return # exit
+                elif string == '':
+                    break
+                newCode += string + "\n"
+                i += 1
+
+            newCode = newCode[:-1]
+
+            print(f"Command now set to following code:\n{newCode}")
+
+        self.updateCode(newCode)
         self.command.program.recomputeGeneratedCode()
 
     def draw(self, screen: pygame.Surface):

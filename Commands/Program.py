@@ -204,7 +204,6 @@ class Program:
         code = f"// GENERATED C++ CODE FROM PathGen {Utility.VERSION}\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
         code = setFlywheelSpeedCommand(code, commands)
-        code += f"robot.localizer->setHeading(getRadians({startHeading}));\n\n"
 
         for i in range(len(commands)):
             command = commands[i]

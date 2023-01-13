@@ -19,7 +19,7 @@ from typing import Iterable
 import Utility, texteditor
 
 class CommandSlider(Slider):
-    def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0):
+    def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0, dx = 0, program = None):
         
         self.min = min
         self.max = max
@@ -27,18 +27,26 @@ class CommandSlider(Slider):
         self.text = text
         self.default = default
         self.dy = dy
+        self.dx = dx
 
         self.parent: 'Command' = parent
+        if program is not None:
+            self.program = program
+        else:
+            self.program = self.parent.program
+
         width = 65
         super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20, onSet = parent.onSliderUpdate)
-        
-        
 
     def getX(self):
-        return self.parent.x + 175
+        return self.parent.x + 175 + self.dx
 
     def getY(self):
         return self.parent.y + self.parent.height / 2 + self.dy
+
+    def compute(self):
+        self.x = self.getX()
+        self.y = self.getY()
         
 
 class ToggleOption(Clickable):
@@ -228,18 +236,17 @@ class Command(Hoverable, ABC):
 
     # called by the toggle owned by this command when toggle is toggled
     def onToggleClick(self):
-        self.parent.program.recomputeGeneratedCode()
+        self.program.recomputeGeneratedCode()
 
     # called by the slider owned by this command when slider is dragged
     def onSliderUpdate(self):
-        self.parent.program.recomputeGeneratedCode()
+        self.program.recomputeGeneratedCode()
 
     def updatePosition(self, x, y):
         self.x = x
         self.y = y
         if self.slider is not None:
-            self.slider.x = self.slider.getX()
-            self.slider.y = self.slider.getY()
+            self.slider.compute()
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         x,y = userInput.mousePosition.screenRef
@@ -375,7 +382,7 @@ class StraightCommand(Command):
 
     def getHoverables(self) -> Iterable[Hoverable]:
 
-        if not self.parent.program.state.mode == Mode.PLAYBACK:
+        if not self.program.state.mode == Mode.PLAYBACK:
             yield self.toggle
             yield self.speedSlider
             if self.toggle.get(int) == 3:
@@ -545,165 +552,3 @@ class ShootCommand(Command):
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         self.idleTicks += 1
         return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)
-
-class Textbox(Clickable):
-
-    def __init__(self, command: 'CustomCommand', text):
-
-        self.command = command
-        
-        self.width = 120
-        self.height = 24
-
-        self.updateCode(text)
-
-        super().__init__()
-
-    def computePosition(self, commandX, commandY):
-
-        self.x = commandX + 62
-        self.y = commandY + Command.COMMAND_HEIGHT // 2 - self.height / 2
-
-    def checkIfHovering(self, userInput: UserInput) -> bool:
-
-        mx, my = userInput.mousePosition.screenRef
-
-        if mx < self.x or mx > self.x + self.width:
-            return False
-        if my < self.y or my > self.y + self.height:
-            return False
-        return True
-
-    def updateCode(self, code):
-        self.code: str = code
-        lines = self.code.split("\n")
-        if len(lines) >= 2:
-            lines = lines[0:4]
-
-        self.surfaces = []
-        for opacity in [150, 128]:
-            self.surfaces.append(pygame.Surface((self.width, self.height)))
-            self.surfaces[-1].set_alpha(opacity)
-            self.surfaces[-1].fill([255,255,255])
-
-            for i in range(0, len(lines)):
-                graphics.drawText(self.surfaces[-1], graphics.FONTCODE, lines[i], colors.BLACK, 7, 2 + i * 9, 0, 0)
-
-    def click(self):
-
-        if Utility.IS_MAC:
-            newCode = texteditor.open(self.code)
-        else:
-
-            newCode = ""
-
-            # For windows computers, just poll user input on command line
-            print("Type out your custom command manually. For each prompt, type in your line of code and press enter. Or, press 'q' to cancel or just enter to submit.")
-            i = 1
-            while True:
-                string = input(f"Input line {i}: ").strip()
-                if string == 'q':
-                    print("Operation cancelled.")
-                    return # exit
-                elif string == '':
-                    break
-                newCode += string + "\n"
-                i += 1
-
-            newCode = newCode[:-1]
-
-            print(f"Command now set to following code:\n{newCode}")
-
-        self.updateCode(newCode)
-        self.command.program.recomputeGeneratedCode()
-
-    def draw(self, screen: pygame.Surface):
-        surf = self.surfaces[1] if self.isHovering else self.surfaces[0]
-        screen.blit(surf, (self.x,self.y))
-
-class DeleteButton(Clickable):
-
-    def __init__(self, program, command):
-
-        self.program = program
-        self.command = command
-
-        self.image = graphics.getImage("Images/trash.png", 0.05)
-        self.imageH = graphics.getImage("Images/trashH.png", 0.05)
-
-        self.dx = 220
-        self.dy = Command.COMMAND_HEIGHT / 2
-
-        super().__init__()
-
-    def computePosition(self, x, y):
-        self.x = x + self.dx
-        self.y = y + self.dy
-
-    def click(self):
-        self.program.deleteCommand(self.command)
-
-    def checkIfHovering(self, userInput: UserInput) -> bool:
-        return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.y)) < 20
-
-    def draw(self, screen: pygame.Surface):
-        image = self.imageH if self.isHovering else self.image
-        graphics.drawSurface(screen, image, self.x, self.y)
-
-
-class CustomCommand(Draggable, Command):
-    def __init__(self, color, program, nextCustomCommand = None):
-        
-        Command.__init__(self, None, color, program = program, nextCustomCommand = nextCustomCommand)
-
-class CodeCommand(CustomCommand):
-
-    def __init__(self, program, nextCustomCommand = None, text = "// [insert code here]"):
-
-        PURPLE = [[181, 51, 255], [209, 160, 238]]
-        super().__init__(PURPLE, program, nextCustomCommand)
-
-        self.image = graphics.getImage("Images/Commands/Custom.png", 0.08)
-
-        self.textbox: Textbox = Textbox(self, text)
-        self.delete: DeleteButton = DeleteButton(program, self)
-
-    def updatePosition(self, x, y):
-        super().updatePosition(x,y)
-        self.textbox.computePosition(x, y)
-        self.delete.computePosition(x, y)
-
-    def getHoverables(self) -> Iterable[Hoverable]:
-
-        yield self.textbox
-        yield self.delete
-        yield self
-
-    def getIcon(self) -> pygame.Surface:
-        return self.image
-
-    def drawInfo(self, screen: pygame.Surface):
-        self.textbox.draw(screen)
-        self.delete.draw(screen)
-
-    def getCode(self) -> str:
-        return "\n" + self.textbox.code + "\n"
-
-    def initSimulationController(self, simulationState: SimulationState):
-        pass
-
-    def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
-        return ControllerInputState(0, 0, True)
-
-    # Callback when the dragged object was just released
-    def stopDragging(self):
-        self.program.stopDragCustomCommand(self)
-
-    # Called when the object was just pressed at the start of a drag
-    def startDragging(self, userInput: UserInput):
-        pass
-    
-    # Called every frame that the object is being dragged. Most likely used to update the position of the object based
-    # on where the mouse is
-    def beDraggedByMouse(self, userInput: UserInput):
-        self.program.dragCustomCommand(userInput)

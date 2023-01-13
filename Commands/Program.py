@@ -290,8 +290,8 @@ class Program:
 
     def getHoverablesOther(self):
         for between in self.betweens:
-            yield between.plus
-            yield between
+            for hoverable in between.getHoverables():
+                yield hoverable
 
         return
         yield

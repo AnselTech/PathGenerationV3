@@ -3,7 +3,7 @@ from typing import Tuple
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from Commands.Edge import StraightEdge
-from Commands.Command import CustomCommand, CodeCommand
+from Commands.CustomCommand import CustomCommand, CodeCommand
 from SingletonState.ReferenceFrame import PointRef, Ref
 
 """

@@ -3,8 +3,10 @@ from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.UserInput import UserInput
 from VisibleElements.Tooltip import Tooltip
 from MouseInterfaces.TooltipOwner import TooltipOwner
-from Commands.Command import Command, CodeCommand
+from Commands.Command import Command
+from Commands.CustomCommand import CustomCommand, CodeCommand, TimeCommand
 import Utility, pygame, graphics
+from typing import Iterable
 
 """
 A between object is the space between two commands.
@@ -20,11 +22,13 @@ def init():
 
 class Plus(Clickable, TooltipOwner):
     
-    def __init__(self, between: 'Between'):
+    def __init__(self, between: 'Between', CommandClass, dx = 0):
 
         self.between = between
         self.program = self.between.beforeCommand.program
-        self.x = (self.between.x1 + self.between.x2) / 2
+        self.x = (self.between.x1 + self.between.x2) / 2 + dx
+
+        self.CommandClass = CommandClass
 
         super().__init__()
 
@@ -34,7 +38,7 @@ class Plus(Clickable, TooltipOwner):
     # insert custom command after the previous command
     def click(self) -> None:
 
-        self.between.beforeCommand.nextCustomCommand = CodeCommand(self.program, self.between.beforeCommand.nextCustomCommand)
+        self.between.beforeCommand.nextCustomCommand = self.CommandClass(self.program, self.between.beforeCommand.nextCustomCommand)
         self.program.recomputeCommands()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
@@ -63,7 +67,14 @@ class Between(Hoverable):
         self.hoverX1 = Utility.SCREEN_SIZE
         self.hoverX2 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 30
 
-        self.plus: Plus = Plus(self)
+        # Initialize list of plus objects which, when clicked, add new commands
+        classes: list[CustomCommand] = [CodeCommand, TimeCommand]
+        m = 20 # distance between plusses
+        self.plusses: list[Plus] = []
+        dx = -(len(classes)-1) * m / 2
+        for c in classes:
+            self.plusses.append(Plus(self, c, dx))
+            dx += m
 
         super().__init__()
 
@@ -79,12 +90,18 @@ class Between(Hoverable):
             return False
         return True
 
+    def getHoverables(self) -> Iterable[Hoverable]:
+        for plus in self.plusses:
+            yield plus
+        yield self
+
     def draw(self, screen: pygame.Surface):
         
         # Only draw when hovered
-        if self.isHovering or self.plus.isHovering:
+        if self.isHovering or any(plus.isHovering for plus in self.plusses):
             graphics.drawRoundedLine(screen, [200, 200, 200], self.x1, self.y, self.x2, self.y, self.thickness)
-            self.plus.draw(screen)
+            for plus in self.plusses:
+                plus.draw(screen)
         elif self is self.program.hoveredBetween:
             graphics.drawRoundedLine(screen, [100, 230, 100], self.x1, self.y, self.x2, self.y, self.thickness)
             h = 50

@@ -26,6 +26,13 @@ id: intake
 info:
     speed => [speed -1 to 1]
 
+id: roller
+info:
+    speed => [speed -1 to 1]
+    mode -> [0/1 for distance/time]
+    distance => rotations in degrees
+    time => seconds
+
 """
 @dataclass
 class CustomCommandData: # not used for the regular commands (forward/turn/curve/shoot) because legacy code. only additional ones
@@ -39,6 +46,13 @@ def loadCustomState(program, data: CustomCommandData):
             return TimeCommand(program, time = data.info["time"])
         elif data.id == "intake":
             return IntakeCommand(program, intakeSpeed = data.info["speed"])
+        elif data.id == "roller":
+            return RollerCommand(program,
+                rollerSpeed = data.info["speed"],
+                toggleMode = data.info["mode"],
+                rollerDistance = data.info["distance"],
+                rollerTime = data.info["time"]
+            )
         else:
             raise Exception("Invalid command type.")
 
@@ -49,6 +63,14 @@ def saveCustomState(command: CustomCommand) -> CustomCommandData:
         return CustomCommandData("time", {"time" : command.time})
     elif isinstance(command, IntakeCommand):
         return CustomCommandData("intake", {"speed" : command.slider.getValue()})
+    elif isinstance(command, RollerCommand):
+        dict = {
+            "speed" : command.sliderSpeed.getValue(),
+            "mode" : command.toggle.get(int),
+            "distance" : command.sliderDistance.getValue(),
+            "time" : command.sliderTime.getValue()
+        }
+        return CustomCommandData("roller", dict)
     else:
         raise Exception("Cannot serialize command: ", str(command))
 

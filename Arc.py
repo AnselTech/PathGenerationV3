@@ -37,6 +37,8 @@ class Arc:
             self.parity = None
             self.radius = None
             self.radiusF = None
+            
+            self.arcLengthField = Utility.distanceTuples(fro.fieldRef, to.fieldRef)
             return
 
         self.isStraight = False

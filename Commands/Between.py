@@ -76,7 +76,7 @@ class Between(Hoverable):
         self.hoverX2 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 30
 
         # Initialize list of plus objects which, when clicked, add new commands
-        classes = [CodeCommand, TimeCommand, IntakeCommand]
+        classes = [CodeCommand, TimeCommand, IntakeCommand, RollerCommand]
 
         m = 20 # distance between plusses
         self.plusses: list[Plus] = []

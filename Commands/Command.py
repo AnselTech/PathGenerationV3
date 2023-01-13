@@ -361,10 +361,8 @@ class StraightCommand(Command):
         self._updateSliderPosition()
 
     def _updateSliderPosition(self):
-        self.timeSlider.x = self.timeSlider.getX()
-        self.timeSlider.y = self.timeSlider.getY()
-        self.speedSlider.x = self.speedSlider.getX()
-        self.speedSlider.y = self.speedSlider.getY()
+        self.timeSlider.compute()
+        self.speedSlider.compute()
 
     def getIcon(self) -> pygame.Surface:
         return self.imageForward if self.parent.distance > 0 else self.imageReverse

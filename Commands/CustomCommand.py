@@ -21,7 +21,7 @@ class DeleteButton(Clickable):
         self.image = graphics.getImage("Images/trash.png", 0.05)
         self.imageH = graphics.getImage("Images/trashH.png", 0.05)
 
-        self.dx = 220
+        self.dx = 230
         self.dy = Command.COMMAND_HEIGHT / 2
 
         super().__init__()
@@ -101,7 +101,7 @@ class Textbox(Clickable):
 
         self.command = command
         
-        self.width = 120
+        self.width = 130
         self.height = 24
 
         self.updateCode(text)
@@ -110,7 +110,7 @@ class Textbox(Clickable):
 
     def computePosition(self, commandX, commandY):
 
-        self.x = commandX + 62
+        self.x = commandX + 70
         self.y = commandY + Command.COMMAND_HEIGHT // 2 - self.height / 2
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
@@ -199,7 +199,7 @@ class CodeCommand(CustomCommand):
 
 class TimeCommand(CustomCommand):
 
-    commandColors = [[120, 120, 120], [190, 190, 190]]
+    commandColors = [[120, 120, 120], [195, 195, 195]]
     text = "time"
 
     def __init__(self, program, nextCustomCommand = None, time = 1):
@@ -209,7 +209,7 @@ class TimeCommand(CustomCommand):
         super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
         self.time = time
-        self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -100, color = [180, 180, 180])
+        self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -90, color = [180, 180, 180])
 
     def getOtherHoverables(self) -> Iterable[Hoverable]:
         yield self.slider
@@ -235,7 +235,7 @@ class IntakeCommand(CustomCommand):
         icon = graphics.getImage("Images/Commands/intake.png", 0.08)
         super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
-        self.slider = CommandSlider(self, -1, 1, 0.05, "Intake speed", intakeSpeed, dx = -80)
+        self.slider = CommandSlider(self, -1, 1, 0.05, "Intake speed", intakeSpeed, dx = -90)
 
     def getOtherHoverables(self) -> Iterable[Hoverable]:
         yield self.slider
@@ -245,3 +245,49 @@ class IntakeCommand(CustomCommand):
 
     def getCode(self) -> str:
         return f"setEffort(*robot.intake, {round(self.slider.getValue(), 2)});"
+
+
+class RollerCommand(CustomCommand):
+
+    commandColors = [[255, 86, 242], [251, 147, 243]]
+    text = "roller"
+
+    def __init__(self, program, nextCustomCommand = None, rollerSpeed = 1, toggleMode = 0, rollerDistance = 180, rollerTime = 0.5):
+
+        icon = graphics.getImage("Images/Commands/roller.png", 0.07)
+        super().__init__(self.commandColors, program, icon, nextCustomCommand)
+
+        self.toggle = CommandToggle(self, ["Run for distance", "Run for time"], dx = -40)
+        self.sliderSpeed = CommandSlider(self, -1, 1, 0.05, "Roller speed", rollerSpeed, dx = -50, dy = -14)
+        self.sliderDistance = CommandSlider(self, -360, 360, 10, "Rotations (deg)", rollerDistance, dx = -50, dy = 14)
+        self.sliderTime = CommandSlider(self, 0.1, 3, 0.1, "Time (seconds)", rollerTime, dx = -50, dy = 14)
+
+        self.toggle.activeOption = toggleMode
+
+    def getOtherHoverables(self) -> Iterable[Hoverable]:
+        yield self.toggle
+        yield self.sliderSpeed
+        if self.toggle.get(int) == 0:
+            yield self.sliderDistance
+        else:
+            yield self.sliderTime
+
+    def updatePosition(self, x, y):
+        super().updatePosition(x,y)
+        self.sliderSpeed.compute()
+        self.sliderDistance.compute()
+        self.sliderTime.compute()
+
+    def drawOther(self, screen: pygame.Surface):
+        self.toggle.draw(screen)
+        self.sliderSpeed.draw(screen)
+        if self.toggle.get(int) == 0:
+            self.sliderDistance.draw(screen)
+        else:
+            self.sliderTime.draw(screen)
+
+    def getCode(self) -> str:
+        if self.toggle.get(int) == 0:
+            return f"\n\n// [run roller for {self.sliderDistance.getValue()} distance at {self.sliderSpeed.getValue()} speed]\n\n"
+        else:
+            return f"\n\n// [run roller for {self.sliderTime.getValue()} seconds at {self.sliderSpeed.getValue()} speed]\n\n"

@@ -187,7 +187,7 @@ class Program:
         y = round(y, 1)
         startHeading = round(self.first.startHeading * 180 / 3.1415, 2)
         
-        code = "// GENERATED C++ CODE FROM PathGen 3.0\n\n"
+        code = f"// GENERATED C++ CODE FROM PathGen {Utility.VERSION}\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
         code = setFlywheelSpeedCommand(code, commands)
         code += f"robot.localizer->setHeading(getRadians({startHeading}));\n\n"

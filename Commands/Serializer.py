@@ -12,8 +12,10 @@ Store data as:
 Starting position (x,y) in field reference frame -> [float, float]
 List of Segment objects"""
 
+
 @dataclass # information storing a segment and a node connected to it
 class Segment:
+    reversed: bool
     beforeHeading: float # of edge
     straightCommandToggle: int
     straightCommandSpeedSlider: float
@@ -44,6 +46,7 @@ class State:
         node: TurnNode = edge.next
 
         self.path.append(Segment(
+            edge.reversed,
             edge.beforeHeading,
             edge.straightCommand.toggle.activeOption,
             edge.straightCommand.speedSlider.getValue(),
@@ -72,6 +75,7 @@ class State:
             edge: StraightEdge = StraightEdge(program, previous = previousNode, heading1 = segment.beforeHeading)
             previousNode.next = edge
 
+            edge.reversed = segment.reversed
             edge.straightCommand.toggle.activeOption = segment.straightCommandToggle
             edge.straightCommand.speedSlider.setValue(segment.straightCommandSpeedSlider, disableCallback = True)
             edge.straightCommand.timeSlider.setValue(segment.straightCommandTimeSlider, disableCallback = True)

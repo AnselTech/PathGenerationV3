@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     # All the global singleton objects
     screen: pygame.Surface = pygame.display.set_mode((Utility.SCREEN_SIZE + Utility.PANEL_WIDTH, Utility.SCREEN_SIZE))
-    pygame.display.set_caption("Path Generation 3.0 by Ansel")
+    pygame.display.set_caption(f"Path Generation {Utility.VERSION} by Ansel")
 
     fieldTransform: FieldTransform = FieldTransform()
     ReferenceFrame.initFieldTransform(fieldTransform)

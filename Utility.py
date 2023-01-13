@@ -2,6 +2,9 @@ import pygame, math, pygame.gfxdraw
 
 pygame.font.init()
 
+VERSION = "3.2.1"
+VERSION_LOWER = "v3_2_1"
+
 SCREEN_SIZE = 700
 PANEL_WIDTH = 300
 

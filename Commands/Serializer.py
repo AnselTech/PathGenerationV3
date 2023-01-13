@@ -3,7 +3,7 @@ from typing import Tuple
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from Commands.Edge import StraightEdge
-from Commands.Command import CustomCommand
+from Commands.Command import CustomCommand, CodeCommand
 from SingletonState.ReferenceFrame import PointRef, Ref
 
 """
@@ -15,17 +15,25 @@ List of Segment objects"""
 
 """
 id: code
-dict:
+info:
     code => [code string]
+
+id: wait
+info:
+    time => [time in seconds]
+
 """
 @dataclass
-class CommandData: # not used for the regular commands (forward/turn/curve/shoot) because legacy code. only additional ones
+class CustomCommandData: # not used for the regular commands (forward/turn/curve/shoot) because legacy code. only additional ones
     id: str # custom, wait, intake, roller
     info: dict
 
 
-def getCustomCommandState(code: str) -> CommandData:
-    return CommandData("custom", {"code" : code})
+def getCustomCommandState(code: str) -> CustomCommandData:
+    return CustomCommandData("code", {"code" : code})
+
+def getTimeCommandState(time: float) -> CustomCommandData:
+    return CustomCommandData("time", {"time" : time})
 
 
 @dataclass # information storing a segment and a node connected to it
@@ -35,18 +43,18 @@ class Segment:
     straightCommandToggle: int
     straightCommandSpeedSlider: float
     straightCommandTimeSlider: float
-    straightCommandCustom: list[CommandData]
+    straightCommandCustom: list[CustomCommandData]
     curveCommandToggle: int
     curveCommandSlider: float
-    curveCommandCustom: list[CommandData]
+    curveCommandCustom: list[CustomCommandData]
     shootHeadingCorrection: float
     shootActive: bool
     shootCommandSlider: float
-    shootCommandCustom: list[CommandData]
+    shootCommandCustom: list[CustomCommandData]
     shootTurnCommandToggle: int
-    shootTurnCommandCustom: list[CommandData]
+    shootTurnCommandCustom: list[CustomCommandData]
     turnCommandToggle: int
-    turnCommandCustom: list[CommandData]
+    turnCommandCustom: list[CustomCommandData]
     afterPosition: Tuple[float, float] # field ref
 
 # Serializable class representing all the data for the path
@@ -61,8 +69,8 @@ class State:
             self.addSegment(startNode.next)
             startNode = startNode.next.next
 
-    def getCustom(self, command: CustomCommand) -> list[CommandData]:
-        code: list[CommandData] = []
+    def getCustom(self, command: CustomCommand) -> list[CustomCommandData]:
+        code: list[CustomCommandData] = []
         while command.nextCustomCommand is not None:
             command = command.nextCustomCommand
             code.append(getCustomCommandState(command.textbox.code))
@@ -94,16 +102,22 @@ class State:
             node.position.fieldRef
         ))
 
-    def loadCustom(self, program, codes: list[CommandData]) -> CustomCommand:
+    def _loadCustom(self, program, data: CustomCommandData):
+        if data.id == "code":
+            return CodeCommand(program, text = data.info["code"])
+        else:
+            raise Exception("Invalid command type.")
+
+    def loadCustom(self, program, codes: list[CustomCommandData]) -> CustomCommand:
 
         if len(codes) == 0:
             return None
 
-        first = CustomCommand(program, text = codes[0].info["code"])
+        first = self._loadCustom(program, codes[0])
 
         previous: CustomCommand = first
         for code in codes[1:]:
-            command = CustomCommand(program, text = code.info["code"])
+            command = self._loadCustom(program, code)
             previous.nextCustomCommand = command
             previous = command
 

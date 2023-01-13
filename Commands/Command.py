@@ -652,11 +652,16 @@ class DeleteButton(Clickable):
 
 
 class CustomCommand(Draggable, Command):
+    def __init__(self, color, program, nextCustomCommand = None):
+        
+        Command.__init__(self, None, color, program = program, nextCustomCommand = nextCustomCommand)
+
+class CodeCommand(CustomCommand):
 
     def __init__(self, program, nextCustomCommand = None, text = "// [insert code here]"):
 
         PURPLE = [[181, 51, 255], [209, 160, 238]]
-        Command.__init__(self, None, PURPLE, program = program, nextCustomCommand = nextCustomCommand)
+        super().__init__(PURPLE, program, nextCustomCommand)
 
         self.image = graphics.getImage("Images/Commands/Custom.png", 0.08)
 

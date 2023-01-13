@@ -3,7 +3,7 @@ from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.UserInput import UserInput
 from VisibleElements.Tooltip import Tooltip
 from MouseInterfaces.TooltipOwner import TooltipOwner
-from Commands.Command import Command, CustomCommand
+from Commands.Command import Command, CodeCommand
 import Utility, pygame, graphics
 
 """
@@ -34,7 +34,7 @@ class Plus(Clickable, TooltipOwner):
     # insert custom command after the previous command
     def click(self) -> None:
 
-        self.between.beforeCommand.nextCustomCommand = CustomCommand(self.program, self.between.beforeCommand.nextCustomCommand)
+        self.between.beforeCommand.nextCustomCommand = CodeCommand(self.program, self.between.beforeCommand.nextCustomCommand)
         self.program.recomputeCommands()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:

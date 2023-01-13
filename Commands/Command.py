@@ -19,7 +19,7 @@ from typing import Iterable
 import Utility, texteditor
 
 class CommandSlider(Slider):
-    def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0, dx = 0, program = None):
+    def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0, dx = 0, program = None, color = None):
         
         self.min = min
         self.max = max
@@ -36,7 +36,9 @@ class CommandSlider(Slider):
             self.program = self.parent.program
 
         width = 65
-        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, self.parent.colors[0], self.text, self.default, textX = width/2, textY = -20, onSet = parent.onSliderUpdate)
+        if color is None:
+            color = self.parent.colors[0]
+        super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, color, self.text, self.default, textX = width/2, textY = -20, onSet = parent.onSliderUpdate)
 
     def getX(self):
         return self.parent.x + 175 + self.dx

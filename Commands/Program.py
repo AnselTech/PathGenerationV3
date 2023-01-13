@@ -420,6 +420,8 @@ class Program:
         before = self.hoveredBetween.beforeCommand # insert after this before command
         if before.nextCustomCommand is not None:
             command.nextCustomCommand = before.nextCustomCommand
+        else:
+            command.nextCustomCommand = None
         before.nextCustomCommand = command
 
         self.hoveredBetween = None

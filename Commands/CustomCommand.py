@@ -205,7 +205,7 @@ class TimeCommand(CustomCommand):
         super().__init__(GREY, program, icon, nextCustomCommand)
 
         self.time = time
-        self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -80)
+        self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -80, color = [180, 180, 180])
 
     def getOtherHoverables(self) -> Iterable[Hoverable]:
         yield self.slider

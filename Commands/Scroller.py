@@ -44,12 +44,19 @@ class Scroller(Draggable):
 
     def beDraggedByMouse(self, userInput: UserInput):
         self.barY = self.startBarY + userInput.mousePosition.screenRef[1] - self.mouseStartY
-        self.barY = Utility.clamp(self.barY, 0, self.displayHeight - self.barHeight)
-        if self.displayHeight == self.barHeight:
-            self.barY = 0
-        else:
-            self.contentY = (self.barY / (self.displayHeight - self.barHeight)) * (self.contentHeight - self.displayHeight)
-        self.program.recomputeCommands()
+        self._update()
+
+    def move(self, amount: int):
+        self.barY += amount
+        self._update()
+
+    def _update(self):
+            self.barY = Utility.clamp(self.barY, 0, self.displayHeight - self.barHeight)
+            if self.displayHeight == self.barHeight:
+                self.barY = 0
+            else:
+                self.contentY = (self.barY / (self.displayHeight - self.barHeight)) * (self.contentHeight - self.displayHeight)
+            self.program.recomputeCommands()
 
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, colors.BLACK, [self.x, self.y, self.width, self.displayHeight], 1)

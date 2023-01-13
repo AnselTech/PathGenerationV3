@@ -69,7 +69,7 @@ def main():
             sys.exit()
         
         # Handle zooming with mousewheel
-        modified = handleMousewheel(fieldSurface, fieldTransform, userInput)
+        modified = handleMousewheel(fieldSurface, fieldTransform, userInput, program)
         
         # Find the hovered object out of all the possible hoverable objects
         handleHoverables(state, userInput, getHoverables())

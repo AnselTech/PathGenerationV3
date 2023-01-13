@@ -47,23 +47,27 @@ def handleRightClick(state: SoftwareState, userInput: UserInput):
         
 # Handle zooming through mousewheel. Zoom "origin" should be at the mouse location
 # return true if modified
-def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform, userInput: UserInput) -> bool:
+def handleMousewheel(fieldSurface: FieldSurface, fieldTransform: FieldTransform, userInput: UserInput, program: Program) -> bool:
     
-    if not fieldSurface.isDragging and userInput.mousewheelDelta != 0:
+    if userInput.isMouseOnField:
 
-        oldMouseX, oldMouseY = userInput.mousePosition.screenRef
+        if not fieldSurface.isDragging and userInput.mousewheelDelta != 0:
 
-        zoomDelta = userInput.mousewheelDelta * 0.1
-        fieldTransform.zoom += zoomDelta
+            oldMouseX, oldMouseY = userInput.mousePosition.screenRef
 
-        # Pan to adjust for the translate that would result from the zoom
-        panX, panY = fieldTransform.pan
-        newMouseX, newMouseY = userInput.mousePosition.screenRef
-        fieldTransform.pan = (panX + oldMouseX - newMouseX, panY + oldMouseY - newMouseY)
+            zoomDelta = userInput.mousewheelDelta * 0.1
+            fieldTransform.zoom += zoomDelta
+
+            # Pan to adjust for the translate that would result from the zoom
+            panX, panY = fieldTransform.pan
+            newMouseX, newMouseY = userInput.mousePosition.screenRef
+            fieldTransform.pan = (panX + oldMouseX - newMouseX, panY + oldMouseY - newMouseY)
 
 
-        fieldSurface.updateScaledSurface()
-        return True
+            fieldSurface.updateScaledSurface()
+            return True
+    else:
+        program.scroller.move(-6 * userInput.mousewheelDelta)
 
     return False
 

@@ -1,7 +1,7 @@
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from MouseInterfaces.Hoverable import Hoverable
-from Commands.Command import Command, CommandSlider
+from Commands.Command import Command, CommandSlider, CommandToggle
 from SingletonState.UserInput import UserInput
 import graphics, Utility, pygame, colors, texteditor
 from typing import Iterable
@@ -209,7 +209,7 @@ class TimeCommand(CustomCommand):
         super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
         self.time = time
-        self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -80, color = [180, 180, 180])
+        self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -100, color = [180, 180, 180])
 
     def getOtherHoverables(self) -> Iterable[Hoverable]:
         yield self.slider
@@ -224,3 +224,24 @@ class TimeCommand(CustomCommand):
     def getCode(self) -> str:
         num = int(self.slider.getValue() * 1000)
         return f"pros::delay({num});"
+
+class IntakeCommand(CustomCommand):
+
+    commandColors = [[248, 128, 34], [251, 172, 110]]
+    text = "intake"
+
+    def __init__(self, program, nextCustomCommand = None, intakeSpeed = 1):
+
+        icon = graphics.getImage("Images/Commands/intake.png", 0.08)
+        super().__init__(self.commandColors, program, icon, nextCustomCommand)
+
+        self.slider = CommandSlider(self, -1, 1, 0.05, "Intake speed", intakeSpeed, dx = -80)
+
+    def getOtherHoverables(self) -> Iterable[Hoverable]:
+        yield self.slider
+
+    def drawOther(self, screen: pygame.Surface):
+        self.slider.draw(screen)
+
+    def getCode(self) -> str:
+        return f"setEffort(*robot.intake, {round(self.slider.getValue(), 2)});"

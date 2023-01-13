@@ -22,6 +22,10 @@ id: wait
 info:
     time => [time in seconds]
 
+id: intake
+info:
+    speed => [speed -1 to 1]
+
 """
 @dataclass
 class CustomCommandData: # not used for the regular commands (forward/turn/curve/shoot) because legacy code. only additional ones
@@ -33,6 +37,8 @@ def loadCustomState(program, data: CustomCommandData):
             return CodeCommand(program, text = data.info["code"])
         elif data.id == "time":
             return TimeCommand(program, time = data.info["time"])
+        elif data.id == "intake":
+            return IntakeCommand(program, intakeSpeed = data.info["speed"])
         else:
             raise Exception("Invalid command type.")
 
@@ -41,6 +47,10 @@ def saveCustomState(command: CustomCommand) -> CustomCommandData:
         return CustomCommandData("code", {"code" : command.textbox.code})
     elif isinstance(command, TimeCommand):
         return CustomCommandData("time", {"time" : command.time})
+    elif isinstance(command, IntakeCommand):
+        return CustomCommandData("intake", {"speed" : command.slider.getValue()})
+    else:
+        raise Exception("Cannot serialize command: ", str(command))
 
 @dataclass # information storing a segment and a node connected to it
 class Segment:

@@ -4,7 +4,7 @@ from SingletonState.UserInput import UserInput
 from VisibleElements.Tooltip import Tooltip
 from MouseInterfaces.TooltipOwner import TooltipOwner
 from Commands.Command import Command
-from Commands.CustomCommand import CustomCommand, CodeCommand, TimeCommand
+from Commands.CustomCommand import *
 import Utility, pygame, graphics
 from typing import Iterable
 
@@ -76,7 +76,7 @@ class Between(Hoverable):
         self.hoverX2 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 30
 
         # Initialize list of plus objects which, when clicked, add new commands
-        classes = [CodeCommand, TimeCommand]
+        classes = [CodeCommand, TimeCommand, IntakeCommand]
 
         m = 20 # distance between plusses
         self.plusses: list[Plus] = []

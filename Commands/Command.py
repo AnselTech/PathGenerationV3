@@ -51,77 +51,14 @@ class CommandSlider(Slider):
         self.y = self.getY()
         
 
-class ToggleOption(Clickable):
-
-    def __init__(self, width: int, height: int, text: str, isTop: bool, onSet = None):
-
-        super().__init__()
-
-        self.onSet = onSet
-
-        self.width = width
-        self.height = height
-        self.text = text
-
-        self.light = [200, 200, 200]
-        self.lightH = [190, 190, 190]
-        self.dark = [160, 160, 160]
-        self.darkH = [150, 150, 150]
-        self.isTop = isTop
-
-    def init(self, toggle: 'CommandToggle', parent: 'Command', onSet = None):
-        self.toggle = toggle
-        self.parent: 'Command' = parent
-        self.onSet = onSet
-
-    def getX(self):
-        return self.parent.x + 104
-
-    def getY(self):
-        return self.parent.y + 10 + (0 if self.isTop else self.height)
-
-    def checkIfHovering(self, userInput: UserInput) -> bool:
-        x = self.getX()
-        y = self.getY()
-        mx, my = userInput.mousePosition.screenRef
-        if mx < x or mx > x + self.width:
-            return False
-        if my < y or my > y + self.height:
-            return False
-        return True
-
-    def click(self):
-        self.toggle.isTopActive = self.isTop
-        if self.onSet is not None:
-            self.onSet()
-
-    def draw(self, screen: pygame.Surface):
-
-        x = self.getX()
-        y = self.getY()
-
-        # Draw the box
-        if self.toggle.isTopActive == self.isTop:
-            color = self.darkH if self.isHovering else self.dark
-        else:
-            color = self.lightH if self.isHovering else self.light
-        pygame.draw.rect(screen, color, [x, y, self.width, self.height])
-
-        # draw black border
-        if self.toggle.isTopActive == self.isTop:
-            pygame.draw.rect(screen, [0,0,0], [x, y, self.width, self.height], 1)
-
-        # Draw text
-        graphics.drawText(screen, graphics.FONT15, self.text, [0,0,0], x + self.width/2, y + self.height/2)
-
-
 class CommandToggle(Clickable, TooltipOwner):
-    def __init__(self, parent: 'Command', options: list[str]):
+    def __init__(self, parent: 'Command', options: list[str], text: list[str] = None, width = 35, dx = 0):
 
         self.parent = parent
 
         self.options: list[str] = options
         self.tooltips: list[Tooltip] = [Tooltip(optionString) for optionString in self.options]
+        self.text: list[str] = text
 
         self.N = len(self.options)
         self.activeOption: int = 0
@@ -130,11 +67,11 @@ class CommandToggle(Clickable, TooltipOwner):
         # colors for different states
         self.disabled = (200, 200, 200)
         self.disabledH = (190, 190, 190)
-        self.enabled = (160, 160, 160)
-        self.enabledH = (150, 150, 150)
+        self.enabled = (180, 180, 180)
+        self.enabledH = (170, 170, 170)
         
-        self.centerX = 130
-        self.width = 35
+        self.centerX = 130 + dx
+        self.width = width
         self.height = 30
 
         super().__init__()
@@ -200,11 +137,18 @@ class CommandToggle(Clickable, TooltipOwner):
                 # draw filled rect3
                 pygame.draw.rect(screen, color, [x, y, dx, self.height])
 
+            if self.text is not None:
+                graphics.drawText(screen, graphics.FONT15, self.text[i], colors.BLACK, x + dx/2, y + self.height/2)
             x += dx
 
             # draw border
             if i != self.N-1:
                 graphics.drawThinLine(screen, self.enabledH, x-1, y, x-1, y + self.height)
+
+        # draw border around active option
+        x0 = self.parent.x + self.centerX - self.width/2 + dx * self.activeOption
+        pygame.draw.rect(screen, [0,0,0], [x0, y, dx + (1 if (self.activeOption == self.N-1) else 0), self.height], 1)
+
 
         # kinda bad to do this here, but reset which one was hovered
         self.tooltipOption = self.hoveringOption
@@ -330,7 +274,7 @@ class TurnCommand(Command):
         BLUE = [[57, 126, 237], [122, 169, 245]]
         super().__init__(parent, BLUE)
 
-        self.toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed"])
+        self.toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed"], ["Precise", "Fast"], width = 135, dx = 47)
 
         self.imageLeft = graphics.getImage("Images/Commands/TurnLeft.png", 0.08)
         self.imageRight = graphics.getImage("Images/Commands/TurnRight.png", 0.08)

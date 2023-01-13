@@ -123,6 +123,10 @@ class Program:
             # node after next segment's previous set to previous segment
             node.next.next.previous = node.previous
 
+            # maintain straightness if edge was straight
+            if node.previous.arc.isStraight:
+                node.previous.headingPoint.setStraight()
+
         # node parameter should be dereferenced after function scope ends
 
         self.recompute()

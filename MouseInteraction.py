@@ -79,9 +79,11 @@ def handleDeleting(userInput: UserInput, state: SoftwareState, program: Program)
     if not userInput.isKeyPressing(pygame.K_x):
         return
 
-    # can only delete turn nodes, not edges or first node
+    # can only delete turn nodes
     if type(state.objectHovering) == TurnNode:
         program.deleteNode(state.objectHovering)
+    if type(state.objectHovering) == StraightEdge: # delete the node after the edge
+        program.deleteNode(state.objectHovering.next)
 
 
 # Find the object that is hoverable, update that object's hoverable state, and return the object

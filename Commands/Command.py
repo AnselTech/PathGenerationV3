@@ -3,6 +3,7 @@ from Sliders.Slider import Slider
 import pygame, graphics, colors
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Clickable import Clickable
+from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.TooltipOwner import TooltipOwner
 from VisibleElements.Tooltip import Tooltip
 from SingletonState.UserInput import UserInput
@@ -204,7 +205,7 @@ class Command(Hoverable, ABC):
     COMMAND_HEIGHT = 60
     COMMAND_WIDTH = 260
 
-    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None, program = None):
+    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None, program = None, nextCustomCommand: 'CustomCommand' = None):
 
         super().__init__()
 
@@ -222,7 +223,7 @@ class Command(Hoverable, ABC):
         self.toggle: CommandToggle = toggle
         self.slider: CommandSlider = slider
 
-        self.nextCustomCommand: 'CustomCommand' = None
+        self.nextCustomCommand: 'CustomCommand' = nextCustomCommand
 
     # called by the toggle owned by this command when toggle is toggled
     def onToggleClick(self):
@@ -550,8 +551,8 @@ class Textbox(Clickable):
 
         self.command = command
         
-        self.width = 170
-        self.height = 35
+        self.width = 120
+        self.height = 25
 
         self.updateCode("// [insert code here]\ntest\ntest\ntest")
 
@@ -559,7 +560,7 @@ class Textbox(Clickable):
 
     def computePosition(self, commandX, commandY):
 
-        self.x = commandX + 72
+        self.x = commandX + 62
         self.y = commandY + Command.COMMAND_HEIGHT // 2 - self.height / 2
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
@@ -597,12 +598,12 @@ class Textbox(Clickable):
 
 
 
-class CustomCommand(Command):
+class CustomCommand(Draggable, Command):
 
-    def __init__(self, program):
+    def __init__(self, program, nextCustomCommand = None):
 
         PURPLE = [[181, 51, 255], [209, 160, 238]]
-        super().__init__(None, PURPLE, program = program)
+        Command.__init__(self, None, PURPLE, program = program, nextCustomCommand = nextCustomCommand)
 
         self.image = graphics.getImage("Images/Commands/Custom.png", 0.08)
 
@@ -631,3 +632,16 @@ class CustomCommand(Command):
 
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         return ControllerInputState(0, 0, True)
+
+    # Callback when the dragged object was just released
+    def stopDragging(self):
+        self.program.stopDragCustomCommand(self)
+
+    # Called when the object was just pressed at the start of a drag
+    def startDragging(self, userInput: UserInput):
+        pass
+    
+    # Called every frame that the object is being dragged. Most likely used to update the position of the object based
+    # on where the mouse is
+    def beDraggedByMouse(self, userInput: UserInput):
+        self.program.dragCustomCommand(userInput)

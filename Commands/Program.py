@@ -37,6 +37,8 @@ class Program:
 
         self.betwens: list[Between] = []
 
+        self.hoveredBetween = None
+
         self.recompute()
         self.recomputeGeneratedCode(None)
         
@@ -378,3 +380,41 @@ class Program:
         self.simulationTick = 0
         self.modeBeforePlayback = self.state.mode
         self.state.mode = Mode.PLAYBACK
+
+    # When custom command is dragged, find hovered between object to display it visually
+    def dragCustomCommand(self, userInput: UserInput):
+        self.hoveredBetween = None
+        for between in self.betweens:
+            if between.checkIfHovering(userInput, Command.COMMAND_HEIGHT):
+                self.hoveredBetween = between
+                return
+        
+    # very inefficient approach but oh well, don't want to refactor
+    def _getPreviousCommand(self, targetCommand):
+        previous = None
+        for command in self.getHoverablesCommands():
+            if command is targetCommand:
+                return previous
+            previous = command
+
+    # Move Custom Command to between object where mouse was released
+    def stopDragCustomCommand(self, command):
+
+        if self.hoveredBetween is None or self.hoveredBetween.beforeCommand is command:
+            self.hoveredBetween = None
+            return
+
+        # At this point, means that custom command was dragged into this between node
+
+        # Remove command from current position
+        previous = self._getPreviousCommand(command)
+        previous.nextCustomCommand = command.nextCustomCommand
+
+        before = self.hoveredBetween.beforeCommand # insert after this before command
+        if before.nextCustomCommand is not None:
+            command.nextCustomCommand = before.nextCustomCommand
+        before.nextCustomCommand = command
+
+        self.hoveredBetween = None
+
+        self.recomputeCommands()

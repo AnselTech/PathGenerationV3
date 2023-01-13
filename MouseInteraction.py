@@ -21,7 +21,7 @@ import pygame
 # Handle left clicks for dealing with the field
 def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program, segmentShadow: PointRef):
 
-# Add segment at mouse location if mouse if clicking at some area of the field
+    # Add segment at mouse location if mouse if clicking at some area of the field
     if state.objectHovering == fieldSurface:
         if state.mode == Mode.ADD_SEGMENT:
             program.addNodeForward(userInput.mousePosition)

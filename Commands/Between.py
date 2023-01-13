@@ -31,12 +31,10 @@ class Plus(Clickable, TooltipOwner):
     def checkIfHovering(self, userInput: UserInput) -> bool:
         return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.between.y)) < 10
 
+    # insert custom command after the previous command
     def click(self) -> None:
 
-        current = self.between.beforeCommand
-        while current.nextCustomCommand is not None:
-            current = current.nextCustomCommand
-        current.nextCustomCommand = CustomCommand(self.program)
+        self.between.beforeCommand.nextCustomCommand = CustomCommand(self.program, self.between.beforeCommand.nextCustomCommand)
         self.program.recomputeCommands()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
@@ -53,6 +51,7 @@ class Between(Hoverable):
 
     def __init__(self, beforeCommand: Command, y):
         self.beforeCommand: Command = beforeCommand
+        self.program = self.beforeCommand.program
         self.y = y # center y
         
         width = Utility.PANEL_WIDTH * 0.8
@@ -68,11 +67,15 @@ class Between(Hoverable):
 
         super().__init__()
 
-    def checkIfHovering(self, userInput: UserInput) -> bool:
+    def checkIfHovering(self, userInput: UserInput, margin = None) -> bool:
+
+        if margin is None:
+            margin = self.hoverDY
+
         mx, my = userInput.mousePosition.screenRef
         if mx < self.hoverX1 or mx > self.hoverX2:
             return False
-        if my < self.y - self.hoverDY or my > self.y + self.hoverDY:
+        if my < self.y - margin or my > self.y + margin:
             return False
         return True
 
@@ -82,3 +85,7 @@ class Between(Hoverable):
         if self.isHovering or self.plus.isHovering:
             graphics.drawRoundedLine(screen, [200, 200, 200], self.x1, self.y, self.x2, self.y, self.thickness)
             self.plus.draw(screen)
+        elif self is self.program.hoveredBetween:
+            graphics.drawRoundedLine(screen, [100, 230, 100], self.x1, self.y, self.x2, self.y, self.thickness)
+            h = 50
+            pygame.draw.rect(screen, [255,255,255], [self.beforeCommand.x, self.y - h/2, Command.COMMAND_WIDTH, h], 2)

@@ -13,9 +13,19 @@ Store data as:
 Starting position (x,y) in field reference frame -> [float, float]
 List of Segment objects"""
 
+"""
+id: code
+dict:
+    code => [code string]
+"""
 @dataclass
-class OtherCommand:
+class CommandData: # not used for the regular commands (forward/turn/curve/shoot) because legacy code. only additional ones
     id: str # custom, wait, intake, roller
+    info: dict
+
+
+def getCustomCommandState(code: str) -> CommandData:
+    return CommandData("custom", {"code" : code})
 
 
 @dataclass # information storing a segment and a node connected to it
@@ -25,18 +35,18 @@ class Segment:
     straightCommandToggle: int
     straightCommandSpeedSlider: float
     straightCommandTimeSlider: float
-    straightCommandCustom: list[str]
+    straightCommandCustom: list[CommandData]
     curveCommandToggle: int
     curveCommandSlider: float
-    curveCommandCustom: list[str]
+    curveCommandCustom: list[CommandData]
     shootHeadingCorrection: float
     shootActive: bool
     shootCommandSlider: float
-    shootCommandCustom: list[str]
+    shootCommandCustom: list[CommandData]
     shootTurnCommandToggle: int
-    shootTurnCommandCustom: list[str]
+    shootTurnCommandCustom: list[CommandData]
     turnCommandToggle: int
-    turnCommandCustom: list[str]
+    turnCommandCustom: list[CommandData]
     afterPosition: Tuple[float, float] # field ref
 
 # Serializable class representing all the data for the path
@@ -44,17 +54,18 @@ class Segment:
 class State:
     def __init__(self, startNode: StartNode):
         self.startPosition: Tuple[float, float] = startNode.position.fieldRef
+        self.startHeading = startNode.startHeading
         self.path: list[Segment] = []
 
         while startNode.next is not None:
             self.addSegment(startNode.next)
             startNode = startNode.next.next
 
-    def getCustom(self, command: CustomCommand) -> list[str]:
-        code = []
+    def getCustom(self, command: CustomCommand) -> list[CommandData]:
+        code: list[CommandData] = []
         while command.nextCustomCommand is not None:
             command = command.nextCustomCommand
-            code.append(command.textbox.code)
+            code.append(getCustomCommandState(command.textbox.code))
         return code
 
     # serialize the edge and the node attached to that edge as a Segment object
@@ -83,16 +94,16 @@ class State:
             node.position.fieldRef
         ))
 
-    def loadCustom(self, program, codes: list[str]) -> CustomCommand:
+    def loadCustom(self, program, codes: list[CommandData]) -> CustomCommand:
 
         if len(codes) == 0:
             return None
 
-        first = CustomCommand(program, text = codes[0])
+        first = CustomCommand(program, text = codes[0].info["code"])
 
         previous: CustomCommand = first
         for code in codes[1:]:
-            command = CustomCommand(program, text = code)
+            command = CustomCommand(program, text = code.info["code"])
             previous.nextCustomCommand = command
             previous = command
 
@@ -104,6 +115,7 @@ class State:
         
         program.first = StartNode(program, None, None)
         program.first.position.fieldRef = self.startPosition
+        program.first.startHeading = self.startHeading
 
         previousNode = program.first
 

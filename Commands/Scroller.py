@@ -19,6 +19,8 @@ class Scroller(Draggable):
         self.contentY = 0
         self.barY = 0
 
+        self.prevSpeed = 0
+
         self.update(0)
 
     def update(self, contentHeight):
@@ -47,6 +49,13 @@ class Scroller(Draggable):
         self._update()
 
     def move(self, amount: int):
+
+        if self.prevSpeed > 0 and amount >= 0 and amount < self.prevSpeed:
+            amount = max(amount, self.prevSpeed * 0.8)
+        elif self.prevSpeed < 0 and amount <= 0 and amount > self.prevSpeed:
+            amount = min(amount, self.prevSpeed * 0.8)
+        self.prevSpeed = amount
+
         self.barY += amount
         self._update()
 

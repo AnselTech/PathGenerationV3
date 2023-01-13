@@ -12,7 +12,7 @@ class StartHeadingPoint(Draggable):
         self.distanceToNode = 5
         self.drawRadius = 4
         self.drawRadiusBig = 5
-        self.hoverRadius = 20
+        self.hoverRadius = 15
         self.distanceToNode = 6.5
 
         self.node = node

@@ -13,6 +13,10 @@ Store data as:
 Starting position (x,y) in field reference frame -> [float, float]
 List of Segment objects"""
 
+@dataclass
+class OtherCommand:
+    id: str # custom, wait, intake, roller
+
 
 @dataclass # information storing a segment and a node connected to it
 class Segment:

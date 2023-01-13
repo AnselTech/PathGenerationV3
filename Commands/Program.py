@@ -267,7 +267,8 @@ class Program:
             elif type(current) == TurnNode and current.direction == 0:
                 pass
             elif type(current) == StartNode: # start node has no command
-                pass
+                if not Utility.headingsEqual(current.startHeading, current.goalHeading):
+                    yield current.command
             else:
                 yield current.command
 

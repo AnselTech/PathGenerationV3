@@ -42,6 +42,7 @@ class DeleteButton(Clickable):
 
 
 
+
 class CustomCommand(Draggable, Command):
     def __init__(self, color, program, icon, nextCustomCommand = None):
         
@@ -93,6 +94,9 @@ class CustomCommand(Draggable, Command):
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
         self.program.dragCustomCommand(userInput)
+
+    def isAddOnsHovering(self) -> bool:
+        return self.delete.isHovering
 
 
 class Textbox(Clickable):
@@ -196,6 +200,9 @@ class CodeCommand(CustomCommand):
     def getCode(self) -> str:
         return "\n" + self.textbox.code + "\n"
 
+    def isAddOnsHovering(self) -> bool:
+        return super().isAddOnsHovering() or self.textbox.isHovering
+
 
 class TimeCommand(CustomCommand):
 
@@ -291,3 +298,6 @@ class RollerCommand(CustomCommand):
             return f"\n\n// [run roller for {self.sliderDistance.getValue()} distance at {self.sliderSpeed.getValue()} speed]\n\n"
         else:
             return f"\n\n// [run roller for {self.sliderTime.getValue()} seconds at {self.sliderSpeed.getValue()} speed]\n\n"
+
+    def isAddOnsHovering(self) -> bool:
+        return super().isAddOnsHovering() or self.sliderSpeed.isHovering or self.sliderTime.isHovering

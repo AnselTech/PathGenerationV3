@@ -213,10 +213,13 @@ class Command(Hoverable, ABC):
 
         yield self
 
+    def isAddOnsHovering(self) -> bool:
+        return False
+
     def isAnyHovering(self) -> bool:
         toggleHovering = self.toggle is not None and self.toggle.isHovering
         sliderHovering = self.slider is not None and self.slider.isHovering
-        return self.isHovering or toggleHovering or sliderHovering or (self.parent is not None and self.parent.isHovering)
+        return self.isAddOnsHovering() or self.isHovering or toggleHovering or sliderHovering or (self.parent is not None and self.parent.isHovering)
 
     def draw(self, screen: pygame.Surface):
 

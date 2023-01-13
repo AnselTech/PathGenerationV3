@@ -115,17 +115,17 @@ def drawTextRotate(surface: pygame.Surface, font: pygame.font, string: str, colo
 def drawThinLine(screen: pygame.Surface, color: tuple, x1: int, y1: int, x2: int, y2: int):
     pygame.draw.aaline(screen, color, (x1,y1), (x2,y2))
 
-def drawCircle(screen: pygame.Surface, x: int, y: int, color: tuple, radius: int, alpha: int = 255):
+def drawCircle(screen: pygame.Surface, x: int, y: int, color: tuple, radius: int, alpha: int = 255, width = 0):
     x = int(x)
     y = int(y)
     radius = int(radius)
     if alpha == 255:
         pygame.gfxdraw.aacircle(screen, x, y, radius, color)
-        pygame.draw.circle(screen, color, (x,y), radius)
+        pygame.draw.circle(screen, color, (x,y), radius, width)
     else:
         surface = pygame.Surface([radius*2, radius*2], pygame.SRCALPHA)
         pygame.gfxdraw.aacircle(surface, radius, radius, radius, (*color, alpha))
-        pygame.draw.circle(surface, (*color, alpha), (radius, radius), radius)
+        pygame.draw.circle(surface, (*color, alpha), (radius, radius), radius, width)
         screen.blit(surface, (x - radius, y - radius))
 
 def drawTriangle(screen, color,  x1, y1, x2, y2, x3, y3):

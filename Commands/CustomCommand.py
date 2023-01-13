@@ -173,11 +173,13 @@ class Textbox(Clickable):
 
 class CodeCommand(CustomCommand):
 
+    commandColors = [[181, 51, 255], [209, 160, 238]]
+    text = "code"
+
     def __init__(self, program, nextCustomCommand = None, text = "// [insert code here]"):
 
-        PURPLE = [[181, 51, 255], [209, 160, 238]]
         icon = graphics.getImage("Images/Commands/Custom.png", 0.08)
-        super().__init__(PURPLE, program, icon, nextCustomCommand)
+        super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
         self.textbox: Textbox = Textbox(self, text)
 
@@ -197,12 +199,14 @@ class CodeCommand(CustomCommand):
 
 class TimeCommand(CustomCommand):
 
+    commandColors = [[120, 120, 120], [190, 190, 190]]
+    text = "time"
+
     def __init__(self, program, nextCustomCommand = None, time = 1):
 
 
-        GREY = [[120, 120, 120], [190, 190, 190]]
         icon = graphics.getImage("Images/Commands/time.png", 0.08)
-        super().__init__(GREY, program, icon, nextCustomCommand)
+        super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
         self.time = time
         self.slider = CommandSlider(self, 0.01, 4, 0.01, "Time (sec)", 1, dx = -80, color = [180, 180, 180])

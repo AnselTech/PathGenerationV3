@@ -18,17 +18,24 @@ def init():
     global plusImage, plusImageH, tooltip
     plusImage = graphics.getImage("Images/Buttons/plus.png", 0.03)
     plusImageH = graphics.getImage("Images/Buttons/plus2.png", 0.03)
-    tooltip = Tooltip("Add a new custom command")
 
 class Plus(Clickable, TooltipOwner):
     
-    def __init__(self, between: 'Between', CommandClass, dx = 0):
+    def __init__(self, between: 'Between', CommandClass, color, text, dx = 0):
 
         self.between = between
         self.program = self.between.beforeCommand.program
         self.x = (self.between.x1 + self.between.x2) / 2 + dx
 
         self.CommandClass = CommandClass
+        
+        self.radius = 6
+        self.thick = 3 # cross thick radius
+        self.thin = 1 # cross thin radius
+        
+        self.tooltip = Tooltip(text)
+
+        self.color = color
 
         super().__init__()
 
@@ -42,13 +49,14 @@ class Plus(Clickable, TooltipOwner):
         self.program.recomputeCommands()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
-        tooltip.draw(screen, mousePosition)
+        self.tooltip.draw(screen, mousePosition)
 
     def draw(self, screen: pygame.Surface):
-        
-        image = plusImageH if self.isHovering else plusImage
-        graphics.drawSurface(screen, image, self.x, self.between.y)
-
+        graphics.drawCircle(screen, self.x, self.between.y, self.color, self.radius)
+        pygame.draw.rect(screen, [255,255,255], [self.x - self.thick, self.between.y - self.thin, self.thick*2, self.thin*2])
+        pygame.draw.rect(screen, [255,255,255], [self.x - self.thin, self.between.y - self.thick, self.thin*2, self.thick*2])
+        if self.isHovering:
+            graphics.drawCircle(screen, self.x, self.between.y, [0,0,0], self.radius+1, width = 1)
 
 # Object is hidden unless it is hovered.
 class Between(Hoverable):
@@ -68,12 +76,13 @@ class Between(Hoverable):
         self.hoverX2 = Utility.SCREEN_SIZE + Utility.PANEL_WIDTH - 30
 
         # Initialize list of plus objects which, when clicked, add new commands
-        classes: list[CustomCommand] = [CodeCommand, TimeCommand]
+        classes = [CodeCommand, TimeCommand]
+
         m = 20 # distance between plusses
         self.plusses: list[Plus] = []
         dx = -(len(classes)-1) * m / 2
         for c in classes:
-            self.plusses.append(Plus(self, c, dx))
+            self.plusses.append(Plus(self, c, c.commandColors[0], f"Add {c.text} command...", dx))
             dx += m
 
         super().__init__()

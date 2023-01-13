@@ -3,7 +3,7 @@ from typing import Tuple
 from Commands.StartNode import StartNode
 from Commands.TurnNode import TurnNode
 from Commands.Edge import StraightEdge
-from Commands.CustomCommand import CustomCommand, CodeCommand
+from Commands.CustomCommand import *
 from SingletonState.ReferenceFrame import PointRef, Ref
 
 """
@@ -28,13 +28,19 @@ class CustomCommandData: # not used for the regular commands (forward/turn/curve
     id: str # custom, wait, intake, roller
     info: dict
 
+def loadCustomState(program, data: CustomCommandData):
+        if data.id == "code":
+            return CodeCommand(program, text = data.info["code"])
+        elif data.id == "time":
+            return TimeCommand(program, time = data.info["time"])
+        else:
+            raise Exception("Invalid command type.")
 
-def getCustomCommandState(code: str) -> CustomCommandData:
-    return CustomCommandData("code", {"code" : code})
-
-def getTimeCommandState(time: float) -> CustomCommandData:
-    return CustomCommandData("time", {"time" : time})
-
+def saveCustomState(command: CustomCommand) -> CustomCommandData:
+    if isinstance(command, CodeCommand):
+        return CustomCommandData("code", {"code" : command.textbox.code})
+    elif isinstance(command, TimeCommand):
+        return CustomCommandData("time", {"time" : command.time})
 
 @dataclass # information storing a segment and a node connected to it
 class Segment:
@@ -73,7 +79,7 @@ class State:
         code: list[CustomCommandData] = []
         while command.nextCustomCommand is not None:
             command = command.nextCustomCommand
-            code.append(getCustomCommandState(command.textbox.code))
+            code.append(saveCustomState(command))
         return code
 
     # serialize the edge and the node attached to that edge as a Segment object
@@ -102,22 +108,16 @@ class State:
             node.position.fieldRef
         ))
 
-    def _loadCustom(self, program, data: CustomCommandData):
-        if data.id == "code":
-            return CodeCommand(program, text = data.info["code"])
-        else:
-            raise Exception("Invalid command type.")
-
     def loadCustom(self, program, codes: list[CustomCommandData]) -> CustomCommand:
 
         if len(codes) == 0:
             return None
 
-        first = self._loadCustom(program, codes[0])
+        first = loadCustomState(program, codes[0])
 
         previous: CustomCommand = first
         for code in codes[1:]:
-            command = self._loadCustom(program, code)
+            command = loadCustomState(program, code)
             previous.nextCustomCommand = command
             previous = command
 

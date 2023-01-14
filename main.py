@@ -88,11 +88,10 @@ def main():
 
 
         # Handle all field left click functionality
-        if userInput.isMouseOnField:
-            if userInput.leftClicked:
-                handleLeftClick(state, fieldSurface, userInput, program, segmentShadow)
-            elif userInput.rightClicked:
-                handleRightClick(state, userInput)
+        if userInput.leftClicked:
+            handleLeftClick(state, fieldSurface, userInput, program, segmentShadow)
+        elif userInput.rightClicked:
+            handleRightClick(state, userInput)
 
         if userInput.isKeyPressed(pygame.K_p):
             print(program.code)

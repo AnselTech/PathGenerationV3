@@ -24,3 +24,6 @@ class Hoverable(ABC):
     @abstractmethod
     def checkIfHovering(self, userInput: UserInput) -> bool:
         pass
+
+    def onRightClick(self, userInput: UserInput):
+        pass

@@ -40,6 +40,18 @@ class CommandSlider(Slider):
             color = self.parent.colors[0]
         super().__init__(self.getX(), self.getY(), width, self.min, self.max, self.step, color, self.text, self.default, textX = width/2, textY = -20, onSet = parent.onSliderUpdate)
 
+    # enter value manually on console
+    def onRightClick(self, userInput: UserInput):
+        value = input(f"Enter value from {self.min} to {self.max}, or nothing to cancel: ").strip()
+        if value != "":
+            try:
+                self.setValue(float(value))
+                print("Value set to:", self.getValue())
+            except:
+                print("Invalid input.")
+        else:
+            print("Operation cancelled.")
+
     def getX(self):
         return self.parent.x + 175 + self.dx
 

@@ -21,29 +21,34 @@ import pygame
 # Handle left clicks for dealing with the field
 def handleLeftClick(state: SoftwareState, fieldSurface: FieldSurface, userInput: UserInput, program: Program, segmentShadow: PointRef):
 
-    # Add segment at mouse location if mouse if clicking at some area of the field
-    if state.objectHovering == fieldSurface:
-        if state.mode == Mode.ADD_SEGMENT:
-            program.addNodeForward(userInput.mousePosition)
-        elif state.mode == Mode.ADD_CURVE:
-            program.addNodeCurve(userInput.mousePosition)
+    if userInput.isMouseOnField:
 
-    elif segmentShadow is not None:
-        program.insertNode(state.objectHovering, segmentShadow)
+        # Add segment at mouse location if mouse if clicking at some area of the field
+        if state.objectHovering == fieldSurface:
+            if state.mode == Mode.ADD_SEGMENT:
+                program.addNodeForward(userInput.mousePosition)
+            elif state.mode == Mode.ADD_CURVE:
+                program.addNodeCurve(userInput.mousePosition)
+
+        elif segmentShadow is not None:
+            program.insertNode(state.objectHovering, segmentShadow)
     
 
 # Handle right clicks for dealing with the field
 def handleRightClick(state: SoftwareState, userInput: UserInput):
 
-    # If right click, cycle the mouse mode (excluding playback)
-    if isinstance(state.objectHovering, TurnNode) and state.mode != Mode.MOUSE_SELECT:
-        node: Node = state.objectHovering
-        node.shoot.active = not node.shoot.active
-        node.program.recompute()
-    elif type(state.objectHovering) == StraightEdge:
-        state.objectHovering.toggleReversed() # toggle going forward/reverse on edge
-    elif type(state.objectHovering) == FieldSurface:
-        state.mode = state.mode.next()
+    if userInput.isMouseOnField:
+        # If right click, cycle the mouse mode (excluding playback)
+        if isinstance(state.objectHovering, TurnNode) and state.mode != Mode.MOUSE_SELECT:
+            node: Node = state.objectHovering
+            node.shoot.active = not node.shoot.active
+            node.program.recompute()
+        elif type(state.objectHovering) == StraightEdge:
+            state.objectHovering.toggleReversed() # toggle going forward/reverse on edge
+        elif type(state.objectHovering) == FieldSurface:
+            state.mode = state.mode.next()
+
+    state.objectHovering.onRightClick(userInput)
         
 # Handle zooming through mousewheel. Zoom "origin" should be at the mouse location
 # return true if modified

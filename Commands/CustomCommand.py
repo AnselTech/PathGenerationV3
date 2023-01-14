@@ -268,7 +268,7 @@ class RollerCommand(CustomCommand):
         icon = graphics.getImage("Images/Commands/roller.png", 0.07)
         super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
-        self.toggle = CommandToggle(self, ["Run for distance", "Run for time"], dx = -40)
+        self.toggle = CommandToggle(self, ["Run for distance", "Run for time"], ["D", "T"],  dx = -40)
         self.sliderSpeed = CommandSlider(self, -1, 1, 0.05, "Roller speed", rollerSpeed, dx = -50, dy = -14)
         self.sliderDistance = CommandSlider(self, -360, 360, 10, "Rotations (deg)", rollerDistance, dx = -50, dy = 14)
         self.sliderTime = CommandSlider(self, 0.1, 3, 0.1, "Time (seconds)", rollerTime, dx = -50, dy = 14)
@@ -290,7 +290,6 @@ class RollerCommand(CustomCommand):
         self.sliderTime.compute()
 
     def drawOther(self, screen: pygame.Surface):
-        self.toggle.draw(screen)
         self.sliderSpeed.draw(screen)
         if self.toggle.get(int) == 0:
             self.sliderDistance.draw(screen)

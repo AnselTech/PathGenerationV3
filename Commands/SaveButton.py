@@ -18,7 +18,7 @@ class SaveButton(ClickButton):
 
         self.tooltip: Tooltip = Tooltip("Save the path as a .pg3 file. You can load a", "file by dragging it within the window.")
 
-        position = (Utility.SCREEN_SIZE - 50, Utility.SCREEN_SIZE - 117)
+        position = (Utility.SCREEN_SIZE - 50, Utility.SCREEN_SIZE - 149)
         super().__init__(position, imageDisabled, imageEnabled, imageHovered)
 
     def isDisabled(self) -> bool:

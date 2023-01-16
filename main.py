@@ -19,6 +19,7 @@ import Commands.TurnNode as TurnNode
 
 from Commands.TextButton import TextButton
 from Commands.SaveButton import SaveButton
+from Commands.RobotButton import RobotButton
 
 import Commands.Between
 
@@ -54,6 +55,7 @@ if __name__ == '__main__':
 
     textButton: TextButton = TextButton(state)
     saveButton: SaveButton = SaveButton(program)
+    robotButton: RobotButton = RobotButton(state)
 
 
 def main():
@@ -113,7 +115,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
     program.drawPath(screen, state)
 
     # Draw robot if mouse is hovering over point or line
-    if shadowPos is not None:
+    if shadowPos is not None and state.showRobot:
         robotImage.draw(screen, shadowPos, shadowHeading)
 
     if segmentShadow is not None:
@@ -130,6 +132,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
     # Draw interface buttons
     textButton.draw(screen)
     saveButton.draw(screen)
+    robotButton.draw(screen)
 
     # Draw panel background
     border = 5
@@ -150,7 +153,8 @@ def drawShadowSegment(fro: PointRef, to: PointRef):
     graphics.drawThinLine(screen, colors.GREEN, *to.screenRef, x, y)
     graphics.drawLine(screen, colors.BLACK, *fro.screenRef, *to.screenRef, 3, 140)
     graphics.drawCircle(screen, *to.screenRef, colors.BLACK, 5, 140)
-    robotImage.draw(screen, to, Utility.thetaTwoPoints(fro.fieldRef, to.fieldRef))
+    if state.showRobot:
+        robotImage.draw(screen, to, Utility.thetaTwoPoints(fro.fieldRef, to.fieldRef))
 
 def drawShadowArc(fro: PointRef, to: PointRef, heading1: float):
 
@@ -163,7 +167,8 @@ def drawShadowArc(fro: PointRef, to: PointRef, heading1: float):
     graphics.drawGuideLine(screen, colors.GREEN, *to.screenRef, arc.heading2)
 
     graphics.drawArc(screen, [80,80,80], arc.center.screenRef, arc.radius.screenRef, arc.theta1, arc.theta2, arc.parity, 3, 255)
-    robotImage.draw(screen, to, arc.heading2)
+    if state.showRobot:
+        robotImage.draw(screen, to, arc.heading2)
 
 def drawShadow():
 
@@ -206,6 +211,7 @@ def getHoverables() -> Iterator[Hoverable]:
 
         yield textButton
         yield saveButton
+        yield robotButton
 
         if not state.mode == Mode.PLAYBACK:
             for hoverable in program.getHoverablesPath(state):

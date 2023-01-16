@@ -32,6 +32,7 @@ class SoftwareState:
         self.objectDragged: Draggable = None # object the mouse is currently dragging
 
         self.isCode = False # whether displaying code (as opposed to block commands)
+        self.showRobot = False
 
     def __str__(self):
         return "Software State:\nHovering: {}\nDragged: {}".format(self.objectHovering, self.objectDragged)

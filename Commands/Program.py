@@ -201,7 +201,7 @@ class Program:
         y = round(y, 1)
         startHeading = round(self.first.startHeading * 180 / 3.1415, 2)
         
-        code = f"// GENERATED C++ CODE FROM PathGen {Utility.VERSION}\n\n"
+        code = f"// GENERATED C++ CODE FROM Pathogen {Utility.VERSION}\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
         code += setFlywheelSpeedCommand(code, commands)
         code += "setEffort(*robot.intake, 1); // Start running intake immediately\n"
@@ -221,6 +221,13 @@ class Program:
 
         self.code = code + "// ================================================\n"
         self.codeLines = self.code.split("\n")
+
+        self.saveCode()
+
+    def saveCode(self):
+        with open("Generated_Code.txt", "w") as file:
+            for line in self.code.split("\n"):
+                file.write(line + "\n")
 
     def getHoverablesPath(self, state: SoftwareState) -> Iterator[Hoverable]:
 

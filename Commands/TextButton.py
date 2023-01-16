@@ -16,7 +16,7 @@ class TextButton(FlipFlopButton):
 
         self.tooltip: Tooltip = Tooltip("Toggle between block commands and c++ code")
 
-        position = (Utility.SCREEN_SIZE - 50, Utility.SCREEN_SIZE - 80)
+        position = (Utility.SCREEN_SIZE - 50, Utility.SCREEN_SIZE - 85)
         super().__init__(position, imageOff, imageOffHovered, imageOn, imageOnHovered)
 
 

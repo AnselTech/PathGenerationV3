@@ -2,7 +2,7 @@ import pygame, math, pygame.gfxdraw, platform
 
 pygame.font.init()
 
-VERSION = "3.4.3"
+VERSION = "3.4.4"
 VERSION_LOWER = "v" + VERSION.replace(".", "_")
 IS_MAC: bool = platform.system() == "Darwin"
 

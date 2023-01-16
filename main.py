@@ -18,7 +18,6 @@ import Commands.StartNode as StartNode
 import Commands.TurnNode as TurnNode
 
 from Commands.TextButton import TextButton
-from Commands.PrintButton import PrintButton
 from Commands.SaveButton import SaveButton
 
 import Commands.Between
@@ -54,7 +53,6 @@ if __name__ == '__main__':
     robotImage: RobotImage = RobotImage(fieldTransform)
 
     textButton: TextButton = TextButton(state)
-    printButton: PrintButton = PrintButton(program)
     saveButton: SaveButton = SaveButton(program)
 
 
@@ -131,7 +129,6 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
 
     # Draw interface buttons
     textButton.draw(screen)
-    printButton.draw(screen)
     saveButton.draw(screen)
 
     # Draw panel background
@@ -208,7 +205,6 @@ def getHoverables() -> Iterator[Hoverable]:
             yield hoverable
 
         yield textButton
-        yield printButton
         yield saveButton
 
         if not state.mode == Mode.PLAYBACK:

@@ -24,10 +24,7 @@ class PrintButton(ClickButton):
 
     def clickEnabledButton(self) -> None:
         print(self.program.code)
-
-        with open("Generated_Code.txt", "w") as file:
-            for line in self.program.code.split("\n"):
-                file.write(line + "\n")
+        self.program.saveCode()
 
     def drawTooltip(self, screen: pygame.Surface, mousePosition: tuple) -> None:
         self.tooltip.draw(screen, mousePosition)

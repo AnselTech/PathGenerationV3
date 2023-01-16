@@ -15,6 +15,7 @@ from RobotImage import RobotImage
 import pygame, Utility, math
 from typing import Iterator
 from timeit import default_timer as timer
+from time import ctime
 
 """
 Stores a list of commands, which make up the path
@@ -201,9 +202,10 @@ class Program:
         y = round(y, 1)
         startHeading = round(self.first.startHeading * 180 / 3.1415, 2)
         
-        code = f"// GENERATED C++ CODE FROM PathGen {Utility.VERSION}\n\n"
+        code = f"// GENERATED C++ CODE FROM PathGen {Utility.VERSION}\n"
+        code += f"// Exported: {ctime()}\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
-        code += setFlywheelSpeedCommand(code, commands)
+        code = setFlywheelSpeedCommand(code, commands)
         code += "setEffort(*robot.intake, 1); // Start running intake immediately\n"
         code += "robot.drive->setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);\n\n"
 

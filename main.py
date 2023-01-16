@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # All the global singleton objects
     screen: pygame.Surface = pygame.display.set_mode((Utility.SCREEN_SIZE + Utility.PANEL_WIDTH, Utility.SCREEN_SIZE))
-    pygame.display.set_caption(f"Pathogen {Utility.VERSION} by Ansel")
+    Utility.updateCaption()
 
     fieldTransform: FieldTransform = FieldTransform()
     ReferenceFrame.initFieldTransform(fieldTransform)

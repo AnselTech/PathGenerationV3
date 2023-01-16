@@ -192,7 +192,19 @@ def handleLoadedFile(program: Program, filename):
     if filename is None:
         return
 
+    # Open loaded .pg3 file
     if filename.endswith(".pg3"):
         with open(filename, "rb") as file:
             state: Serializer.State = pickle.load(file)
             state.load(program)
+
+    # For .txt files, set save target as the that file
+    elif filename.endswith(".txt"):
+
+        if Utility.SAVE_TARGET == "Generated_Code.txt":
+            with open(Utility.SAVE_TARGET, "w") as file:
+                file.write("// (Target moved to a different file location)\n")
+
+        Utility.SAVE_TARGET = filename
+        program.saveCode()
+        Utility.updateCaption()

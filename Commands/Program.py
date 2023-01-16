@@ -227,7 +227,7 @@ class Program:
         self.saveCode()
 
     def saveCode(self):
-        with open("Generated_Code.txt", "w") as file:
+        with open(Utility.SAVE_TARGET, "w") as file:
             for line in self.code.split("\n"):
                 file.write(line + "\n")
 

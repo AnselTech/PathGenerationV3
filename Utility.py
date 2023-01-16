@@ -2,9 +2,11 @@ import pygame, math, pygame.gfxdraw, platform
 
 pygame.font.init()
 
-VERSION = "3.4.4"
+VERSION = "3.4.5"
 VERSION_LOWER = "v" + VERSION.replace(".", "_")
 IS_MAC: bool = platform.system() == "Darwin"
+
+SAVE_TARGET = "Generated_Code.txt" # by default. Can change by dragging file in
 
 SCREEN_SIZE = 700
 PANEL_WIDTH = 300
@@ -12,6 +14,9 @@ PANEL_WIDTH = 300
 PIXELS_TO_FIELD_CORNER = 19 * (SCREEN_SIZE / 800)
 FIELD_SIZE_IN_PIXELS = 766 * (SCREEN_SIZE / 800)
 FIELD_SIZE_IN_INCHES = 144
+
+def updateCaption():
+    pygame.display.set_caption(f"Pathogen {VERSION} by Ansel [Target: {SAVE_TARGET}]")
 
 def wrap(value, max):
     if value < 0:

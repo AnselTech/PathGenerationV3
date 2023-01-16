@@ -1,12 +1,13 @@
-import pygame, math, pygame.gfxdraw, platform
+import pygame, math, pygame.gfxdraw, platform, os
 
 pygame.font.init()
 
-VERSION = "3.4.5"
+VERSION = "3.4.5b"
 VERSION_LOWER = "v" + VERSION.replace(".", "_")
 IS_MAC: bool = platform.system() == "Darwin"
 
-SAVE_TARGET = "Generated_Code.txt" # by default. Can change by dragging file in
+SAVE_TARGET = None
+SAVE_TARGET_NAME = None
 
 SCREEN_SIZE = 700
 PANEL_WIDTH = 300
@@ -15,7 +16,11 @@ PIXELS_TO_FIELD_CORNER = 19 * (SCREEN_SIZE / 800)
 FIELD_SIZE_IN_PIXELS = 766 * (SCREEN_SIZE / 800)
 FIELD_SIZE_IN_INCHES = 144
 
-def updateCaption():
+def setTarget(target):
+    global SAVE_TARGET, SAVE_TARGET_NAME
+    SAVE_TARGET = target
+    SAVE_TARGET_NAME = os.path.basename(target)[:-4]
+    print(SAVE_TARGET, SAVE_TARGET_NAME)
     pygame.display.set_caption(f"Pathogen {VERSION} by Ansel [Target: {SAVE_TARGET}]")
 
 def wrap(value, max):

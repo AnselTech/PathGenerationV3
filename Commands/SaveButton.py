@@ -31,10 +31,10 @@ class SaveButton(ClickButton):
             os.makedirs("saves")
 
         i = 1
-        filename = f"saves/save_{Utility.VERSION_LOWER}.pg3"
+        filename = f"saves/{Utility.SAVE_TARGET_NAME}_save{i}.pg3"
         while os.path.isfile(filename):
             i += 1
-            filename = f"saves/save{i}_{Utility.VERSION_LOWER}.pg3"
+            filename = f"saves/{Utility.SAVE_TARGET_NAME}_save{i}.pg3"
 
         with open(filename, "wb") as file:
             pickle.dump(state, file)

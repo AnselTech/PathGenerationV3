@@ -205,6 +205,6 @@ def handleLoadedFile(program: Program, filename):
             with open(Utility.SAVE_TARGET, "w") as file:
                 file.write("// (Target moved to a different file location)\n")
 
-        Utility.SAVE_TARGET = filename
+        Utility.setTarget(filename)
         program.saveCode()
-        Utility.updateCaption()
+        

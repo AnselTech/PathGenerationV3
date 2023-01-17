@@ -224,5 +224,7 @@ def handleCommandCommenting(userInput: UserInput, state: SoftwareState, program:
     if userInput.isKeyPressing(pygame.K_c):
         if isinstance(state.objectHovering, Command):
             state.objectHovering.commented = state.enableComments
+            program.recomputeGeneratedCode()
         elif isinstance(state.objectHovering, CommandAddon):
             state.objectHovering.parent.commented = state.enableComments
+            program.recomputeGeneratedCode()

@@ -217,7 +217,10 @@ class Program:
             if isShooter:
                 code += "\n"
             
-            code += command.getCode() + "\n"
+            if command.commented:
+                code += "/*" + command.getCode() + "*/" + "\n"
+            else:
+                code += command.getCode() + "\n"
 
             if isShooter:
                 code = setFlywheelSpeedCommand(code, commands[i+1:]) + "\n"

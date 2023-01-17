@@ -56,8 +56,9 @@ class Scroller(Draggable):
             amount = min(amount, self.prevSpeed * 0.8)
         self.prevSpeed = amount
 
-        self.barY += amount
-        self._update()
+        if amount != 0:
+            self.barY += amount
+            self._update()
 
     def _update(self):
             self.barY = Utility.clamp(self.barY, 0, self.displayHeight - self.barHeight)
@@ -65,7 +66,7 @@ class Scroller(Draggable):
                 self.barY = 0
             else:
                 self.contentY = (self.barY / (self.displayHeight - self.barHeight)) * (self.contentHeight - self.displayHeight)
-            self.program.recomputeCommands()
+            self.program.recomputeCommands(True)
 
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, colors.BLACK, [self.x, self.y, self.width, self.displayHeight], 1)

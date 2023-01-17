@@ -159,7 +159,7 @@ class Program:
         # Since the number of edges or nodes may have changed, or a turn was added/removed, update commands
         self.recomputeCommands()
 
-    def recomputeCommands(self):
+    def recomputeCommands(self, purelyVisual = False):
 
         self.betweens: list[Between] = []
 
@@ -179,7 +179,8 @@ class Program:
             if command is not commands[-1]: # if not last node
                 self.betweens.append(Between(command, y - (dy-Command.COMMAND_HEIGHT)/2))
 
-        self.recomputeGeneratedCode(commands)
+        if not purelyVisual:
+            self.recomputeGeneratedCode(commands)
 
     def recomputeGeneratedCode(self, commands: list[Command] = None):
         if commands is None:
@@ -227,6 +228,7 @@ class Program:
         self.saveCode()
 
     def saveCode(self):
+        print("Saved generated code to target.")
         with open(Utility.SAVE_TARGET, "w") as file:
             for line in self.code.split("\n"):
                 file.write(line + "\n")
@@ -436,7 +438,7 @@ class Program:
         before.nextCustomCommand = command
 
         self.hoveredBetween = None
-
+        print("stop drag")
         self.recomputeCommands()
 
     def deleteCommand(self, command):

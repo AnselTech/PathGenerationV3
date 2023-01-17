@@ -12,6 +12,7 @@ from Commands.Edge import StraightEdge
 from Commands.Node import Node
 from Commands.TurnNode import TurnNode
 import Commands.Serializer as Serializer
+from Commands.Command import Command, CommandAddon
 import Utility
 from typing import Iterator, Tuple
 from Arc import Arc
@@ -208,3 +209,20 @@ def handleLoadedFile(program: Program, filename):
         Utility.setTarget(filename)
         program.saveCode()
         
+
+def handleCommandCommenting(userInput: UserInput, state: SoftwareState, program: Program):
+
+    if userInput.keyJustPressed == pygame.K_c:
+        state.enableComments = True
+        if isinstance(state.objectHovering, Command):
+            if state.objectHovering.commented:
+                state.enableComments = False
+        elif isinstance(state.objectHovering, CommandAddon):
+            if state.objectHovering.parent.commented:
+                state.enableComments = False
+
+    if userInput.isKeyPressing(pygame.K_c):
+        if isinstance(state.objectHovering, Command):
+            state.objectHovering.commented = state.enableComments
+        elif isinstance(state.objectHovering, CommandAddon):
+            state.objectHovering.parent.commented = state.enableComments

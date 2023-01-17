@@ -1,7 +1,7 @@
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
 from MouseInterfaces.Hoverable import Hoverable
-from Commands.Command import Command, CommandSlider, CommandToggle
+from Commands.Command import Command, CommandSlider, CommandToggle, CommandAddon
 from SingletonState.UserInput import UserInput
 import graphics, Utility, pygame, colors, texteditor
 from typing import Iterable
@@ -11,12 +11,12 @@ from Simulation.SimulationState import SimulationState
 from Simulation.Simulator import Simulator
 from Simulation.PID import PID
 
-class DeleteButton(Clickable):
+class DeleteButton(Clickable, CommandAddon):
 
     def __init__(self, program, command):
 
         self.program = program
-        self.command = command
+        self.parent = command
 
         self.image = graphics.getImage("Images/trash.png", 0.05)
         self.imageH = graphics.getImage("Images/trashH.png", 0.05)
@@ -31,7 +31,7 @@ class DeleteButton(Clickable):
         self.y = y + self.dy
 
     def click(self):
-        self.program.deleteCommand(self.command)
+        self.program.deleteCommand(self.parent)
 
     def checkIfHovering(self, userInput: UserInput) -> bool:
         return Utility.distanceTuples(userInput.mousePosition.screenRef, (self.x, self.y)) < 20
@@ -99,11 +99,11 @@ class CustomCommand(Draggable, Command):
         return self.delete.isHovering
 
 
-class Textbox(Clickable):
+class Textbox(Clickable, CommandAddon):
 
     def __init__(self, command: 'CustomCommand', text):
 
-        self.command = command
+        self.parent = command
         
         self.width = 130
         self.height = 24
@@ -168,7 +168,7 @@ class Textbox(Clickable):
             print(f"Command now set to following code:\n{newCode}")
 
         self.updateCode(newCode)
-        self.command.program.recomputeGeneratedCode()
+        self.parent.program.recomputeGeneratedCode()
 
     def draw(self, screen: pygame.Surface):
         surf = self.surfaces[1] if self.isHovering else self.surfaces[0]

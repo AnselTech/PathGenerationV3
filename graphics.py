@@ -264,3 +264,9 @@ def drawArc(screen: pygame.Surface, color: tuple, center: tuple, radius: float, 
 
         x1 = x2
         y1 = y2
+
+def drawTransparentRectangle(screen: pygame.Surface, color, alpha, x, y, width, height):
+    s = pygame.Surface((width,height))  # the size of your rect
+    s.set_alpha(alpha)                # alpha level
+    s.fill(color)           # this fills the entire surface
+    screen.blit(s, (x,y)) 

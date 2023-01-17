@@ -18,7 +18,10 @@ from Simulation.PID import PID
 from typing import Iterable
 import Utility, texteditor
 
-class CommandSlider(Slider):
+class CommandAddon:
+    pass
+
+class CommandSlider(Slider, CommandAddon):
     def __init__(self, parent, min: float, max: float, step: float, text: str, default: float = 0, dy = 0, dx = 0, program = None, color = None):
         
         self.min = min
@@ -63,7 +66,7 @@ class CommandSlider(Slider):
         self.y = self.getY()
         
 
-class CommandToggle(Clickable, TooltipOwner):
+class CommandToggle(Clickable, TooltipOwner, CommandAddon):
     def __init__(self, parent: 'Command', options: list[str], text: list[str] = None, width = 35, dx = 0):
 
         self.parent = parent
@@ -172,7 +175,7 @@ class Command(Hoverable, ABC):
     COMMAND_HEIGHT = 60
     COMMAND_WIDTH = 260
 
-    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None, program = None, nextCustomCommand: 'CustomCommand' = None):
+    def __init__(self, parent, colors, toggle: CommandToggle = None, slider: CommandSlider = None, program = None, nextCustomCommand: 'CustomCommand' = None, commented = False):
 
         super().__init__()
 
@@ -191,6 +194,8 @@ class Command(Hoverable, ABC):
         self.slider: CommandSlider = slider
 
         self.nextCustomCommand: 'CustomCommand' = nextCustomCommand
+        
+        self.commented = commented
 
     # called by the toggle owned by this command when toggle is toggled
     def onToggleClick(self):
@@ -257,6 +262,9 @@ class Command(Hoverable, ABC):
         # Slider
         if self.slider is not None:
             self.slider.draw(screen)
+
+        if self.commented:
+            graphics.drawTransparentRectangle(screen, (255,255,255), 100, self.x, self.y, self.width, self.height)
 
         
 
@@ -351,12 +359,6 @@ class StraightCommand(Command):
 
         yield self
 
-    def draw(self, screen):
-        super().draw(screen)
-        self.speedSlider.draw(screen)
-        if self.toggle.get(int) == 3:
-            self.timeSlider.draw(screen)
-
     # called by the toggle owned by this command when toggle is toggled
     def onToggleClick(self):
         super().onToggleClick()
@@ -383,6 +385,11 @@ class StraightCommand(Command):
         return self.imageForward if self.parent.distance > 0 else self.imageReverse
 
     def drawInfo(self, screen: pygame.Surface):
+
+        self.speedSlider.draw(screen)
+        if self.toggle.get(int) == 3:
+            self.timeSlider.draw(screen)
+
         x = self.x + self.INFO_DX
         dy = 12
         y0 = self.y + self.height/2 - dy

@@ -298,9 +298,9 @@ class RollerCommand(CustomCommand):
 
     def getCode(self) -> str:
         if self.toggle.get(int) == 0:
-            return f"\n\n// [run roller for {self.sliderDistance.getValue()} distance at {self.sliderSpeed.getValue()} speed]\n\n"
+            return f"\n\nmoveRollerDegrees(robot, {self.sliderDistance.getValue()}, {self.sliderSpeed.getValue()})\n\n"
         else:
-            return f"\n\n// [run roller for {self.sliderTime.getValue()} seconds at {self.sliderSpeed.getValue()} speed]\n\n"
+            return f"\n\nmoveRollerTime(robot, {self.sliderTime.getValue()}, {self.sliderSpeed.getValue()})\n\n"
 
     def isAddOnsHovering(self) -> bool:
         return super().isAddOnsHovering() or self.sliderSpeed.isHovering or self.sliderTime.isHovering

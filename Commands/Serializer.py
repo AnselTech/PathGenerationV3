@@ -17,14 +17,17 @@ List of Segment objects"""
 id: code
 info:
     code => [code string]
+    commented => bool
 
 id: wait
 info:
     time => [time in seconds]
+    commented => bool
 
 id: intake
 info:
     speed => [speed -1 to 1]
+    commented => bool
 
 id: roller
 info:
@@ -32,6 +35,7 @@ info:
     mode -> [0/1 for distance/time]
     distance => rotations in degrees
     time => seconds
+    commented => bool
 
 """
 @dataclass
@@ -41,13 +45,13 @@ class CustomCommandData: # not used for the regular commands (forward/turn/curve
 
 def loadCustomState(program, data: CustomCommandData):
         if data.id == "code":
-            return CodeCommand(program, text = data.info["code"])
+            command =  CodeCommand(program, text = data.info["code"])
         elif data.id == "time":
-            return TimeCommand(program, time = data.info["time"])
+            command =  TimeCommand(program, time = data.info["time"])
         elif data.id == "intake":
-            return IntakeCommand(program, intakeSpeed = data.info["speed"])
+            command =  IntakeCommand(program, intakeSpeed = data.info["speed"])
         elif data.id == "roller":
-            return RollerCommand(program,
+            command = RollerCommand(program,
                 rollerSpeed = data.info["speed"],
                 toggleMode = data.info["mode"],
                 rollerDistance = data.info["distance"],
@@ -56,19 +60,36 @@ def loadCustomState(program, data: CustomCommandData):
         else:
             raise Exception("Invalid command type.")
 
+        try:
+            command.commented = data.info["commented"]
+        except:
+            pass
+    
+        return command
+
 def saveCustomState(command: CustomCommand) -> CustomCommandData:
     if isinstance(command, CodeCommand):
-        return CustomCommandData("code", {"code" : command.textbox.code})
+        return CustomCommandData("code", {
+            "code" : command.textbox.code,
+            "commented" : command.commented
+        })
     elif isinstance(command, TimeCommand):
-        return CustomCommandData("time", {"time" : command.time})
+        return CustomCommandData("time", {
+            "time" : command.time,
+            "commented" : command.commented
+        })
     elif isinstance(command, IntakeCommand):
-        return CustomCommandData("intake", {"speed" : command.slider.getValue()})
+        return CustomCommandData("intake", {
+            "speed" : command.slider.getValue(),
+            "commented" : command.commented,
+        })
     elif isinstance(command, RollerCommand):
         dict = {
             "speed" : command.sliderSpeed.getValue(),
             "mode" : command.toggle.get(int),
             "distance" : command.sliderDistance.getValue(),
-            "time" : command.sliderTime.getValue()
+            "time" : command.sliderTime.getValue(),
+            "commented" : command.commented
         }
         return CustomCommandData("roller", dict)
     else:
@@ -82,30 +103,27 @@ class Segment:
     straightCommandSpeedSlider: float
     straightCommandTimeSlider: float
     straightCommandCustom: list[CustomCommandData]
+    straightCommandCommented: bool
     curveCommandToggle: int
     curveCommandSlider: float
     curveCommandCustom: list[CustomCommandData]
+    curveCommandCommented: bool
     shootHeadingCorrection: float
     shootActive: bool
     shootCommandSlider: float
     shootCommandCustom: list[CustomCommandData]
+    shootCommandCommented: bool
     shootTurnCommandToggle: int
     shootTurnCommandCustom: list[CustomCommandData]
+    shootTurnCommandCommented: bool
     turnCommandToggle: int
     turnCommandCustom: list[CustomCommandData]
+    turnCommandCommented: bool
     afterPosition: Tuple[float, float] # field ref
 
 # Serializable class representing all the data for the path
 # startNode is the start of the entire path linked list
 class State:
-    def __init__(self, startNode: StartNode):
-        self.startPosition: Tuple[float, float] = startNode.position.fieldRef
-        self.startHeading = startNode.startHeading
-        self.path: list[Segment] = []
-
-        while startNode.next is not None:
-            self.addSegment(startNode.next)
-            startNode = startNode.next.next
 
     def getCustom(self, command: CustomCommand) -> list[CustomCommandData]:
         code: list[CustomCommandData] = []
@@ -113,33 +131,7 @@ class State:
             command = command.nextCustomCommand
             code.append(saveCustomState(command))
         return code
-
-    # serialize the edge and the node attached to that edge as a Segment object
-    def addSegment(self, edge: StraightEdge):
-
-        node: TurnNode = edge.next
-
-        self.path.append(Segment(
-            edge.reversed,
-            edge.beforeHeading,
-            edge.straightCommand.toggle.activeOption,
-            edge.straightCommand.speedSlider.getValue(),
-            edge.straightCommand.timeSlider.getValue(),
-            self.getCustom(edge.straightCommand),
-            edge.curveCommand.toggle.activeOption,
-            edge.curveCommand.slider.getValue(),
-            self.getCustom(edge.curveCommand),
-            node.shoot.headingCorrection,
-            node.shoot.active,
-            node.shoot.shootCommand.slider.getValue(),
-            self.getCustom(node.shoot.shootCommand),
-            node.shoot.turnToShootCommand.toggle.activeOption,
-            self.getCustom(node.shoot.turnToShootCommand),
-            node.command.toggle.activeOption,
-            self.getCustom(node.command),
-            node.position.fieldRef
-        ))
-
+    
     def loadCustom(self, program, codes: list[CustomCommandData]) -> CustomCommand:
 
         if len(codes) == 0:
@@ -155,6 +147,53 @@ class State:
 
         return first
 
+    
+    def __init__(self, startNode: StartNode):
+        self.startPosition: Tuple[float, float] = startNode.position.fieldRef
+        self.startHeading = startNode.startHeading
+        self.path: list[Segment] = []
+
+        # need to refactor properly v3.5
+        self.startCommented = startNode.command.commented
+        self.startCustom = self.getCustom(startNode.command)
+
+        while startNode.next is not None:
+            self.addSegment(startNode.next)
+            startNode = startNode.next.next
+
+    
+
+    # serialize the edge and the node attached to that edge as a Segment object
+    def addSegment(self, edge: StraightEdge):
+
+        node: TurnNode = edge.next
+
+        self.path.append(Segment(
+            reversed = edge.reversed,
+            beforeHeading = edge.beforeHeading,
+            straightCommandToggle = edge.straightCommand.toggle.activeOption,
+            straightCommandSpeedSlider = edge.straightCommand.speedSlider.getValue(),
+            straightCommandTimeSlider = edge.straightCommand.timeSlider.getValue(),
+            straightCommandCustom = self.getCustom(edge.straightCommand),
+            straightCommandCommented = edge.straightCommand.commented,
+            curveCommandToggle = edge.curveCommand.toggle.activeOption,
+            curveCommandSlider = edge.curveCommand.slider.getValue(),
+            curveCommandCustom = self.getCustom(edge.curveCommand),
+            curveCommandCommented = edge.curveCommand.commented,
+            shootHeadingCorrection = node.shoot.headingCorrection,
+            shootActive = node.shoot.active,
+            shootCommandSlider = node.shoot.shootCommand.slider.getValue(),
+            shootCommandCustom = self.getCustom(node.shoot.shootCommand),
+            shootCommandCommented = node.shoot.shootCommand.commented,
+            shootTurnCommandToggle = node.shoot.turnToShootCommand.toggle.activeOption,
+            shootTurnCommandCustom = self.getCustom(node.shoot.turnToShootCommand),
+            shootTurnCommandCommented = node.shoot.turnToShootCommand.commented,
+            turnCommandToggle = node.command.toggle.activeOption,
+            turnCommandCustom = self.getCustom(node.command),
+            turnCommandCommented = node.command.commented,
+            afterPosition = node.position.fieldRef
+        ))
+
     # Build the entire linked list from the serialized state
     # After a state object is unpickled, call load() to update program
     def load(self, program) -> StartNode:
@@ -162,6 +201,13 @@ class State:
         program.first = StartNode(program, None, None)
         program.first.position.fieldRef = self.startPosition
         program.first.startHeading = self.startHeading
+
+        try:
+            program.first.command.commented = self.startCommented
+            program.first.command.nextCustomCommand = self.loadCustom(program, self.startCustom)
+        except Exception as e:
+            print("could not load custom commands after first turn command.")
+            print(e)
 
         previousNode = program.first
 
@@ -176,10 +222,19 @@ class State:
             edge.straightCommand.timeSlider.setValue(segment.straightCommandTimeSlider, disableCallback = True)
             edge.straightCommand.speedSlider.dy = -edge.straightCommand.DELTA_SLIDER_Y if (segment.straightCommandToggle == 3) else 0
             edge.straightCommand.nextCustomCommand = self.loadCustom(program, segment.straightCommandCustom)
+            try:
+                edge.straightCommand.commented = segment.straightCommandCommented
+            except:
+                pass
 
             edge.curveCommand.toggle.activeOption = segment.curveCommandToggle
             edge.curveCommand.slider.setValue(segment.curveCommandSlider, disableCallback = True)
             edge.curveCommand.nextCustomCommand = self.loadCustom(program, segment.curveCommandCustom)
+            try:
+                edge.curveCommand.commented = segment.curveCommandCommented
+            except:
+                pass
+
 
             position = PointRef(Ref.FIELD, segment.afterPosition)
             node: TurnNode = TurnNode(program, position, previous = edge)
@@ -187,12 +242,27 @@ class State:
 
             node.shoot.headingCorrection = segment.shootHeadingCorrection
             node.shoot.active = segment.shootActive
+
             node.shoot.turnToShootCommand.toggle.activeOption = segment.shootTurnCommandToggle
             node.shoot.turnToShootCommand.nextCustomCommand = self.loadCustom(program, segment.shootTurnCommandCustom)
+            try:
+                node.shoot.turnToShootCommand.commented = segment.shootTurnCommandCommented
+            except:
+                pass
+
             node.shoot.shootCommand.slider.setValue(segment.shootCommandSlider, disableCallback = True)
             node.shoot.shootCommand.nextCustomCommand = self.loadCustom(program, segment.shootCommandCustom)
+            try:
+                node.shoot.shootCommand.commented = segment.shootCommandCommented
+            except:
+                pass
+
             node.command.toggle.activeOption = segment.turnCommandToggle
             node.command.nextCustomCommand = self.loadCustom(program, segment.turnCommandCustom)
+            try:
+                node.command.commented = segment.turnCommandCommented
+            except:
+                pass
 
             previousNode = node
 

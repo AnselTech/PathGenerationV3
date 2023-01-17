@@ -447,3 +447,4 @@ class Program:
     def deleteCommand(self, command):
         previous = self._getPreviousCommand(command)
         previous.nextCustomCommand = command.nextCustomCommand
+        self.recomputeCommands()

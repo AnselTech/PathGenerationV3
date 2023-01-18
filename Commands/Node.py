@@ -50,6 +50,7 @@ class Node(Draggable, ABC):
     def beDraggedByMouse(self, userInput: UserInput):
 
         self.position = userInput.mousePosition.copy()
+        self.position.fieldRef = Utility.clamp2D(self.position.fieldRef, 0, 0, 144, 144)
 
         # For straight edges only, snap to shoot heading of previous node
         if self.previous is not None and self.previous.arc.isStraight:

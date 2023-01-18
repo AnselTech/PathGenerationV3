@@ -151,6 +151,8 @@ class Textbox(Clickable, CommandAddon):
             newCode = ""
 
             # For windows computers, just poll user input on command line
+            print("Currrent code: ")
+            print(self.code)
             print("Type out your custom command manually. For each prompt, type in your line of code and press enter. Or, press 'q' to cancel or just enter to submit.")
             i = 1
             while True:

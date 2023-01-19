@@ -84,7 +84,7 @@ class Shoot(Draggable):
         thickness = 3
         a = 1.6
         
-        if thick:
+        if thick or self.shootCommand.isHovering:
             graphics.drawGuideLine(screen, (255,255,0), *self.position.screenRef, self.heading)
         
         graphics.drawVector(screen, color, *self.parent.position.screenRef, *self.position.screenRef, thickness, a)

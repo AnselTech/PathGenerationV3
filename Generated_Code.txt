@@ -1,0 +1,15 @@
+// GENERATED C++ CODE FROM PathGen 4.0
+// Exported: Fri Jan 20 14:11:29 2023
+
+// Robot assumes a starting position of (24,48) at heading of 0.0 degrees.
+setEffort(*robot.intake, 1); // Start running intake immediately
+robot.drive->setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
+
+goTurnU(robot, GTU_TURN_PRECISE, getRadians(46.65));
+goForwardU(robot, GFU_DIST_PRECISE(1), GFU_TURN, 93.79, getRadians(46.65));
+goTurnU(robot, GTU_TURN_PRECISE, getRadians(288.6));
+goForwardU(robot, GFU_DIST_PRECISE(1), GFU_TURN, 23.58, getRadians(288.6));
+goTurnU(robot, GTU_TURN_PRECISE, getRadians(248.2));
+goForwardU(robot, GFU_DIST_PRECISE(1), GFU_TURN, 19.67, getRadians(248.2));
+// ================================================
+

@@ -25,7 +25,7 @@ class SaveButton(ClickButton):
         return self.program.first.next is None
 
     def clickEnabledButton(self) -> None:
-        state = Serializer.State(self.program.first)
+        state = Serializer.State(self.program.first, self.program.firstCommand)
 
         if not os.path.exists("saves"):
             os.makedirs("saves")

@@ -148,10 +148,12 @@ class State:
         return first
 
     
-    def __init__(self, startNode: StartNode):
+    def __init__(self, startNode: StartNode, beforeStartCommand):
         self.startPosition: Tuple[float, float] = startNode.position.fieldRef
         self.startHeading = startNode.startHeading
         self.path: list[Segment] = []
+
+        self.beforeStartCustom = self.getCustom(beforeStartCommand)
 
         # need to refactor properly v3.5
         self.startCommented = startNode.command.commented
@@ -197,6 +199,8 @@ class State:
     # Build the entire linked list from the serialized state
     # After a state object is unpickled, call load() to update program
     def load(self, program) -> StartNode:
+
+        program.firstCommand.nextCustomCommand = self.loadCustom(program, self.beforeStartCustom)
         
         program.first = StartNode(program, None, None)
         program.first.position.fieldRef = self.startPosition

@@ -21,6 +21,11 @@ from time import ctime
 Stores a list of commands, which make up the path
 """
 
+class FirstCommand:
+    def __init__(self, program):
+        self.program = program
+        self.nextCustomCommand = None
+
 class Program:
 
     def __init__(self, state: SoftwareState):
@@ -39,6 +44,9 @@ class Program:
         self.betwens: list[Between] = []
 
         self.hoveredBetween = None
+
+        self.firstCommand = FirstCommand(self)
+
 
         self.recompute()
         self.recomputeGeneratedCode(None)
@@ -172,12 +180,13 @@ class Program:
         contentHeight = len(commands) * dy
         self.scroller.update(contentHeight)
 
+        self.betweens.append(Between(self.firstCommand, y - (dy-Command.COMMAND_HEIGHT)/2))
+
         for command in commands:
             command.updatePosition(x, y)
             y += dy
 
-            if command is not commands[-1]: # if not last node
-                self.betweens.append(Between(command, y - (dy-Command.COMMAND_HEIGHT)/2))
+            self.betweens.append(Between(command, y - (dy-Command.COMMAND_HEIGHT)/2))
 
         if not purelyVisual:
             self.recomputeGeneratedCode(commands)
@@ -270,6 +279,8 @@ class Program:
     # Does not include custom commands
     def _getHoverablesCommands(self) -> Iterator[Command]:
 
+        yield self.firstCommand
+
         current = self.first
         while current is not None:
 
@@ -296,7 +307,9 @@ class Program:
     # includes custom commands
     def getHoverablesCommands(self) -> Iterator[Command]:
         for command in self._getHoverablesCommands():
-            yield command
+
+            if command is not self.firstCommand:
+                yield command
             c = command.nextCustomCommand
             while c is not None:
                 yield c

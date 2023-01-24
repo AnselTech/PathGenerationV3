@@ -24,7 +24,7 @@ class Plus(Clickable, TooltipOwner):
     def __init__(self, between: 'Between', CommandClass, color, text, dx = 0):
 
         self.between = between
-        self.program = self.between.beforeCommand.program
+        self.program = self.between.program
         self.x = (self.between.x1 + self.between.x2) / 2 + dx
 
         self.CommandClass = CommandClass
@@ -64,6 +64,7 @@ class Between(Hoverable):
     def __init__(self, beforeCommand: Command, y):
         self.beforeCommand: Command = beforeCommand
         self.program = self.beforeCommand.program
+
         self.y = y # center y
         
         width = Utility.PANEL_WIDTH * 0.8

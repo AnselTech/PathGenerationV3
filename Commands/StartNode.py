@@ -35,6 +35,11 @@ class StartHeadingPoint(Draggable):
             if Utility.headingDiff(self.node.next.beforeHeading, self.node.startHeading) < 0.12:
                 self.node.startHeading = self.node.next.beforeHeading
 
+        # snap to cardinal directions
+        for i in [0, 3.1415/2, 3.1415, 3*3.1415/2]:
+            if Utility.headingDiff(i, self.node.startHeading) < 0.12:
+                self.node.startHeading = i
+
         self.node.program.recompute()
 
 

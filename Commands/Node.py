@@ -64,9 +64,12 @@ class Node(Draggable, ABC):
             self._snapToPosition(nextNode, nextNode.shoot.heading)
 
         # For straight edges only, snap to previous heading if close. Only for third node onward
-        if self.previous is not None and self.previous.arc.isStraight and self.previous.previous.previous is not None:
+        if self.previous is not None and self.previous.arc.isStraight:
             prevNode: Node = self.previous.previous
-            self._snapToPosition(prevNode, prevNode.previous.afterHeading)
+            if prevNode.previous is not None:
+                self._snapToPosition(prevNode, prevNode.previous.afterHeading)
+            else:
+                self._snapToPosition(prevNode, prevNode.startHeading)
 
         # For straight edges only, snap to next heading if close
         if self.next is not None and self.next.arc.isStraight and self.next.next.next is not None:

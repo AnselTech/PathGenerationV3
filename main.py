@@ -17,6 +17,7 @@ import Commands.Node as Node
 import Commands.StartNode as StartNode
 import Commands.TurnNode as TurnNode
 
+from Commands.OdomButton import OdomButton
 from Commands.TextButton import TextButton
 from Commands.SaveButton import SaveButton
 from Commands.RobotButton import RobotButton
@@ -53,6 +54,7 @@ if __name__ == '__main__':
     mouseSelector: MouseSelector = MouseSelector(state, program)
     robotImage: RobotImage = RobotImage(fieldTransform)
 
+    odomButton: OdomButton = OdomButton(program)
     textButton: TextButton = TextButton(state)
     saveButton: SaveButton = SaveButton(program)
     robotButton: RobotButton = RobotButton(state)
@@ -140,6 +142,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
     mouseSelector.draw(screen)
 
     # Draw interface buttons
+    odomButton.draw(screen)
     textButton.draw(screen)
     saveButton.draw(screen)
     robotButton.draw(screen)
@@ -219,6 +222,7 @@ def getHoverables() -> Iterator[Hoverable]:
         for hoverable in mouseSelector.getHoverables():
             yield hoverable
 
+        yield odomButton
         yield textButton
         yield saveButton
         yield robotButton

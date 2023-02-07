@@ -315,9 +315,13 @@ class TurnCommand(Command):
         graphics.drawText(screen, graphics.FONT15, self.parent.goalHeadingStr, colors.BLACK, x, y)
     
     def getCode(self) -> str:
-        mode = "GTU_TURN_PRECISE" if self.toggle.get(int) == 0 else "GTU_TURN"
-        num = round(self.parent.goalHeading * 180 / 3.1415, 2)
-        return f"goTurnU(robot, {mode}, getRadians({num}));"
+        if self.parent.program.state.useOdom:
+            nextPoint = self.parent.next.next.position.fieldRef
+            return f"turnToPoint(robot, GTU_TURN, {round(nextPoint[0], 2)}, {round(nextPoint[1], 2)});"
+        else:
+            mode = "GTU_TURN_PRECISE" if self.toggle.get(int) == 0 else "GTU_TURN"
+            num = round(self.parent.goalHeading * 180 / 3.1415, 2)
+            return f"goTurnU(robot, {mode}, getRadians({num}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         tolerance = 5 # tolerance interval in degrees
@@ -409,10 +413,18 @@ class StraightCommand(Command):
             time = self.timeSlider.getValue()
             return f"goForwardTimedU(robot, GFU_TURN, {time}, {speed}, getRadians({heading}));"
         elif self.toggle.get(int) == 2:
-            return f"goForwardU(robot, NO_SLOWDOWN({speed}), GFU_TURN, {distance}, getRadians({heading}));"
+            if self.program.state.useOdom:
+                nextPoint = self.parent.next.position.fieldRef
+                return f"goToPoint(robot, NO_SLOWDOWN, GFU_TURN, {round(nextPoint[0], 2)}, {round(nextPoint[1], 2)});"
+            else:
+                return f"goForwardU(robot, NO_SLOWDOWN({speed}), GFU_TURN, {distance}, getRadians({heading}));"
         else:
             mode = "GFU_DIST_PRECISE" if self.toggle.get(int) == 0 else "GFU_DIST"
-            return f"goForwardU(robot, {mode}({speed}), GFU_TURN, {distance}, getRadians({heading}));"
+            if self.program.state.useOdom:
+                nextPoint = self.parent.next.position.fieldRef
+                return f"goToPoint(robot, {mode}, GFU_TURN, {round(nextPoint[0], 2)}, {round(nextPoint[1], 2)});"
+            else:
+                return f"goForwardU(robot, {mode}({speed}), GFU_TURN, {distance}, getRadians({heading}));"
 
     def initSimulationController(self, simulationState: SimulationState):
         minSpeed = Simulator.MAX_VELOCITY * 0.05

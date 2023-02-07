@@ -33,6 +33,7 @@ class SoftwareState:
 
         self.isCode = False # whether displaying code (as opposed to block commands)
         self.showRobot = False
+        self.useOdom = False
 
         self.enableComments = True # when c is pressed, this is updated. Determines what commenting state
         # comments will be set to when mouse is hovered while c is held

@@ -144,7 +144,7 @@ class Textbox(Clickable, CommandAddon):
 
     def click(self):
 
-        if True or Utility.IS_MAC:
+        if Utility.IS_MAC:
             newCode = texteditor.open(self.code)
         else:
 

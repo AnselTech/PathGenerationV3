@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
 def main():
 
-    if not Utility.IS_MAC:
+    if False and not Utility.IS_MAC:
         oldEnvironmentVariable = os.environ["EDITOR"]
         print("Old EDITOR environment variable to be temporarily replaced:", oldEnvironmentVariable)
 
@@ -108,9 +108,7 @@ def main():
     except:
         pass
     finally:
-        if not Utility.IS_MAC:
-            os.environ["EDITOR"] = oldEnvironmentVariable
-            print("EDITOR environment variable reset back to:", oldEnvironmentVariable)
+        pass
 
                 
 

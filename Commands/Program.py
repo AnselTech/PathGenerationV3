@@ -203,8 +203,9 @@ class Program:
         def setFlywheelSpeedCommand(code, commands):
             for command in commands:
                 if type(command) == ShootCommand:
-                    speed = int(command.slider.getValue())
-                    return code + f"robot.flywheel->setVelocity({speed}); // Preemptively set speed for next shot\n"
+                    rpmCorrection = int(command.slider.getValue())
+                    distance = Utility.distanceTuples(command.parent.parent.position.fieldRef, command.parent.goalPosition)
+                    return code + f"setShootDistance(robot, {distance}, {rpmCorrection}); // Preemptively set speed for next shot\n"
             return code
 
         x,y = self.first.position.fieldRef
@@ -459,5 +460,8 @@ class Program:
 
     def deleteCommand(self, command):
         previous = self._getPreviousCommand(command)
-        previous.nextCustomCommand = command.nextCustomCommand
+        if previous is None:
+            self.firstCommand.nextCustomCommand = command.nextCustomCommand
+        else:
+            previous.nextCustomCommand = command.nextCustomCommand
         self.recomputeCommands()

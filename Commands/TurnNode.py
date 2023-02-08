@@ -1,5 +1,7 @@
 from Commands.Node import *
 from SingletonState.SoftwareState import Mode, SoftwareState
+from SingletonState.ReferenceFrame import PointRef, Ref
+import Utility, colors
 
 def init():
     global turnCImage, turnCCImage, turnCImageH, turnCCImageH
@@ -24,7 +26,7 @@ class Shoot(Draggable):
         self.turnToShootCommand: TurnCommand = TurnCommand(self, True)
         self.shootCommand: ShootCommand = ShootCommand(self)
 
-        self.target: PointRef = PointRef(Ref.FIELD, point = (132, 132)) # red goal center
+        self.target: PointRef = PointRef(Ref.FIELD, point = Utility.RED_GOAL) # red goal center
 
         self.active = False
         self.headingCorrection = 0 # [Heading to goal] + self.headingCorrection gives shooting heading
@@ -49,6 +51,15 @@ class Shoot(Draggable):
 
         self.goalHeading = self.heading
         self.goalHeadingStr = Utility.headingToString(self.goalHeading)
+
+        # calculate whether target is blue or red
+        headingToRed = Utility.headingTwoPoints(self.position.fieldRef, Utility.RED_GOAL)
+        headingToBlue = Utility.headingTwoPoints(self.position.fieldRef, Utility.BLUE_GOAL)
+        if Utility.headingDiff(self.heading, headingToRed) < Utility.headingDiff(self.heading, headingToBlue):
+            self.goalPosition = Utility.RED_GOAL
+        else:
+            self.goalPosition = Utility.BLUE_GOAL
+        self.goalPositionS = PointRef(Ref.FIELD, self.goalPosition).screenRef
 
 
     # Hovering if touching the top half of the vector
@@ -86,6 +97,10 @@ class Shoot(Draggable):
         
         if thick or self.shootCommand.isHovering:
             graphics.drawGuideLine(screen, (255,255,0), *self.position.screenRef, self.heading)
+
+            # Draw target goal
+            targetColor = [100,0,0] if self.goalPosition == Utility.RED_GOAL else [0,0,100]
+            graphics.drawCircle(screen, *self.goalPositionS, targetColor, 10)
         
         graphics.drawVector(screen, color, *self.parent.position.screenRef, *self.position.screenRef, thickness, a)
 

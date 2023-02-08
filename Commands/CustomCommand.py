@@ -31,6 +31,7 @@ class DeleteButton(Clickable, CommandAddon):
         self.y = y + self.dy
 
     def click(self):
+        #print(type(self.parent))
         self.program.deleteCommand(self.parent)
 
     def checkIfHovering(self, userInput: UserInput) -> bool:

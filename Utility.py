@@ -2,7 +2,7 @@ import pygame, math, pygame.gfxdraw, platform, os
 
 pygame.font.init()
 
-VERSION = "3.5.2"
+VERSION = "3.5.3"
 VERSION_LOWER = "v" + VERSION.replace(".", "_")
 IS_MAC: bool = platform.system() == "Darwin"
 
@@ -15,6 +15,9 @@ PANEL_WIDTH = 300
 PIXELS_TO_FIELD_CORNER = 19 * (SCREEN_SIZE / 800)
 FIELD_SIZE_IN_PIXELS = 766 * (SCREEN_SIZE / 800)
 FIELD_SIZE_IN_INCHES = 144
+
+RED_GOAL = (129, 129)
+BLUE_GOAL = (15, 15)
 
 def setTarget(target):
     global SAVE_TARGET, SAVE_TARGET_NAME

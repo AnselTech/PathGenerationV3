@@ -66,51 +66,45 @@ def main():
         oldEnvironmentVariable = os.environ["EDITOR"]
         print("Old EDITOR environment variable to be temporarily replaced:", oldEnvironmentVariable)
 
-    # Main software loop
-    try:
-        while True:
-            
-            userInput.getUserInput()
-            if userInput.isQuit:
-                pygame.quit()
-                sys.exit()
-            
-            # Handle zooming with mousewheel
-            modified = handleMousewheel(fieldSurface, fieldTransform, userInput, program)
-            
-            # Find the hovered object out of all the possible hoverable objects
-            handleHoverables(state, userInput, getHoverables())
-            
-            # Now that the hovered object is computed, handle what object is being dragged and then actually dragging the object
-            handleDragging(userInput, state, fieldSurface)
+    while True:
+        
+        userInput.getUserInput()
+        if userInput.isQuit:
+            pygame.quit()
+            sys.exit()
+        
+        # Handle zooming with mousewheel
+        modified = handleMousewheel(fieldSurface, fieldTransform, userInput, program)
+        
+        # Find the hovered object out of all the possible hoverable objects
+        handleHoverables(state, userInput, getHoverables())
+        
+        # Now that the hovered object is computed, handle what object is being dragged and then actually dragging the object
+        handleDragging(userInput, state, fieldSurface)
 
-            # If the X key is pressed, delete hovered PathPoint/segment
-            handleDeleting(userInput, state, program)
+        # If the X key is pressed, delete hovered PathPoint/segment
+        handleDeleting(userInput, state, program)
 
-            handleCommandCommenting(userInput, state, program)
+        handleCommandCommenting(userInput, state, program)
 
-            # Handle dragging .pg3 file into program to load
-            handleLoadedFile(program, userInput.loadedFile)
+        # Handle dragging .pg3 file into program to load
+        handleLoadedFile(program, userInput.loadedFile)
 
-            shadowPos, shadowHeading = handleHoverPath(userInput, state, program)
-            segmentShadow = handleHoverPathAdd(userInput, state, program)
+        shadowPos, shadowHeading = handleHoverPath(userInput, state, program)
+        segmentShadow = handleHoverPathAdd(userInput, state, program)
 
 
-            # Handle all field left click functionality
-            if userInput.leftClicked:
-                handleLeftClick(state, fieldSurface, userInput, program, segmentShadow)
-            elif userInput.rightClicked:
-                handleRightClick(state, userInput)
+        # Handle all field left click functionality
+        if userInput.leftClicked:
+            handleLeftClick(state, fieldSurface, userInput, program, segmentShadow)
+        elif userInput.rightClicked:
+            handleRightClick(state, userInput)
 
-            if userInput.isKeyPressed(pygame.K_p):
-                print(program.code)
+        if userInput.isKeyPressed(pygame.K_p):
+            print(program.code)
 
-            # Draw everything on the screen
-            drawEverything(shadowPos, shadowHeading, segmentShadow)
-    except:
-        pass
-    finally:
-        pass
+        # Draw everything on the screen
+        drawEverything(shadowPos, shadowHeading, segmentShadow)
 
                 
 

@@ -5,6 +5,7 @@ from Commands.TurnNode import TurnNode
 from Commands.Scroller import Scroller
 from Commands.TextButton import TextButton
 from Commands.Between import Between
+from Commands.CustomCommand import FlapCommand
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
@@ -200,29 +201,39 @@ class Program:
             self.codeLines = []
             return
 
-        def setFlywheelSpeedCommand(code, commands):
+        def setFlywheelSpeedCommand(code, commands, flapUp):
             for command in commands:
-                if type(command) == ShootCommand:
+
+                if type(command) == FlapCommand:
+                    flapUp = command.toggle.activeOption != 0
+                elif type(command) == ShootCommand:
                     rpmCorrection = int(command.slider.getValue())
                     distance = Utility.distanceTuples(command.parent.parent.position.fieldRef, command.parent.goalPosition)
-                    return code + f"setShootDistance(robot, {distance}, {rpmCorrection}); // Preemptively set speed for next shot\n"
+                    flapText = "true" if flapUp else "false"
+                    return code + f"setShootDistance(robot, {distance}, {rpmCorrection}, {flapText}); // Preemptively set speed for next shot\n"
             return code
 
         x,y = self.first.position.fieldRef
         x = round(x, 1)
         y = round(y, 1)
         startHeading = round(self.first.startHeading * 180 / 3.1415, 2)
+
+        flapUp = False
         
         code = f"// GENERATED C++ CODE FROM PathGen {Utility.VERSION}\n"
         code += f"// Exported: {ctime()}\n\n"
         code += f"// Robot assumes a starting position of ({x},{y}) at heading of {startHeading} degrees.\n"
-        code = setFlywheelSpeedCommand(code, commands)
+        code = setFlywheelSpeedCommand(code, commands, flapUp)
         code += "setEffort(*robot.intake, 1); // Start running intake immediately\n"
         code += "robot.drive->setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);\n\n"
 
+        
         for i in range(len(commands)):
             command = commands[i]
             isShooter = type(command) == ShootCommand
+
+            if type(command) == FlapCommand:
+                flapUp = command.toggle.activeOption != 0
 
             if isShooter:
                 code += "\n"
@@ -233,7 +244,7 @@ class Program:
                 code += command.getCode() + "\n"
 
             if isShooter:
-                code = setFlywheelSpeedCommand(code, commands[i+1:]) + "\n"
+                code = setFlywheelSpeedCommand(code, commands[i+1:], flapUp) + "\n"
 
         self.code = code + "// ================================================\n"
         self.codeLines = self.code.split("\n")

@@ -57,6 +57,10 @@ def loadCustomState(program, data: CustomCommandData):
                 rollerDistance = data.info["distance"],
                 rollerTime = data.info["time"]
             )
+        elif data.id == "backIntoRoller":
+            command = DoRollerCommand(program)
+        elif data.id == "flap":
+            command = FlapCommand(program, flapUp = data.info["toggle"])
         else:
             raise Exception("Invalid command type.")
 
@@ -92,6 +96,15 @@ def saveCustomState(command: CustomCommand) -> CustomCommandData:
             "commented" : command.commented
         }
         return CustomCommandData("roller", dict)
+    elif isinstance(command, FlapCommand):
+        return CustomCommandData("flap", {
+            "toggle" : command.toggle.activeOption,
+            "commented" : command.commented
+        })
+    elif isinstance(command, DoRollerCommand):
+        return CustomCommandData("backIntoRoller", {
+            "commented" : command.commented
+        })
     else:
         raise Exception("Cannot serialize command: ", str(command))
 

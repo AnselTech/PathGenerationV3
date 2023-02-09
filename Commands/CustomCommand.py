@@ -307,3 +307,58 @@ class RollerCommand(CustomCommand):
 
     def isAddOnsHovering(self) -> bool:
         return super().isAddOnsHovering() or self.sliderSpeed.isHovering or self.sliderTime.isHovering
+
+
+class FlapCommand(CustomCommand):
+
+    commandColors = [[34, 245, 231], [152, 237, 232]]
+    text = "flap"
+
+    def __init__(self, program, nextCustomCommand = None, flapUp = 0):
+
+        icon = graphics.getImage("Images/Commands/flap.png", 0.07)
+        super().__init__(self.commandColors, program, icon, nextCustomCommand)
+
+        self.toggle = CommandToggle(self, ["Pneumatic flap down", "Pneumatic flap up"], ["Down", "Up"],   width = 135, dx = 47)
+
+        self.toggle.activeOption = flapUp
+
+    def getOtherHoverables(self) -> Iterable[Hoverable]:
+        yield self.toggle
+
+
+    def getCode(self) -> str:
+
+        if self.toggle.activeOption == 0:
+            value = "false"
+        else:
+            value = "true"
+
+        return f"\nrobot.shooterFlap->set_value({value});"
+
+
+class DoRollerCommand(CustomCommand):
+
+    commandColors = [[117, 61, 61], [201, 167, 167]]
+    text = "backIntoRoller"
+
+    def __init__(self, program, nextCustomCommand = None):
+
+        icon = graphics.getImage("Images/Commands/roller.png", 0.07)
+        super().__init__(self.commandColors, program, icon, nextCustomCommand)
+
+    def drawOther(self, screen: pygame.Surface):
+        graphics.drawText(screen, graphics.FONT15, "Back up and do roller", [0,0,0], self.x + self.INFO_DX + 50, self.y + Command.COMMAND_HEIGHT/2)
+
+    def getCode(self) -> str:
+
+        string =  "\n// Back up and do rollers using drivetrain current detection\n"
+        string += "robot.drive->setEffort(-0.3, -0.3);\n"
+        string += "robot.roller->move_velocity(100);\n"
+        string += "while (robot.drive->getCurrent() < 1.2) pros::delay(10);\n"
+        string += "robot.roller->brake();\n"
+        string += "robot.drive->stop();\n"
+
+        return string
+
+

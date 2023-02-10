@@ -6,6 +6,7 @@ from Commands.Scroller import Scroller
 from Commands.TextButton import TextButton
 from Commands.Between import Between
 from Commands.CustomCommand import FlapCommand
+import Commands.Serializer as Serializer
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
@@ -13,7 +14,7 @@ from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
 from Simulation.Simulator import Simulator
 from RobotImage import RobotImage
-import pygame, Utility, math
+import pygame, Utility, math, os, os.path, pickle
 from typing import Iterator
 from timeit import default_timer as timer
 from time import ctime
@@ -477,3 +478,20 @@ class Program:
         else:
             previous.nextCustomCommand = command.nextCustomCommand
         self.recomputeCommands()
+
+    def generateSavefile(self):
+
+        state = Serializer.State(self.first, self.firstCommand)
+
+        if not os.path.exists("saves"):
+            os.makedirs("saves")
+
+        i = 1
+        filename = f"saves/{Utility.SAVE_TARGET_NAME}_save{i}.pg3"
+        while os.path.isfile(filename):
+            i += 1
+            filename = f"saves/{Utility.SAVE_TARGET_NAME}_save{i}.pg3"
+
+        with open(filename, "wb") as file:
+            pickle.dump(state, file)
+        print(f"Saved as {filename}!")

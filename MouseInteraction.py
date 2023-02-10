@@ -196,6 +196,9 @@ def handleLoadedFile(program: Program, filename):
     # Open loaded .pg3 file
     if filename.endswith(".pg3"):
         with open(filename, "rb") as file:
+
+            program.generateSavefile() # save before loading new path
+
             state: Serializer.State = pickle.load(file)
             state.load(program)
 

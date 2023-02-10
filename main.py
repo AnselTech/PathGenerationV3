@@ -70,6 +70,9 @@ def main():
         
         userInput.getUserInput()
         if userInput.isQuit:
+
+            program.generateSavefile() # save before quit
+
             pygame.quit()
             sys.exit()
         

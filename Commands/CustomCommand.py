@@ -355,7 +355,8 @@ class DoRollerCommand(CustomCommand):
         string =  "\n// Back up and do rollers using drivetrain current detection\n"
         string += "robot.drive->setEffort(-0.3, -0.3);\n"
         string += "robot.roller->move_velocity(100);\n"
-        string += "while (robot.drive->getCurrent() < 1.2) pros::delay(10);\n"
+        string += "uint32_t endTime = pros::millis() + 2000;"
+        string += "while (robot.drive->getCurrent() < 1.2 && pros::millis() < endTime) pros::delay(10);\n"
         string += "robot.roller->brake();\n"
         string += "robot.drive->stop();\n"
 

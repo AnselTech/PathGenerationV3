@@ -507,7 +507,7 @@ class ShootCommand(Command):
         super().__init__(parent, YELLOW)
 
         self.image = graphics.getImage("Images/Commands/shoot.png", 0.15)
-        self.slider = CommandSlider(self, -500, 500, 1, "+/- RPM adjustment", 0)
+        self.slider = CommandSlider(self, -300, 310, 1, "+/- RPM adjustment", 0)
         
 
     def getIcon(self) -> pygame.Surface:

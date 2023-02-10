@@ -347,8 +347,11 @@ class DoRollerCommand(CustomCommand):
         icon = graphics.getImage("Images/Commands/roller.png", 0.07)
         super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
-    def drawOther(self, screen: pygame.Surface):
-        graphics.drawText(screen, graphics.FONT15, "Back up and do roller", [0,0,0], self.x + self.INFO_DX + 50, self.y + Command.COMMAND_HEIGHT/2)
+        self.slider = CommandSlider(self, 0, 2, 0.01, "Roller Time (seconds)", 0, dx = -50)
+
+
+    def getOtherHoverables(self) -> Iterable[Hoverable]:
+        yield self.slider
 
     def getCode(self) -> str:
 
@@ -358,6 +361,12 @@ class DoRollerCommand(CustomCommand):
         string += "robot.roller->move_velocity(100);\n"
         string += "uint32_t endTime = pros::millis() + 2000;\n"
         string += "while (robot.drive->getCurrent() < 1.2 && pros::millis() < endTime) pros::delay(10);\n"
+
+        if self.slider.getValue() > 0:
+            string += "robot.drive->setEffort(-0.1, -0.1);\n"
+            time = int(self.slider.getValue() * 1000)
+            string += f"pros::delay({time});\n"
+
         string += "robot.roller->brake();\n"
         string += "robot.drive->stop();\n"
         string += "}\n"

@@ -411,6 +411,8 @@ class StraightCommand(Command):
 
         if self.toggle.get(int) == 3:
             time = self.timeSlider.getValue()
+            if distance < 0:
+                speed *= -1
             return f"goForwardTimedU(robot, GFU_TURN, {time}, {speed}, getRadians({heading}));"
         elif self.toggle.get(int) == 2:
             if self.program.state.useOdom:

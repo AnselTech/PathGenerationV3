@@ -35,6 +35,7 @@ class Node(Draggable, ABC):
     def startDragging(self, userInput: UserInput):
         pass
 
+    # snap to heading if close. return true if snapped
     def _snapToPosition(self, otherNode: 'Node', goalHeading: float, flip: bool = False):
         mouseHeading = Utility.thetaTwoPoints(otherNode.position.fieldRef, self.position.fieldRef)
 
@@ -43,7 +44,9 @@ class Node(Draggable, ABC):
                 distance = Utility.distanceTuples(otherNode.position.fieldRef, self.position.fieldRef)
                 vector = VectorRef(Ref.FIELD, magnitude = distance, heading = h)
                 self.position = otherNode.position + vector
-                break
+                return True
+
+        return False
 
     # Called every frame that the object is being dragged. Most likely used to update the position of the object based
     # on where the mouse is
@@ -67,14 +70,28 @@ class Node(Draggable, ABC):
         if self.previous is not None and self.previous.arc.isStraight:
             prevNode: Node = self.previous.previous
             if prevNode.previous is not None:
-                self._snapToPosition(prevNode, prevNode.previous.afterHeading)
+                snapped = self._snapToPosition(prevNode, prevNode.previous.afterHeading)
             else:
-                self._snapToPosition(prevNode, prevNode.startHeading)
+                snapped = self._snapToPosition(prevNode, prevNode.startHeading)
+
+            # Snap to cardinal direction
+            if not snapped:
+                if not self._snapToPosition(prevNode, 0):
+                    self._snapToPosition(prevNode, 3.1415/2)
 
         # For straight edges only, snap to next heading if close
-        if self.next is not None and self.next.arc.isStraight and self.next.next.next is not None:
+        if self.next is not None and self.next.arc.isStraight:
+
             nextNode = self.next.next
-            self._snapToPosition(nextNode, nextNode.next.beforeHeading)
+            snapped = False
+
+            if self.next.next.next is not None:
+                snapped = self._snapToPosition(nextNode, nextNode.next.beforeHeading)
+
+            # Snap to cardinal direction
+            if not snapped:
+                if not self._snapToPosition(nextNode, 0):
+                    self._snapToPosition(nextNode, 3.1415/2)
 
         # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
         if self.previous is not None and self.previous.arc.isStraight:

@@ -67,7 +67,13 @@ class StartNode(Node):
         super().compute()
         self.headingPoint.compute()
 
-        self.goalHeading = (self.next.beforeHeading) if self.next is not None else self.startHeading
+        if self.next is None:
+            self.goalHeading = self.startHeading
+        else:
+            self.goalHeading = self.next.beforeHeading
+            if self.next.reversed:
+                self.goalHeading += 3.1415
+                
         self.goalHeadingStr = Utility.headingToString(self.goalHeading)
 
         if self.next is None or Utility.headingsEqual(self.startHeading, self.goalHeading):

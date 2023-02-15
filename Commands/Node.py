@@ -55,43 +55,49 @@ class Node(Draggable, ABC):
         self.position = userInput.mousePosition.copy()
         self.position.fieldRef = Utility.clamp2D(self.position.fieldRef, 0, 0, 144, 144)
 
+        snapped = False
+
         # For straight edges only, snap to shoot heading of previous node
         if self.previous is not None and self.previous.arc.isStraight:
             node: Node = self.previous.previous
             if node.previous is not None and node.shoot.active:
-                self._snapToPosition(node, node.shoot.heading)
+                snapped = snapped or self._snapToPosition(node, node.shoot.heading)
 
         # For straight edges only, snap to shoot heading of next node
         if self.next is not None and self.next.arc.isStraight and self.next.next.shoot.active:
             nextNode = self.next.next
-            self._snapToPosition(nextNode, nextNode.shoot.heading)
+            snapped = snapped or self._snapToPosition(nextNode, nextNode.shoot.heading)
 
         # For straight edges only, snap to previous heading if close. Only for third node onward
         if self.previous is not None and self.previous.arc.isStraight:
             prevNode: Node = self.previous.previous
             if prevNode.previous is not None:
-                snapped = self._snapToPosition(prevNode, prevNode.previous.afterHeading)
+                snapped = snapped or self._snapToPosition(prevNode, prevNode.previous.afterHeading)
             else:
-                snapped = self._snapToPosition(prevNode, prevNode.startHeading)
-
-            # Snap to cardinal direction
-            if not snapped:
-                if not self._snapToPosition(prevNode, 0):
-                    self._snapToPosition(prevNode, 3.1415/2)
+                snapped = snapped or self._snapToPosition(prevNode, prevNode.startHeading)
 
         # For straight edges only, snap to next heading if close
         if self.next is not None and self.next.arc.isStraight:
 
             nextNode = self.next.next
-            snapped = False
 
             if self.next.next.next is not None:
-                snapped = self._snapToPosition(nextNode, nextNode.next.beforeHeading)
+                snapped = snapped or self._snapToPosition(nextNode, nextNode.next.beforeHeading)
+        
+        # If has not been snapped already, snap to cardinal direction
+        if not snapped:
 
-            # Snap to cardinal direction
-            if not snapped:
-                if not self._snapToPosition(nextNode, 0):
-                    self._snapToPosition(nextNode, 3.1415/2)
+            # Snap previous edge to cardinal direction
+            if self.previous is not None and self.previous.arc.isStraight:
+                prevNode = self.previous.previous
+                snapped = snapped or self._snapToPosition(prevNode, 0)
+                snapped = snapped or self._snapToPosition(prevNode, 3.1415/2)
+
+            # Snap next edge to cardinal direction
+            if not snapped and self.next is not None and self.next.arc.isStraight:
+                nextNode = self.next.next
+                snapped = snapped or self._snapToPosition(nextNode, 0)
+                snapped = snapped or self._snapToPosition(nextNode, 3.1415/2)
 
         # For straight edges, change the heading of the edge rather than the arc's curvature (to maintain straightness)
         if self.previous is not None and self.previous.arc.isStraight:

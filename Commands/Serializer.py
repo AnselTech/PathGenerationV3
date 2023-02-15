@@ -51,12 +51,7 @@ def loadCustomState(program, data: CustomCommandData):
         elif data.id == "intake":
             command =  IntakeCommand(program, intakeSpeed = data.info["speed"])
         elif data.id == "roller":
-            command = RollerCommand(program,
-                rollerSpeed = data.info["speed"],
-                toggleMode = data.info["mode"],
-                rollerDistance = data.info["distance"],
-                rollerTime = data.info["time"]
-            )
+            command =  RollerCommand(program, rollerSpeed = data.info["speed"])
         elif data.id == "backIntoRoller":
             command = DoRollerCommand(program)
         elif data.id == "flap":
@@ -88,14 +83,10 @@ def saveCustomState(command: CustomCommand) -> CustomCommandData:
             "commented" : command.commented,
         })
     elif isinstance(command, RollerCommand):
-        dict = {
-            "speed" : command.sliderSpeed.getValue(),
-            "mode" : command.toggle.get(int),
-            "distance" : command.sliderDistance.getValue(),
-            "time" : command.sliderTime.getValue(),
-            "commented" : command.commented
-        }
-        return CustomCommandData("roller", dict)
+        return CustomCommandData("roller", {
+            "speed" : command.slider.getValue(),
+            "commented" : command.commented,
+        })
     elif isinstance(command, FlapCommand):
         return CustomCommandData("flap", {
             "toggle" : command.toggle.activeOption,

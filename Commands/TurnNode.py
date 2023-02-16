@@ -77,13 +77,16 @@ class Shoot(Draggable):
 
     # Adjust headingCorrection based on where the mouse is dragging the arrow
     def beDraggedByMouse(self, userInput: UserInput):
+
+        shiftPressed = userInput.isKeyPressing(pygame.K_LSHIFT)
+
         # the heading the mouse is dragging the shoot arrow to
         mouseHeading = Utility.thetaTwoPoints(self.parent.position.fieldRef, userInput.mousePosition.fieldRef)
         d = 0.06 * Utility.distanceTuples(self.parent.position.fieldRef, userInput.mousePosition.fieldRef)
-        if Utility.headingDiff(mouseHeading, self.parent.previous.afterHeading) < 0.04 / d:
+        if not shiftPressed and Utility.headingDiff(mouseHeading, self.parent.previous.afterHeading) < 0.04 / d:
             # Possibly snap mouse heading to previous heading
             mouseHeading = self.parent.previous.afterHeading
-        elif self.parent.next is not None and Utility.headingDiff(mouseHeading, self.parent.next.beforeHeading) < 0.04 / d:
+        elif not shiftPressed and self.parent.next is not None and Utility.headingDiff(mouseHeading, self.parent.next.beforeHeading) < 0.04 / d:
             # Possibly snap mouse heading to next heading, if it exists
             mouseHeading = self.parent.next.beforeHeading
         

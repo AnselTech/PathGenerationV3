@@ -61,6 +61,9 @@ class HeadingPoint(Draggable):
         self.position: PointRef = nodePos + vector
 
     def beDraggedByMouse(self, userInput: UserInput):
+
+        shiftPressed = userInput.isKeyPressing(pygame.K_LSHIFT)
+        
         self.heading = Utility.thetaTwoPoints(self.edge.previous.position.fieldRef, userInput.mousePosition.fieldRef)
 
         # limit maximum arc length to 300 inches
@@ -68,12 +71,12 @@ class HeadingPoint(Draggable):
             return
 
         # Snap to straight edge if sufficiently close
-        if Utility.headingDiff(self.edge.straightHeading, self.heading) < 0.12:
+        if not shiftPressed and Utility.headingDiff(self.edge.straightHeading, self.heading) < 0.12:
             self.heading = self.edge.straightHeading
 
         # Snap to heading of previous edge if sufficiently close
         prevEdge: 'StraightEdge' = self.edge.previous.previous
-        if prevEdge is not None:
+        if not shiftPressed and prevEdge is not None:
             if Utility.headingDiff(prevEdge.afterHeading, self.heading) < 0.12:
                 self.heading = prevEdge.afterHeading
             elif Utility.headingDiff(prevEdge.afterHeading + 3.1415, self.heading) < 0.12:
@@ -82,7 +85,7 @@ class HeadingPoint(Draggable):
         # Snap to heading of next edge if suffiently close
         nextEdge: 'StraightEdge' = self.edge.next.next
         heading2 = Arc.Arc(self.edge.previous.position, self.edge.next.position, self.heading).heading2
-        if nextEdge is not None:
+        if not shiftPressed and nextEdge is not None:
             if Utility.headingDiff(nextEdge.beforeHeading, heading2) < 0.12:
                 dx = self.edge.next.position.fieldRef[0] - self.edge.previous.position.fieldRef[0]
                 dy = self.edge.next.position.fieldRef[1] - self.edge.previous.position.fieldRef[1]

@@ -37,6 +37,7 @@ class Node(Draggable, ABC):
 
     # snap to heading if close. return true if snapped
     def _snapToPosition(self, otherNode: 'Node', goalHeading: float, flip: bool = False):
+        
         mouseHeading = Utility.thetaTwoPoints(otherNode.position.fieldRef, self.position.fieldRef)
 
         for h in [goalHeading, goalHeading + 3.1415]: # try both directions
@@ -52,24 +53,27 @@ class Node(Draggable, ABC):
     # on where the mouse is
     def beDraggedByMouse(self, userInput: UserInput):
 
+        # if shift pressed, no snapping
+        shiftPressed = userInput.isKeyPressing(pygame.K_LSHIFT)
+
         self.position = userInput.mousePosition.copy()
         self.position.fieldRef = Utility.clamp2D(self.position.fieldRef, 0, 0, 144, 144)
 
         snapped = False
 
         # For straight edges only, snap to shoot heading of previous node
-        if self.previous is not None and self.previous.arc.isStraight:
+        if not shiftPressed and self.previous is not None and self.previous.arc.isStraight:
             node: Node = self.previous.previous
             if node.previous is not None and node.shoot.active:
                 snapped = snapped or self._snapToPosition(node, node.shoot.heading)
 
         # For straight edges only, snap to shoot heading of next node
-        if self.next is not None and self.next.arc.isStraight and self.next.next.shoot.active:
+        if not shiftPressed and self.next is not None and self.next.arc.isStraight and self.next.next.shoot.active:
             nextNode = self.next.next
             snapped = snapped or self._snapToPosition(nextNode, nextNode.shoot.heading)
 
         # For straight edges only, snap to previous heading if close. Only for third node onward
-        if self.previous is not None and self.previous.arc.isStraight:
+        if not shiftPressed and self.previous is not None and self.previous.arc.isStraight:
             prevNode: Node = self.previous.previous
             if prevNode.previous is not None:
                 snapped = snapped or self._snapToPosition(prevNode, prevNode.previous.afterHeading)
@@ -77,7 +81,7 @@ class Node(Draggable, ABC):
                 snapped = snapped or self._snapToPosition(prevNode, prevNode.startHeading)
 
         # For straight edges only, snap to next heading if close
-        if self.next is not None and self.next.arc.isStraight:
+        if not shiftPressed and self.next is not None and self.next.arc.isStraight:
 
             nextNode = self.next.next
 
@@ -85,7 +89,7 @@ class Node(Draggable, ABC):
                 snapped = snapped or self._snapToPosition(nextNode, nextNode.next.beforeHeading)
         
         # If has not been snapped already, snap to cardinal direction
-        if not snapped:
+        if not shiftPressed and not snapped:
 
             # Snap previous edge to cardinal direction
             if self.previous is not None and self.previous.arc.isStraight:

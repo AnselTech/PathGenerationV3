@@ -10,6 +10,7 @@ import Commands.Serializer as Serializer
 from MouseInterfaces.Hoverable import Hoverable
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.SoftwareState import SoftwareState, Mode
+from SingletonState.UserInput import UserInput
 from Simulation.ControllerInputState import ControllerInputState
 from Simulation.SimulationState import SimulationState
 from Simulation.Simulator import Simulator

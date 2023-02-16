@@ -1,4 +1,4 @@
-import pygame, sys, os
+import pygame, sys, os, os.path
 from SingletonState.FieldTransform import FieldTransform
 from SingletonState.ReferenceFrame import PointRef
 import SingletonState.ReferenceFrame as ReferenceFrame
@@ -59,12 +59,40 @@ if __name__ == '__main__':
     saveButton: SaveButton = SaveButton(program)
     robotButton: RobotButton = RobotButton(state)
 
+# attempt to load most recent .pg3 file and target
+def loadPreviousSavestate():
+
+    try:
+        # Try to load .pg3 file
+        with open("cache/autosave.pg3", "rb") as file:
+            state: Serializer.State = pickle.load(file)
+            state.load(program)
+            print("Loaded autosaved .pg3 file.")
+    except Exception as e:
+        program.reset()
+        print("Error with loading autosaved path:")
+        print(e)
+
+    try:
+        # Try to load target
+        with open("cache/autotarget.pgt", "rb") as file:
+            data = pickle.load(file)
+            target = data["target"]
+            if os.path.isfile(target):
+                Utility.setTarget(target)
+                print("Loaded autosaved target location:", target)
+            else:
+                print("Autosaved target location is invalid. Defaulting target destination to Generated_Code.txt")
+    except Exception as e:
+        print("Error with loading target:")
+        print(e)
+        print("Defaulting target destination to Generated_Code.txt")
+        Utility.setTarget("Generated_Code.txt")
+        
 
 def main():
 
-    if False and not Utility.IS_MAC:
-        oldEnvironmentVariable = os.environ["EDITOR"]
-        print("Old EDITOR environment variable to be temporarily replaced:", oldEnvironmentVariable)
+    loadPreviousSavestate()
 
     while True:
         

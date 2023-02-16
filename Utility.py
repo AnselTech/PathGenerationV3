@@ -2,7 +2,7 @@ import pygame, math, pygame.gfxdraw, platform, os
 
 pygame.font.init()
 
-VERSION = "3.6.1"
+VERSION = "3.6.2"
 VERSION_LOWER = "v" + VERSION.replace(".", "_")
 IS_MAC: bool = platform.system() == "Darwin"
 
@@ -25,6 +25,9 @@ def setTarget(target):
     SAVE_TARGET_NAME = os.path.basename(target)[:-4]
     print(SAVE_TARGET, SAVE_TARGET_NAME)
     pygame.display.set_caption(f"Pathogen {VERSION} by Ansel [Target: {SAVE_TARGET}]")
+
+def getTarget():
+    return SAVE_TARGET
 
 def wrap(value, max):
     if value < 0:

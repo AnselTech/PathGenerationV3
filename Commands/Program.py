@@ -43,12 +43,21 @@ class Program:
         self.code: str = ""
         self.codeLines: list[str] = []
 
-        self.betwens: list[Between] = []
+        self.betweens: list[Between] = []
 
         self.hoveredBetween = None
 
         self.firstCommand = FirstCommand(self)
 
+
+        self.recompute()
+        self.recomputeGeneratedCode(None)
+
+    def reset(self):
+        self.first: StartNode = StartNode(self)
+        self.last: Node = self.first
+
+        self.firstCommand = FirstCommand(self)
 
         self.recompute()
         self.recomputeGeneratedCode(None)
@@ -492,6 +501,17 @@ class Program:
             i += 1
             filename = f"saves/{Utility.SAVE_TARGET_NAME}_save{i}.pg3"
 
+        # Autosave current path and target destination
+        if not os.path.exists("cache"):
+            os.makedirs("cache")
+
         with open(filename, "wb") as file:
             pickle.dump(state, file)
+        with open("cache/autosave.pg3", "wb") as file:
+            pickle.dump(state, file)
+        with open("cache/autotarget.pgt", "wb") as file:
+            data = {
+                "target" : Utility.getTarget()
+            }
+            pickle.dump(data, file)
         print(f"Saved as {filename}!")

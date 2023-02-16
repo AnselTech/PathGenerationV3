@@ -21,6 +21,7 @@ from Commands.OdomButton import OdomButton
 from Commands.TextButton import TextButton
 from Commands.SaveButton import SaveButton
 from Commands.RobotButton import RobotButton
+from Commands.ResetButton import ResetButton
 
 import Commands.Between
 
@@ -58,6 +59,7 @@ if __name__ == '__main__':
     textButton: TextButton = TextButton(state)
     saveButton: SaveButton = SaveButton(program)
     robotButton: RobotButton = RobotButton(state)
+    resetButton: ResetButton = ResetButton(program)
 
 # attempt to load most recent .pg3 file and target
 def loadPreviousSavestate():
@@ -171,6 +173,7 @@ def drawEverything(shadowPos: PointRef, shadowHeading: float, segmentShadow: Poi
     textButton.draw(screen)
     saveButton.draw(screen)
     robotButton.draw(screen)
+    resetButton.draw(screen)
 
     # Draw panel background
     border = 5
@@ -251,6 +254,7 @@ def getHoverables() -> Iterator[Hoverable]:
         yield textButton
         yield saveButton
         yield robotButton
+        yield resetButton
 
         if not state.mode == Mode.PLAYBACK:
             for hoverable in program.getHoverablesPath(state):

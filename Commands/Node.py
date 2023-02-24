@@ -33,7 +33,8 @@ class Node(Draggable, ABC):
 
     # Called when the object was just pressed at the start of a drag
     def startDragging(self, userInput: UserInput):
-        pass
+        self.startMousePosition = userInput.mousePosition.copy()
+        self.startNodePosition = self.position
 
     # snap to heading if close. return true if snapped
     def _snapToPosition(self, otherNode: 'Node', goalHeading: float, flip: bool = False):
@@ -56,7 +57,9 @@ class Node(Draggable, ABC):
         # if shift pressed, no snapping
         shiftPressed = userInput.isKeyPressing(pygame.K_LSHIFT)
 
-        self.position = userInput.mousePosition.copy()
+        #self.position = userInput.mousePosition.copy()
+        print((userInput.mousePosition - self.startMousePosition).fieldRef)
+        self.position = self.startNodePosition + (userInput.mousePosition - self.startMousePosition)
         self.position.fieldRef = Utility.clamp2D(self.position.fieldRef, 0, 0, 144, 144)
 
         snapped = False

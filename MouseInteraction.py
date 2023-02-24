@@ -111,14 +111,19 @@ def handleHoverables(state: SoftwareState, userInput: UserInput, hoverablesGener
 # Elif object is clickable, click it
 def handleStartingPressingObject(userInput: UserInput, state: SoftwareState, fieldSurface: FieldSurface) -> None:
 
+    # TODO: if coordinate arrows of node are pressed, do not reset state.nodeSelected either
+    if state.nodeSelected is not state.objectHovering and state.nodeSelected is not None:
+        state.nodeSelected.disableCoordinateArrows()
+        state.nodeSelected = None
+
+    state.startMousedownPosition = userInput.mousePosition.copy()
+    state.startMousedownObject = state.objectHovering
+
     # if the mouse is down on some object, try to drag that object
     if isinstance(state.objectHovering, Draggable):
         state.objectDragged = state.objectHovering
         state.objectDragged._startDragging(userInput)
 
-    elif isinstance(state.objectHovering, Clickable):
-        objectClicked: Clickable = state.objectHovering
-        objectClicked.click()
 
 
 # Determine what object is being dragged based on the mouse's rising and falling edges, and actually drag the object in question
@@ -128,12 +133,18 @@ def handleDragging(userInput: UserInput, state: SoftwareState, fieldSurface: Fie
     if userInput.leftPressed and userInput.mousewheelDelta == 0: # left mouse button just pressed
 
         # When the mouse has just clicked on the object, nothing should have been dragging before        
-        handleStartingPressingObject(userInput, state, fieldSurface)   
+        handleStartingPressingObject(userInput, state, fieldSurface)
     
     elif userInput.mouseReleased: # released, so nothing should be dragged
         if state.objectDragged is not None: # there was an object being dragged, so release that
             state.objectDragged._stopDragging()
             state.objectDragged = None
+        
+        if state.startMousedownObject is not None:
+            pixelsMouseMoved = Utility.distanceTuples(state.startMousedownPosition.screenRef, userInput.mousePosition.screenRef)
+            if isinstance(state.startMousedownObject, Clickable) and pixelsMouseMoved < 3:
+                objectClicked: Clickable = state.startMousedownObject
+                objectClicked.click()
 
     # Now that we know what's being dragged, actually drag the object
     if state.objectDragged is not None:

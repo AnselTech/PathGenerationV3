@@ -3,6 +3,8 @@ from enum import Enum
 from MouseInterfaces.Hoverable import Hoverable
 from MouseInterfaces.Draggable import Draggable
 from MouseInterfaces.Clickable import Clickable
+from SingletonState.ReferenceFrame import PointRef
+
 
 """ A class representing global state of the software."""
 
@@ -30,6 +32,11 @@ class SoftwareState:
         self.mode: Mode = Mode.MOUSE_SELECT
         self.objectHovering: Hoverable = None # object the mouse is currently hovering over
         self.objectDragged: Draggable = None # object the mouse is currently dragging
+
+        self.nodeSelected = None
+
+        self.startMousedownPosition: PointRef = None
+        self.startMousedownObject: Hoverable = None
 
         self.isCode = False # whether displaying code (as opposed to block commands)
         self.showRobot = False

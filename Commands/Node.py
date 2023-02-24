@@ -2,10 +2,11 @@ from abc import ABC, abstractmethod
 from SingletonState.ReferenceFrame import PointRef, Ref, VectorRef
 from SingletonState.UserInput import UserInput
 from MouseInterfaces.Draggable import Draggable
+from MouseInterfaces.Clickable import Clickable
 import pygame, graphics, Utility, colors, math
 from Commands.Command import Command, TurnCommand, ShootCommand
 
-class Node(Draggable, ABC):
+class Node(Draggable, Clickable, ABC):
 
     def __init__(self, program, position: PointRef, hoverRadius: int, previous: 'Edge' = None, next: 'Edge' = None):
 
@@ -18,14 +19,29 @@ class Node(Draggable, ABC):
         self.position: PointRef = position.copy()
         self.hoverRadius = hoverRadius
 
+        self.arrowsEnabled = False
+
 
         self.command: Command = TurnCommand(self)
+
+
+    def enableCoordinateArrows(self):
+        print("enable coordinate")
+        self.arrowsEnabled = True
+
+    def disableCoordinateArrows(self):
+        print("disable coordinate")
+        self.arrowsEnabled = False
 
 
     # Called to determine if the mouse is touching this object (and if is the first object touched, would be considered hovered)
     def checkIfHovering(self, userInput: UserInput) -> bool:
         distance = Utility.distanceTuples(self.position.screenRef, userInput.mousePosition.screenRef)
         return distance < self.hoverRadius
+    
+    def click(self):
+        self.program.state.nodeSelected = self
+        self.enableCoordinateArrows()
 
     # Callback when the dragged object was just released
     def stopDragging(self):

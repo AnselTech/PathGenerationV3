@@ -30,7 +30,7 @@ class FieldTransform:
         return self._zoom
 
     def _setZoom(self, fieldZoom: float):
-        self._zoom = Utility.clamp(fieldZoom, 1, 3) # limits to how much you can zoom in or out
+        self._zoom = Utility.clamp(fieldZoom, 1, Utility.MAX_FIELD_ZOOM) # limits to how much you can zoom in or out
         self._boundFieldPan()
 
     # self.zoom property that is gettable and settable

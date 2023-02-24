@@ -19,6 +19,8 @@ FIELD_SIZE_IN_INCHES = 144
 RED_GOAL = (129, 129)
 BLUE_GOAL = (15, 15)
 
+MAX_FIELD_ZOOM = 4
+
 def setTarget(target):
     global SAVE_TARGET, SAVE_TARGET_NAME
     SAVE_TARGET = target

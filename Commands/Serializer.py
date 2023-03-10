@@ -115,6 +115,7 @@ class Segment:
     shootHeadingCorrection: float
     shootActive: bool
     shootCommandSlider: float
+    shootCommandNumSlider: float
     shootCommandCustom: list[CustomCommandData]
     shootCommandCommented: bool
     shootTurnCommandToggle: int
@@ -189,6 +190,7 @@ class State:
             shootHeadingCorrection = node.shoot.headingCorrection,
             shootActive = node.shoot.active,
             shootCommandSlider = node.shoot.shootCommand.slider.getValue(),
+            shootCommandNumSlider = node.shoot.shootCommand.numSlider.getValue(),
             shootCommandCustom = self.getCustom(node.shoot.shootCommand),
             shootCommandCommented = node.shoot.shootCommand.commented,
             shootTurnCommandToggle = node.shoot.turnToShootCommand.toggle.activeOption,
@@ -262,6 +264,10 @@ class State:
             node.shoot.shootCommand.nextCustomCommand = self.loadCustom(program, segment.shootCommandCustom)
             try:
                 node.shoot.shootCommand.commented = segment.shootCommandCommented
+            except:
+                pass
+            try:
+                node.shoot.shootCommand.numSlider.setValue(segment.shootCommandNumSlider, disableCallback = True)
             except:
                 pass
 

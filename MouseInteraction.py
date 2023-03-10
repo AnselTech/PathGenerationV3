@@ -40,7 +40,7 @@ def handleRightClick(state: SoftwareState, userInput: UserInput):
 
     if userInput.isMouseOnField:
         # If right click, cycle the mouse mode (excluding playback)
-        if isinstance(state.objectHovering, TurnNode) and state.mode != Mode.MOUSE_SELECT:
+        if isinstance(state.objectHovering, TurnNode):
             node: Node = state.objectHovering
             node.shoot.active = not node.shoot.active
             node.program.recompute()

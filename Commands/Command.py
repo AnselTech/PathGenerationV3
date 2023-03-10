@@ -193,6 +193,8 @@ class Command(Hoverable, ABC):
         self.toggle: CommandToggle = toggle
         self.slider: CommandSlider = slider
 
+        self.DELTA_SLIDER_Y = 14
+
         self.nextCustomCommand: 'CustomCommand' = nextCustomCommand
         
         self.commented = commented
@@ -339,8 +341,6 @@ class StraightCommand(Command):
 
         RED = [[245, 73, 73], [237, 119, 119]]
         super().__init__(parent, RED)
-
-        self.DELTA_SLIDER_Y = 14
 
         toggle = CommandToggle(self, ["Tuned for precision", "Tuned for speed", "No slowdown", "Timed"])
         self.speedSlider = CommandSlider(self, 0, 1, 0.01, "Speed", 1, 0)
@@ -509,7 +509,9 @@ class ShootCommand(Command):
         super().__init__(parent, YELLOW)
 
         self.image = graphics.getImage("Images/Commands/shoot.png", 0.15)
-        self.slider = CommandSlider(self, -300, 310, 1, "+/- RPM adjustment", 0)
+        self.slider = CommandSlider(self, -300, 310, 1, "+/- RPM adjustment", 0, -self.DELTA_SLIDER_Y)
+
+        self.numSlider = CommandSlider(self, 1, 3, 1, "# of disks", 3, self.DELTA_SLIDER_Y)
         
 
     def getIcon(self) -> pygame.Surface:
@@ -520,9 +522,10 @@ class ShootCommand(Command):
         y = self.y + self.height/2
 
         graphics.drawText(screen, graphics.FONT20, "Shoot", colors.BLACK, x, y)
+        self.numSlider.draw(screen)
 
     def getCode(self) -> str:
-        return f"shoot(robot);"
+        return f"shoot(robot, {self.numSlider.getValue()});"
 
     def initSimulationController(self, simulationState: SimulationState):
         # temporarily, this controller just does nothing for 20 ticks
@@ -532,3 +535,17 @@ class ShootCommand(Command):
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         self.idleTicks += 1
         return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)
+    
+    def isAddOnsHovering(self) -> bool:
+        return self.numSlider.isHovering
+    
+    def getHoverables(self) -> Iterable[Hoverable]:
+        yield self.slider
+        yield self.numSlider
+        yield self
+        
+    def updatePosition(self, x, y):
+        self.x = x
+        self.y = y
+        self.slider.compute()
+        self.numSlider.compute()

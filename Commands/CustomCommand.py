@@ -295,7 +295,7 @@ class FlapCommand(CustomCommand):
         icon = graphics.getImage("Images/Commands/flap.png", 0.07)
         super().__init__(self.commandColors, program, icon, nextCustomCommand)
 
-        self.toggle = CommandToggle(self, ["Pneumatic flap down", "Pneumatic flap up"], ["Down", "Up"],   width = 135, dx = 47)
+        self.toggle = CommandToggle(self, ["Pneumatic flap down", "Pneumatic flap up"], ["Down", "Up"],   width = 135, dx = 5)
 
         self.toggle.activeOption = flapUp
 

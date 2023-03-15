@@ -27,7 +27,7 @@ import Commands.Between
 
 from MouseSelector.MouseSelector import MouseSelector
 
-import Utility, colors, math
+import Utility, colors, math, time
 from typing import Iterator
 import graphics, Arc
 import multiprocessing as mp 
@@ -96,7 +96,14 @@ def main():
 
     loadPreviousSavestate()
 
+    AUTOSAVE_SECONDS = 60
+    lastSave = time.time()
+
     while True:
+
+        if time.time() - lastSave > AUTOSAVE_SECONDS:
+            program.autosave()
+            lastSave = time.time()
         
         userInput.getUserInput()
         if userInput.isQuit:

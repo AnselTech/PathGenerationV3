@@ -489,6 +489,18 @@ class Program:
             previous.nextCustomCommand = command.nextCustomCommand
         self.recomputeCommands()
 
+    def autosave(self):
+        state = Serializer.State(self.first, self.firstCommand)
+
+        if not os.path.exists("cache"):
+            os.makedirs("cache")
+
+        with open("cache/autosave.pg3", "wb") as file:
+            pickle.dump(state, file)
+
+        print("Autosaved as cache/autosave.pg3")
+
+
     def generateSavefile(self):
 
         state = Serializer.State(self.first, self.firstCommand)

@@ -532,7 +532,7 @@ class ShootCommand(Command):
 
     def getCode(self) -> str:
         if self.toggle.get(str) == "Cata":
-            return "shootCata(robot);"
+            return "pros::Task([&] {shootCata(robot); })"
         else:
             return f"shoot(robot, {self.numSlider.getValue()});"
 

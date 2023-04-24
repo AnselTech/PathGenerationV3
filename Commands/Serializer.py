@@ -118,6 +118,7 @@ class Segment:
     shootCommandNumSlider: float
     shootCommandCustom: list[CustomCommandData]
     shootCommandCommented: bool
+    shootCommandToggle: bool
     shootTurnCommandToggle: int
     shootTurnCommandCustom: list[CustomCommandData]
     shootTurnCommandCommented: bool
@@ -193,6 +194,7 @@ class State:
             shootCommandNumSlider = node.shoot.shootCommand.numSlider.getValue(),
             shootCommandCustom = self.getCustom(node.shoot.shootCommand),
             shootCommandCommented = node.shoot.shootCommand.commented,
+            shootCommandToggle = node.shoot.shootCommand.toggle.activeOption,
             shootTurnCommandToggle = node.shoot.turnToShootCommand.toggle.activeOption,
             shootTurnCommandCustom = self.getCustom(node.shoot.turnToShootCommand),
             shootTurnCommandCommented = node.shoot.turnToShootCommand.commented,
@@ -268,6 +270,11 @@ class State:
                 pass
             try:
                 node.shoot.shootCommand.numSlider.setValue(segment.shootCommandNumSlider, disableCallback = True)
+            except:
+                pass
+
+            try:
+                node.shoot.shootCommand.toggle.activeOption = segment.shootCommandToggle
             except:
                 pass
 

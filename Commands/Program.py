@@ -221,7 +221,11 @@ class Program:
                     rpmCorrection = int(command.slider.getValue())
                     distance = Utility.distanceTuples(command.parent.parent.position.fieldRef, command.parent.goalPosition)
                     flapText = "true" if flapUp else "false"
-                    return code + f"setShootDistance(robot, {distance}, {rpmCorrection}, {flapText}); // Preemptively set speed for next shot\n"
+
+                    if command.toggle.get(str) == "Flywheel":
+                        code += f"setShootDistance(robot, {distance}, {rpmCorrection}, {flapText}); // Preemptively set speed for next shot\n"
+
+                    return code
             return code
 
         x,y = self.first.position.fieldRef

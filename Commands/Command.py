@@ -509,6 +509,9 @@ class ShootCommand(Command):
         super().__init__(parent, YELLOW)
 
         self.image = graphics.getImage("Images/Commands/shoot.png", 0.15)
+
+        self.toggle = CommandToggle(self, ["Flywheel", "Cata"])
+
         self.slider = CommandSlider(self, -300, 310, 1, "+/- RPM adjustment", 0, -self.DELTA_SLIDER_Y)
 
         self.numSlider = CommandSlider(self, 0, 3, 1, "# of disks", 3, self.DELTA_SLIDER_Y)
@@ -521,11 +524,17 @@ class ShootCommand(Command):
         x = self.x + self.INFO_DX + 5
         y = self.y + self.height/2
 
-        graphics.drawText(screen, graphics.FONT20, "Shoot", colors.BLACK, x, y)
+        graphics.drawText(screen, graphics.FONT15, "Shoot", colors.BLACK, x, y - 5)
+
+        distance = Utility.distanceTuples(self.parent.parent.position.fieldRef, self.parent.goalPosition)
+        graphics.drawText(screen, graphics.FONT15, str(round(distance, 2)), colors.BLACK, x, y + 5)
         self.numSlider.draw(screen)
 
     def getCode(self) -> str:
-        return f"shoot(robot, {self.numSlider.getValue()});"
+        if self.toggle.get(str) == "Cata":
+            return "shootCata(robot);"
+        else:
+            return f"shoot(robot, {self.numSlider.getValue()});"
 
     def initSimulationController(self, simulationState: SimulationState):
         # temporarily, this controller just does nothing for 20 ticks
@@ -542,6 +551,7 @@ class ShootCommand(Command):
     def getHoverables(self) -> Iterable[Hoverable]:
         yield self.slider
         yield self.numSlider
+        yield self.toggle
         yield self
         
     def updatePosition(self, x, y):

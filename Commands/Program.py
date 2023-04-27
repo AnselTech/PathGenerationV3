@@ -218,12 +218,11 @@ class Program:
                 if type(command) == FlapCommand:
                     flapUp = command.toggle.activeOption != 0
                 elif type(command) == ShootCommand:
-                    rpmCorrection = int(command.slider.getValue())
-                    distance = Utility.distanceTuples(command.parent.parent.position.fieldRef, command.parent.goalPosition)
+                    rpm = int(command.slider.getValue())
                     flapText = "true" if flapUp else "false"
 
                     if command.toggle.get(str) == "Flywheel":
-                        code += f"setShootDistance(robot, {distance}, {rpmCorrection}, {flapText}); // Preemptively set speed for next shot\n"
+                        code += f"setShootDistance(robot, {rpm}, {flapText}); // Preemptively set speed for next shot\n"
 
                     return code
             return code

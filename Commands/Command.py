@@ -512,7 +512,7 @@ class ShootCommand(Command):
 
         self.toggle = CommandToggle(self, ["Flywheel", "Cata"])
 
-        self.slider = CommandSlider(self, -300, 310, 1, "+/- RPM adjustment", 0, -self.DELTA_SLIDER_Y)
+        self.slider = CommandSlider(self, 3000, 4000, 1, "+/- RPM", 0, -self.DELTA_SLIDER_Y)
 
         self.numSlider = CommandSlider(self, 0, 3, 1, "# of disks", 3, self.DELTA_SLIDER_Y)
         
@@ -540,7 +540,7 @@ class ShootCommand(Command):
         # temporarily, this controller just does nothing for 20 ticks
         self.idleTicks = 0
         self.maxIdleTicks = 20
-
+        s
     def simulateTick(self, simulationState: SimulationState) -> ControllerInputState:
         self.idleTicks += 1
         return ControllerInputState(0, 0, self.idleTicks >= self.maxIdleTicks)

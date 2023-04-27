@@ -512,7 +512,7 @@ class ShootCommand(Command):
 
         self.toggle = CommandToggle(self, ["Flywheel", "Cata"])
 
-        self.slider = CommandSlider(self, 3000, 4000, 1, "+/- RPM", 0, -self.DELTA_SLIDER_Y)
+        self.slider = CommandSlider(self, 3000, 4000, 1, "+/- RPM", 3400, -self.DELTA_SLIDER_Y)
 
         self.numSlider = CommandSlider(self, 0, 3, 1, "# of disks", 3, self.DELTA_SLIDER_Y)
         
